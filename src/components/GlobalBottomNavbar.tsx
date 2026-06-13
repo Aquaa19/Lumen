@@ -15,8 +15,7 @@ const TABS = [
   { key: 'settings', label: 'Settings', icon: 'settings', route: 'Settings' },
 ] as const;
 
-// 1. THIS IS THE MAGIC TRICK: 
-// A variable outside the component lifecycle that remembers the last tab you were on.
+// Global memory outside the component to remember the last tab position across all screens
 let previousTabIndex = 0;
 
 export const GlobalBottomNavbar: React.FC<GlobalBottomNavbarProps> = ({
@@ -30,26 +29,32 @@ export const GlobalBottomNavbar: React.FC<GlobalBottomNavbarProps> = ({
   const activeIndex = TABS.findIndex(t => t.key === activeTab);
   const targetIndex = activeIndex >= 0 ? activeIndex : 0;
 
-  // 2. Initialize the animation at the PREVIOUS position, not the target position.
+  // Initialize the animation at the previous position to prevent jumping
   const tabIndexAnim = useRef(new Animated.Value(previousTabIndex)).current;
 
   useEffect(() => {
-    // 3. Update the memory immediately so the next screen knows where to start
-    previousTabIndex = targetIndex;
+    const unsubscribe = navigation.addListener('focus', () => {
+      tabIndexAnim.setValue(previousTabIndex);
 
-    // 4. Spring from the previous location to the new target location
-    Animated.spring(tabIndexAnim, {
-      toValue: targetIndex,
-      useNativeDriver: true,
-      bounciness: 12,
-      speed: 12,
-    }).start();
-  }, [targetIndex, tabIndexAnim]);
+      Animated.spring(tabIndexAnim, {
+        toValue: targetIndex,
+        useNativeDriver: true,
+        // Swap bounciness for friction/tension for a premium, controlled glide
+        friction: 8,  // Acts like brakes. Higher = less overshoot.
+        tension: 45,  // Acts like a rubber band. Lower = slower, smoother travel.
+      }).start();
+
+      previousTabIndex = targetIndex;
+    });
+
+    return unsubscribe;
+  }, [navigation, targetIndex, tabIndexAnim]);
 
   const handleTabPress = (route: string) => {
     navigation.navigate(route);
   };
 
+  // Pre-calculate sizes for the sliding pill
   const tabWidth = containerWidth / TABS.length;
 
   return (
@@ -67,42 +72,31 @@ export const GlobalBottomNavbar: React.FC<GlobalBottomNavbarProps> = ({
             <Animated.View
               style={{
                 position: 'absolute',
-                top: 8,
+                top: 8, // Vertically aligns exactly behind the 40px height icon wrapper
                 left: 0,
                 width: S,
                 height: S,
                 backgroundColor: 'rgba(173, 198, 255, 0.16)',
                 borderRadius: S / 2,
                 transform: [
-                  {
-                    translateX: tabIndexAnim.interpolate({
-                      inputRange: [0, 0.5, 1, 1.5, 2, 2.5, 3],
-                      outputRange: [
-                        getC(0),
-                        getC(0) + tabWidth / 2,
-                        getC(1),
-                        getC(1) + tabWidth / 2,
-                        getC(2),
-                        getC(2) + tabWidth / 2,
-                        getC(3),
-                      ],
-                    }),
-                  },
-                  {
-                    scaleX: tabIndexAnim.interpolate({
-                      inputRange: [0, 0.5, 1, 1.5, 2, 2.5, 3],
-                      outputRange: [
-                        1,
-                        1 + tabWidth / S,
-                        1,
-                        1 + tabWidth / S,
-                        1,
-                        1 + tabWidth / S,
-                        1,
-                      ],
-                    }),
-                  },
-                ],
+  {
+    translateX: tabIndexAnim.interpolate({
+      // We only need the start and end points for the X-axis
+      inputRange: [0, TABS.length - 1], 
+      outputRange: [getC(0), getC(TABS.length - 1)],
+      extrapolate: 'clamp', // 🛑 Hard stop. Physically prevents the pill from sliding past the first or last icon.
+    }),
+  },
+  {
+    scaleX: tabIndexAnim.interpolate({
+      inputRange: [0, 0.5, 1, 1.5, 2, 2.5, 3],
+      // Replaced the dynamic math with a fixed '1.4' stretch multiplier.
+      // This prevents the pill from stretching into a crazy spaghetti noodle on long jumps.
+      outputRange: [1, 1.4, 1, 1.4, 1, 1.4, 1],
+      extrapolate: 'clamp', 
+    }),
+  },
+],
               }}
             />
           );
@@ -120,6 +114,7 @@ export const GlobalBottomNavbar: React.FC<GlobalBottomNavbarProps> = ({
               activeOpacity={0.8}
               className="flex-1 items-center justify-start pt-2 z-10"
             >
+              {/* Icon Wrapper matches the height of the pill for perfect centering */}
               <View className="h-10 w-10 items-center justify-center">
                 <MaterialIcon name={tab.icon} size={22} color={color} />
               </View>

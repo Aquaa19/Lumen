@@ -2,19 +2,17 @@ import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, Modal, TouchableOpacity, StyleSheet, Animated } from 'react-native';
 import { BlurView } from '@react-native-community/blur';
 import { useMockStore } from '../store/mockStore';
-import { DEFAULT_CATEGORIES } from '../utils/constants';
 import MaterialIcon from './MaterialIcon';
 
-interface LogPaymentModalProps {
+interface AddFundsModalProps {
   visible: boolean;
   onClose: () => void;
 }
 
-export const LogPaymentModal: React.FC<LogPaymentModalProps> = ({ visible, onClose }) => {
-  const { addTransaction } = useMockStore();
+export const AddFundsModal: React.FC<AddFundsModalProps> = ({ visible, onClose }) => {
+  const { addFunds } = useMockStore();
   const [amount, setAmount] = useState('0');
   const [source, setSource] = useState<'cash' | 'upi'>('cash');
-  const [selectedCategory, setSelectedCategory] = useState('Others');
   const [containerWidth, setContainerWidth] = useState(0);
 
   const toggleAnim = useRef(new Animated.Value(source === 'cash' ? 0 : 1)).current;
@@ -58,13 +56,11 @@ export const LogPaymentModal: React.FC<LogPaymentModalProps> = ({ visible, onClo
     const numericAmount = parseFloat(amount);
     if (isNaN(numericAmount) || numericAmount <= 0) return;
 
-    // Use selected category as default title
-    addTransaction(selectedCategory, numericAmount, source, selectedCategory);
+    addFunds(numericAmount, source);
     
     // Reset inputs
     setAmount('0');
     setSource('cash');
-    setSelectedCategory('Others');
     onClose();
   };
 
@@ -108,7 +104,7 @@ export const LogPaymentModal: React.FC<LogPaymentModalProps> = ({ visible, onClo
               style={{ fontFamily: 'Montserrat-Regular' }}
               className="font-label-caps text-label-caps text-on-surface-variant mt-1"
             >
-              ENTER AMOUNT
+              ENTER AMOUNT TO ADD
             </Text>
           </View>
 
@@ -176,45 +172,6 @@ export const LogPaymentModal: React.FC<LogPaymentModalProps> = ({ visible, onClo
             </TouchableOpacity>
           </View>
 
-          {/* Category Grid */}
-          <View className="flex-row flex-wrap justify-between gap-y-4">
-            {DEFAULT_CATEGORIES.map(cat => (
-              <TouchableOpacity
-                key={cat.name}
-                onPress={() => setSelectedCategory(cat.name)}
-                className="w-[30%] items-center gap-1"
-              >
-                <View 
-                  style={{ backgroundColor: selectedCategory === cat.name ? 'rgba(77,142,255,0.2)' : 'rgba(255,255,255,0.03)' }}
-                  className={`w-14 h-14 rounded-full border items-center justify-center ${
-                    selectedCategory === cat.name ? 'border-primary' : 'border-white/10'
-                  }`}
-                >
-                  <MaterialIcon 
-                    name={
-                      cat.name === 'Food' ? 'restaurant' :
-                      cat.name === 'Travel' ? 'directions_car' :
-                      cat.name === 'Stationery' ? 'menu_book' :
-                      cat.name === 'Shopping' ? 'local_mall' :
-                      cat.name === 'Entertainment' ? 'movie' :
-                      'category'
-                    }
-                    size={24}
-                    color={selectedCategory === cat.name ? '#3B82F6' : '#e1e2ec'}
-                  />
-                </View>
-                <Text 
-                  style={{ fontFamily: 'Montserrat-Bold' }}
-                  className={`font-label-caps text-[10px] ${
-                    selectedCategory === cat.name ? 'text-primary' : 'text-on-surface-variant'
-                  }`}
-                >
-                  {cat.name}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-
           {/* Custom Numpad */}
           <View className="grid grid-cols-3 gap-y-2 gap-x-4">
             <View className="flex-row justify-between w-full">
@@ -272,14 +229,14 @@ export const LogPaymentModal: React.FC<LogPaymentModalProps> = ({ visible, onClo
             </View>
           </View>
 
-          {/* Save Button */}
+          {/* Add Funds Button */}
           <TouchableOpacity
             onPress={handleSave}
             activeOpacity={0.85}
             className="w-full py-4 rounded-xl bg-primary-container items-center justify-center shadow-[0_0_20px_rgba(77,142,255,0.4)]"
           >
             <Text style={{ fontFamily: 'Montserrat-Bold' }} className="text-on-primary-container font-title-md text-title-md font-bold">
-              Save Payment
+              Add Funds
             </Text>
           </TouchableOpacity>
         </View>
@@ -287,4 +244,5 @@ export const LogPaymentModal: React.FC<LogPaymentModalProps> = ({ visible, onClo
     </Modal>
   );
 };
-export default LogPaymentModal;
+
+export default AddFundsModal;

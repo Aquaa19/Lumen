@@ -1,28 +1,34 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, Animated, Alert, StyleSheet } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Animated, StyleSheet } from 'react-native';
 import { useMockStore } from '../store/mockStore';
 import { GlassCard } from '../components/GlassCard';
 import LogPaymentModal from '../components/LogPaymentModal';
+import AddFundsModal from '../components/AddFundsModal';
 import GlobalLayout from '../components/GlobalLayout';
 import GlowOrb from '../components/GlowOrb';
 import MaterialIcon from '../components/MaterialIcon';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { BlurView } from '@react-native-community/blur';
+import LinearGradient from 'react-native-linear-gradient';
 
 const TABS = ['total', 'cash', 'upi'] as const;
 
 export const DashboardScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
-  const { cashBalance, upiBalance, transactions, addFunds } = useMockStore();
+  const { cashBalance, upiBalance, transactions } = useMockStore();
   const [activeTab, setActiveTab] = useState<'total' | 'cash' | 'upi'>('total');
   const insets = useSafeAreaInsets();
   const bottomMargin = Math.max(insets.bottom, 12);
   const fabBottom = bottomMargin + 70 + 16; // 70 navbar height + 16 spacing
+  // 70 (Navbar Height) + exact bottom margin + 4px (to protect the drop shadow)
+  const bottomPadding = 70 + bottomMargin + 4;
   const [isLogModalVisible, setIsLogModalVisible] = useState(false);
+  const [isAddFundsModalVisible, setIsAddFundsModalVisible] = useState(false);
   const [containerWidth, setContainerWidth] = useState(0);
   const [isFabExpanded, setIsFabExpanded] = useState(false);
 
   const tabIndexAnim = useRef(new Animated.Value(0)).current;
   const fabAnim = useRef(new Animated.Value(0)).current;
-
+  
   const toggleFab = () => {
     const toValue = isFabExpanded ? 0 : 1;
     Animated.spring(fabAnim, {
@@ -49,9 +55,7 @@ export const DashboardScreen: React.FC<{ navigation: any }> = ({ navigation }) =
       color: '#4ade80',
       onPress: () => {
         toggleFab();
-        // Mock Add Funds: add 1000 to Cash balance
-        addFunds(1000, 'cash');
-        Alert.alert('Add Funds', 'Successfully added ₹1,000.00 mock funds to Cash Wallet.');
+        setIsAddFundsModalVisible(true);
       },
     },
     {
@@ -123,8 +127,8 @@ export const DashboardScreen: React.FC<{ navigation: any }> = ({ navigation }) =
       activeTab="dashboard"
       navigation={navigation}
     >
-
-      <ScrollView contentContainerStyle={{ paddingBottom: 120 }} className="flex-1">
+      <View className="flex-1 relative">
+      <ScrollView contentContainerStyle={{ paddingBottom: 130 }} className="flex-1" showsVerticalScrollIndicator={false}>
         {/* Wallet Segmented Toggle */}
         <View className="px-6 mt-4">
           <View 
@@ -355,15 +359,33 @@ export const DashboardScreen: React.FC<{ navigation: any }> = ({ navigation }) =
           </GlassCard>
         </View>
       </ScrollView>
+      <LinearGradient
+        colors={['rgba(0, 0, 0, 0)', 'rgba(0, 0, 0, 1)']} // True Pitch Black
+        style={{
+          position: 'absolute',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          height: 140,
+        }}
+        pointerEvents="none"
+      />
+      </View>
 
-      {/* Backdrop Dim overlay when FAB is expanded */}
+      {/* Backdrop Dim/Blur overlay when FAB is expanded */}
       {isFabExpanded && (
         <TouchableOpacity
           activeOpacity={1}
           onPress={toggleFab}
           style={[StyleSheet.absoluteFill, { zIndex: 40 }]}
-          className="bg-black/50"
-        />
+        >
+          <BlurView
+            style={StyleSheet.absoluteFill}
+            blurType="dark"
+            blurAmount={15}
+            reducedTransparencyFallbackColor="rgba(0, 0, 0, 0.5)"
+          />
+        </TouchableOpacity>
       )}
 
       {/* Expandable FAB Options Container */}
@@ -448,6 +470,12 @@ export const DashboardScreen: React.FC<{ navigation: any }> = ({ navigation }) =
       <LogPaymentModal 
         visible={isLogModalVisible} 
         onClose={() => setIsLogModalVisible(false)} 
+      />
+
+      {/* Add Funds Modal Sheet */}
+      <AddFundsModal
+        visible={isAddFundsModalVisible}
+        onClose={() => setIsAddFundsModalVisible(false)}
       />
     </GlobalLayout>
   );

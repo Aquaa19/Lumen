@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, Modal, TouchableOpacity, StyleSheet, Animated } from 'react-native';
+import { View, Text, Modal, TouchableOpacity, StyleSheet, Animated, Vibration } from 'react-native';
 import { BlurView } from '@react-native-community/blur';
 import { useMockStore } from '../store/mockStore';
 import MaterialIcon from './MaterialIcon';
@@ -10,7 +10,7 @@ interface AddFundsModalProps {
 }
 
 export const AddFundsModal: React.FC<AddFundsModalProps> = ({ visible, onClose }) => {
-  const { addFunds } = useMockStore();
+  const { addFunds, showToast } = useMockStore();
   const [amount, setAmount] = useState('0');
   const [source, setSource] = useState<'cash' | 'upi'>('cash');
   const [containerWidth, setContainerWidth] = useState(0);
@@ -27,6 +27,7 @@ export const AddFundsModal: React.FC<AddFundsModalProps> = ({ visible, onClose }
   }, [source, toggleAnim]);
 
   const handleNumPress = (val: string) => {
+    Vibration.vibrate(15);
     if (amount === '0') {
       if (val === '.') {
         setAmount('0.');
@@ -45,6 +46,7 @@ export const AddFundsModal: React.FC<AddFundsModalProps> = ({ visible, onClose }
   };
 
   const handleBackspace = () => {
+    Vibration.vibrate(15);
     if (amount.length <= 1) {
       setAmount('0');
     } else {
@@ -57,6 +59,7 @@ export const AddFundsModal: React.FC<AddFundsModalProps> = ({ visible, onClose }
     if (isNaN(numericAmount) || numericAmount <= 0) return;
 
     addFunds(numericAmount, source);
+    showToast('Funds added successfully!');
     
     // Reset inputs
     setAmount('0');
@@ -93,7 +96,11 @@ export const AddFundsModal: React.FC<AddFundsModalProps> = ({ visible, onClose }
           <View className="w-12 h-1.5 bg-outline-variant/50 rounded-full mx-auto" />
 
           {/* Amount Display */}
-          <View className="items-center justify-center pt-4">
+          <TouchableOpacity 
+            activeOpacity={0.7} 
+            onPress={() => setAmount('0')}
+            className="items-center justify-center pt-4 w-full"
+          >
             <Text 
               style={{ fontFamily: 'Montserrat-Bold' }}
               className="font-display-lg text-display-lg text-primary text-5xl font-bold tracking-tighter"
@@ -102,11 +109,11 @@ export const AddFundsModal: React.FC<AddFundsModalProps> = ({ visible, onClose }
             </Text>
             <Text 
               style={{ fontFamily: 'Montserrat-Regular' }}
-              className="font-label-caps text-label-caps text-on-surface-variant mt-1"
+              className="font-label-caps text-label-caps text-on-surface-variant mt-1 text-[10px] opacity-60"
             >
-              ENTER AMOUNT TO ADD
+              TAP TO CLEAR • ENTER AMOUNT TO ADD
             </Text>
-          </View>
+          </TouchableOpacity>
 
           {/* Source Toggle */}
           <View 
@@ -232,10 +239,20 @@ export const AddFundsModal: React.FC<AddFundsModalProps> = ({ visible, onClose }
           {/* Add Funds Button */}
           <TouchableOpacity
             onPress={handleSave}
+            disabled={amount === '0'}
             activeOpacity={0.85}
-            className="w-full py-4 rounded-xl bg-primary-container items-center justify-center shadow-[0_0_20px_rgba(77,142,255,0.4)]"
+            className={`w-full py-4 rounded-xl items-center justify-center ${
+              amount === '0' 
+                ? 'bg-surface-container-high border border-white/5' 
+                : 'bg-primary-container shadow-[0_0_20px_rgba(77,142,255,0.4)]'
+            }`}
           >
-            <Text style={{ fontFamily: 'Montserrat-Bold' }} className="text-on-primary-container font-title-md text-title-md font-bold">
+            <Text 
+              style={{ fontFamily: 'Montserrat-Bold' }} 
+              className={`${
+                amount === '0' ? 'text-on-surface-variant/40' : 'text-on-primary-container'
+              } font-title-md text-title-md font-bold`}
+            >
               Add Funds
             </Text>
           </TouchableOpacity>

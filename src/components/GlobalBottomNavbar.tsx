@@ -10,7 +10,7 @@ interface GlobalBottomNavbarProps {
 
 const TABS = [
   { key: 'dashboard', label: 'Dashboard', icon: 'home', route: 'Dashboard' },
-  { key: 'statistics', label: 'Statistics', icon: 'bar_chart', route: 'Statistics' },
+  { key: 'statistics', label: 'Statistics', icon: 'line_chart', route: 'Statistics' },
   { key: 'assistant', label: 'Assistant', icon: 'smart_toy', route: 'Assistant' },
   { key: 'settings', label: 'Settings', icon: 'settings', route: 'Settings' },
 ] as const;

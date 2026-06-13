@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, Modal, TouchableOpacity, StyleSheet, Animated } from 'react-native';
+import { View, Text, Modal, TouchableOpacity, StyleSheet, Animated, TextInput, Alert, Vibration } from 'react-native';
 import { BlurView } from '@react-native-community/blur';
 import { useMockStore } from '../store/mockStore';
 import { DEFAULT_CATEGORIES } from '../utils/constants';
@@ -11,10 +11,12 @@ interface LogPaymentModalProps {
 }
 
 export const LogPaymentModal: React.FC<LogPaymentModalProps> = ({ visible, onClose }) => {
-  const { addTransaction } = useMockStore();
+  const { addTransaction, cashBalance, upiBalance, showToast } = useMockStore();
   const [amount, setAmount] = useState('0');
   const [source, setSource] = useState<'cash' | 'upi'>('cash');
   const [selectedCategory, setSelectedCategory] = useState('Others');
+  const [note, setNote] = useState('');
+  const [title, setTitle] = useState('');
   const [containerWidth, setContainerWidth] = useState(0);
 
   const toggleAnim = useRef(new Animated.Value(source === 'cash' ? 0 : 1)).current;
@@ -29,6 +31,7 @@ export const LogPaymentModal: React.FC<LogPaymentModalProps> = ({ visible, onClo
   }, [source, toggleAnim]);
 
   const handleNumPress = (val: string) => {
+    Vibration.vibrate(15);
     if (amount === '0') {
       if (val === '.') {
         setAmount('0.');
@@ -47,6 +50,7 @@ export const LogPaymentModal: React.FC<LogPaymentModalProps> = ({ visible, onClo
   };
 
   const handleBackspace = () => {
+    Vibration.vibrate(15);
     if (amount.length <= 1) {
       setAmount('0');
     } else {
@@ -54,18 +58,42 @@ export const LogPaymentModal: React.FC<LogPaymentModalProps> = ({ visible, onClo
     }
   };
 
-  const handleSave = () => {
-    const numericAmount = parseFloat(amount);
-    if (isNaN(numericAmount) || numericAmount <= 0) return;
-
-    // Use selected category as default title
-    addTransaction(selectedCategory, numericAmount, source, selectedCategory);
+  const executeSave = (numericAmount: number) => {
+    const finalTitle = title.trim() || selectedCategory;
+    addTransaction(finalTitle, numericAmount, source, selectedCategory, note || undefined);
+    showToast('Payment saved successfully!');
     
     // Reset inputs
     setAmount('0');
     setSource('cash');
     setSelectedCategory('Others');
+    setNote('');
+    setTitle('');
     onClose();
+  };
+
+  const handleSave = () => {
+    const numericAmount = parseFloat(amount);
+    if (isNaN(numericAmount) || numericAmount <= 0) return;
+
+    const availableBalance = source === 'cash' ? cashBalance : upiBalance;
+    if (numericAmount > availableBalance) {
+      Alert.alert(
+        'Insufficient Balance',
+        `The amount ₹${numericAmount.toFixed(2)} exceeds your available ${source.toUpperCase()} balance (₹${availableBalance.toFixed(2)}). Do you want to proceed?`,
+        [
+          { text: 'Cancel', style: 'cancel' },
+          {
+            text: 'Proceed',
+            onPress: () => {
+              executeSave(numericAmount);
+            },
+          },
+        ]
+      );
+    } else {
+      executeSave(numericAmount);
+    }
   };
 
   return (
@@ -97,7 +125,11 @@ export const LogPaymentModal: React.FC<LogPaymentModalProps> = ({ visible, onClo
           <View className="w-12 h-1.5 bg-outline-variant/50 rounded-full mx-auto" />
 
           {/* Amount Display */}
-          <View className="items-center justify-center pt-4">
+          <TouchableOpacity 
+            activeOpacity={0.7} 
+            onPress={() => setAmount('0')}
+            className="items-center justify-center pt-4 w-full"
+          >
             <Text 
               style={{ fontFamily: 'Montserrat-Bold' }}
               className="font-display-lg text-display-lg text-primary text-5xl font-bold tracking-tighter"
@@ -106,11 +138,11 @@ export const LogPaymentModal: React.FC<LogPaymentModalProps> = ({ visible, onClo
             </Text>
             <Text 
               style={{ fontFamily: 'Montserrat-Regular' }}
-              className="font-label-caps text-label-caps text-on-surface-variant mt-1"
+              className="font-label-caps text-label-caps text-on-surface-variant mt-1 text-[10px] opacity-60"
             >
-              ENTER AMOUNT
+              TAP TO CLEAR • ENTER AMOUNT
             </Text>
-          </View>
+          </TouchableOpacity>
 
           {/* Source Toggle */}
           <View 
@@ -185,10 +217,11 @@ export const LogPaymentModal: React.FC<LogPaymentModalProps> = ({ visible, onClo
                 className="w-[30%] items-center gap-1"
               >
                 <View 
-                  style={{ backgroundColor: selectedCategory === cat.name ? 'rgba(77,142,255,0.2)' : 'rgba(255,255,255,0.03)' }}
-                  className={`w-14 h-14 rounded-full border items-center justify-center ${
-                    selectedCategory === cat.name ? 'border-primary' : 'border-white/10'
-                  }`}
+                  style={{ 
+                    backgroundColor: selectedCategory === cat.name ? cat.bgColor : 'rgba(255,255,255,0.03)',
+                    borderColor: selectedCategory === cat.name ? cat.color : 'rgba(255,255,255,0.1)'
+                  }}
+                  className="w-14 h-14 rounded-full border items-center justify-center"
                 >
                   <MaterialIcon 
                     name={
@@ -200,19 +233,43 @@ export const LogPaymentModal: React.FC<LogPaymentModalProps> = ({ visible, onClo
                       'category'
                     }
                     size={24}
-                    color={selectedCategory === cat.name ? '#3B82F6' : '#e1e2ec'}
+                    color={selectedCategory === cat.name ? cat.color : cat.color + '80'}
                   />
                 </View>
                 <Text 
-                  style={{ fontFamily: 'Montserrat-Bold' }}
-                  className={`font-label-caps text-[10px] ${
-                    selectedCategory === cat.name ? 'text-primary' : 'text-on-surface-variant'
-                  }`}
+                  style={{ 
+                    fontFamily: 'Montserrat-Bold',
+                    color: selectedCategory === cat.name ? cat.color : '#c2c6d6'
+                  }}
+                  className="font-label-caps text-[10px]"
                 >
                   {cat.name}
                 </Text>
               </TouchableOpacity>
             ))}
+          </View>
+
+          {/* Inputs Section */}
+          <View className="gap-3 w-full">
+            {/* Title Input */}
+            <TextInput
+              placeholder="Payment Title (optional)"
+              placeholderTextColor="#8c909f"
+              style={{ fontFamily: 'Montserrat-Regular' }}
+              className="w-full bg-white/5 rounded-xl px-4 py-3 text-white text-sm border border-white/5"
+              onChangeText={setTitle}
+              value={title}
+            />
+
+            {/* Note Input */}
+            <TextInput
+              placeholder="Add a note (optional)..."
+              placeholderTextColor="#8c909f"
+              style={{ fontFamily: 'Montserrat-Regular' }}
+              className="w-full bg-white/5 rounded-xl px-4 py-3 text-white text-sm border border-white/5"
+              onChangeText={setNote}
+              value={note}
+            />
           </View>
 
           {/* Custom Numpad */}
@@ -275,10 +332,20 @@ export const LogPaymentModal: React.FC<LogPaymentModalProps> = ({ visible, onClo
           {/* Save Button */}
           <TouchableOpacity
             onPress={handleSave}
+            disabled={amount === '0'}
             activeOpacity={0.85}
-            className="w-full py-4 rounded-xl bg-primary-container items-center justify-center shadow-[0_0_20px_rgba(77,142,255,0.4)]"
+            className={`w-full py-4 rounded-xl items-center justify-center ${
+              amount === '0' 
+                ? 'bg-surface-container-high border border-white/5' 
+                : 'bg-primary-container shadow-[0_0_20px_rgba(77,142,255,0.4)]'
+            }`}
           >
-            <Text style={{ fontFamily: 'Montserrat-Bold' }} className="text-on-primary-container font-title-md text-title-md font-bold">
+            <Text 
+              style={{ fontFamily: 'Montserrat-Bold' }} 
+              className={`${
+                amount === '0' ? 'text-on-surface-variant/40' : 'text-white'
+              } font-title-md text-title-md font-bold`}
+            >
               Save Payment
             </Text>
           </TouchableOpacity>

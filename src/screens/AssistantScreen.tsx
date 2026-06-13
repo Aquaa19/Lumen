@@ -5,6 +5,7 @@ import { GlassCard } from '../components/GlassCard';
 import GlobalLayout from '../components/GlobalLayout';
 import MaterialIcon from '../components/MaterialIcon';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { DEFAULT_CATEGORIES } from '../utils/constants';
 
 interface Message {
   id: string;
@@ -153,9 +154,17 @@ export const AssistantScreen: React.FC<{ navigation: any }> = ({ navigation }) =
                         }`}
                       >
                         <View className="flex-row items-center gap-2">
-                          <View className="w-8 h-8 rounded-full bg-white/5 items-center justify-center">
-                            <MaterialIcon name={getCategoryIcon(tx.category)} size={16} color="#e1e2ec" />
-                          </View>
+                          {(() => {
+                            const catConfig = DEFAULT_CATEGORIES.find(c => c.name === tx.category) || { color: '#94a3b8', bgColor: 'rgba(148, 163, 184, 0.1)' };
+                            return (
+                              <View 
+                                style={{ backgroundColor: catConfig.bgColor, borderColor: catConfig.color + '33' }}
+                                className="w-8 h-8 rounded-full border items-center justify-center"
+                              >
+                                <MaterialIcon name={getCategoryIcon(tx.category)} size={16} color={catConfig.color} />
+                              </View>
+                            );
+                          })()}
                           <View>
                             <Text className="font-body-sm text-[12px] text-white font-medium">{tx.title}</Text>
                             <Text className="font-label-caps text-[9px] text-on-surface-variant uppercase">

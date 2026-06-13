@@ -4,6 +4,8 @@ import { useMockStore } from '../store/mockStore';
 import { GlassCard } from '../components/GlassCard';
 import GlobalLayout from '../components/GlobalLayout';
 import MaterialIcon from '../components/MaterialIcon';
+import LinearGradient from 'react-native-linear-gradient';
+import { DEFAULT_CATEGORIES } from '../utils/constants';
 
 export const TransactionDetailScreen: React.FC<{ route: any; navigation: any }> = ({ route, navigation }) => {
   const { transactionId } = route.params;
@@ -48,42 +50,70 @@ export const TransactionDetailScreen: React.FC<{ route: any; navigation: any }> 
       showBack={true}
     >
 
-      <View className="flex-1 px-6 pt-8 max-w-md mx-auto justify-between pb-12">
+      <View className="flex-1 px-6 pt-8">
         <View>
           {/* Merchant card */}
-          <GlassCard className="items-center py-6 relative overflow-hidden mb-6">
-            <View className="w-20 h-20 rounded-full bg-surface-container-high border border-white/10 items-center justify-center mb-4 shadow-lg">
-              <MaterialIcon name={getCategoryIcon(tx.category)} size={36} color="#3B82F6" />
-            </View>
+          <GlassCard className="mb-6 overflow-hidden" contentClassName="items-center py-6 px-4">
+            <LinearGradient
+              colors={['rgba(255, 255, 255, 0.06)', 'rgba(255, 255, 255, 0)']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 0, y: 1 }}
+              style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
+            />
+            {/* Icon Container */}
+            {(() => {
+              const catConfig = DEFAULT_CATEGORIES.find(c => c.name === tx.category) || { color: '#94a3b8', bgColor: 'rgba(148, 163, 184, 0.1)' };
+              return (
+                <View 
+                  style={{ 
+                    width: 80, 
+                    height: 80, 
+                    borderRadius: 40, 
+                    alignItems: 'center', 
+                    justifyContent: 'center',
+                    alignSelf: 'center',
+                    backgroundColor: catConfig.bgColor,
+                    borderColor: catConfig.color + '33'
+                  }}
+                  className="border mb-4 shadow-lg"
+                >
+                  <MaterialIcon name={getCategoryIcon(tx.category)} size={36} color={catConfig.color} />
+                </View>
+              );
+            })()}
+            
             <Text 
               allowFontScaling={false}
               style={{ fontSize: 28, lineHeight: 34, fontWeight: 'bold', fontFamily: 'Montserrat-Bold', color: '#e1e2ec' }}
-              className="mb-1"
+              className="mb-1 text-center"
             >
               {tx.title}
             </Text>
-            <Text className="font-body-sm text-body-sm text-on-surface-variant mb-6">
+            <Text 
+              style={{ fontFamily: 'Montserrat-Bold' }} 
+              className="font-body-sm text-body-sm text-on-surface-variant mb-6 text-center font-bold"
+            >
               {tx.timestamp}, {tx.date}
             </Text>
             <Text 
               allowFontScaling={false}
               style={{ fontSize: 48, lineHeight: 56, fontWeight: 'bold', fontFamily: 'Montserrat-Bold', color: '#ffb4ab', letterSpacing: -1 }}
-              className="mb-6"
+              className="mb-6 text-center"
             >
               -₹{tx.amount.toFixed(2)}
             </Text>
 
-            {/* Badges */}
+            {/* Badges Container */}
             <View className="flex-row gap-3">
               <View className="bg-primary/10 border border-primary/20 rounded-full px-4 py-1.5 flex-row items-center gap-1">
                 <MaterialIcon name="credit_card" color="#3B82F6" size={12} />
-                <Text className="font-label-caps text-label-caps text-primary uppercase">
+                <Text style={{ fontFamily: 'Montserrat-Bold' }} className="font-label-caps text-label-caps text-primary uppercase font-bold">
                   {tx.source}
                 </Text>
               </View>
               <View className="bg-white/5 border border-white/10 rounded-full px-4 py-1.5 flex-row items-center gap-1">
                 <MaterialIcon name="local_offer" color="#8c909f" size={12} />
-                <Text className="font-label-caps text-label-caps text-on-surface-variant uppercase">
+                <Text style={{ fontFamily: 'Montserrat-Bold' }} className="font-label-caps text-label-caps text-on-surface-variant uppercase font-bold">
                   {tx.category}
                 </Text>
               </View>
@@ -91,7 +121,13 @@ export const TransactionDetailScreen: React.FC<{ route: any; navigation: any }> 
           </GlassCard>
 
           {/* Details list */}
-          <GlassCard className="p-4">
+          <GlassCard className="mb-6 overflow-hidden" contentClassName="p-4">
+            <LinearGradient
+              colors={['rgba(255, 255, 255, 0.08)', 'rgba(255, 255, 255, 0)']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
+            />
             <Text 
               allowFontScaling={false}
               style={{ fontSize: 20, lineHeight: 28, fontWeight: 'semibold', fontFamily: 'Montserrat-Bold', color: 'white' }}
@@ -101,20 +137,14 @@ export const TransactionDetailScreen: React.FC<{ route: any; navigation: any }> 
             </Text>
             <View className="gap-3">
               <View className="flex-row justify-between items-center py-2 border-b border-white/5">
-                <Text className="font-body-sm text-body-sm text-on-surface-variant">Transaction ID</Text>
-                <Text className="font-body-sm text-body-sm text-on-surface font-mono">
-                  TXN-{tx.id.toUpperCase()}8472
-                </Text>
-              </View>
-              <View className="flex-row justify-between items-center py-2 border-b border-white/5">
-                <Text className="font-body-sm text-body-sm text-on-surface-variant">Status</Text>
-                <Text className="font-body-sm text-body-sm text-emerald-400 font-semibold">
+                <Text style={{ fontFamily: 'Montserrat-Bold' }} className="font-body-sm text-body-sm text-on-surface-variant font-bold">Status</Text>
+                <Text style={{ fontFamily: 'Montserrat-Bold' }} className="font-body-sm text-body-sm text-emerald-400 font-semibold">
                   ✓ Completed
                 </Text>
               </View>
               <View className="flex-row justify-between items-center py-2">
-                <Text className="font-body-sm text-body-sm text-on-surface-variant">Note</Text>
-                <Text className="font-body-sm text-body-sm text-on-surface italic">
+                <Text style={{ fontFamily: 'Montserrat-Bold' }} className="font-body-sm text-body-sm text-on-surface-variant font-bold">Note</Text>
+                <Text style={{ fontFamily: 'Montserrat-Regular' }} className="font-body-sm text-body-sm text-on-surface italic">
                   {tx.note || 'None'}
                 </Text>
               </View>
@@ -123,14 +153,14 @@ export const TransactionDetailScreen: React.FC<{ route: any; navigation: any }> 
         </View>
 
         {/* Action Buttons */}
-        <View className="gap-3">
+        <View className="gap-3 mb-4">
           <TouchableOpacity
             onPress={handleRefund}
             activeOpacity={0.85}
             className="w-full py-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex-row items-center justify-center gap-2"
           >
-            <MaterialIcon name="sync" color="#34d399" size={18} />
-            <Text className="text-emerald-400 font-title-md text-title-md font-bold">
+            <MaterialIcon name="undo" color="#34d399" size={18} />
+            <Text style={{ fontFamily: 'Montserrat-Bold' }} className="text-emerald-400 font-title-md text-title-md font-bold">
               Mark as Refunded
             </Text>
           </TouchableOpacity>
@@ -143,7 +173,7 @@ export const TransactionDetailScreen: React.FC<{ route: any; navigation: any }> 
             activeOpacity={0.85}
             className="w-full py-4 rounded-xl border border-error/30 items-center justify-center"
           >
-            <Text className="text-error font-title-md text-title-md font-bold">
+            <Text style={{ fontFamily: 'Montserrat-Bold' }} className="text-error font-title-md text-title-md font-bold">
               Delete Record
             </Text>
           </TouchableOpacity>

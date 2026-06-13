@@ -21,6 +21,8 @@ interface MockStoreContextProps {
   selfTransfer: (amount: number, from: 'cash' | 'upi', to: 'cash' | 'upi') => void;
   setBiometricLock: (enabled: boolean) => void;
   addFunds: (amount: number, source: 'cash' | 'upi') => void;
+  toastMessage: string | null;
+  showToast: (msg: string) => void;
 }
 
 const MockStoreContext = createContext<MockStoreContextProps | undefined>(undefined);
@@ -187,6 +189,15 @@ export const MockStoreProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     setTransactions((prev: Transaction[]) => [addTx, ...prev]);
   };
 
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  const showToast = (msg: string) => {
+    setToastMessage(msg);
+    setTimeout(() => {
+      setToastMessage(null);
+    }, 3000);
+  };
+
   return (
     <MockStoreContext.Provider
       value={{
@@ -203,7 +214,9 @@ export const MockStoreProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         refundTransaction,
         selfTransfer,
         setBiometricLock,
-        addFunds
+        addFunds,
+        toastMessage,
+        showToast
       }}
     >
       {children}

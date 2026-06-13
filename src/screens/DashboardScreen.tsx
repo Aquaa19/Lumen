@@ -10,6 +10,7 @@ import MaterialIcon from '../components/MaterialIcon';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BlurView } from '@react-native-community/blur';
 import LinearGradient from 'react-native-linear-gradient';
+import { DEFAULT_CATEGORIES } from '../utils/constants';
 
 const TABS = ['total', 'cash', 'upi'] as const;
 
@@ -320,6 +321,7 @@ export const DashboardScreen: React.FC<{ navigation: any }> = ({ navigation }) =
             <TouchableOpacity onPress={() => navigation.navigate('Statistics')}>
               <Text 
                 allowFontScaling={false}
+                style={{ fontSize: 12, fontWeight: '700', fontFamily: 'Montserrat-Bold', color: '#e1e2ec' }}
                 className="font-label-caps text-primary text-xs font-semibold tracking-wider"
               >
                 SEE ALL
@@ -336,9 +338,17 @@ export const DashboardScreen: React.FC<{ navigation: any }> = ({ navigation }) =
                 }`}
               >
                 <View className="flex-row items-center gap-3.5">
-                  <View className="w-11 h-11 rounded-full bg-white/5 border border-white/10 items-center justify-center shadow-md">
-                    <MaterialIcon name={getCategoryIcon(tx.category)} size={20} color="#e1e2ec" />
-                  </View>
+                  {(() => {
+                    const catConfig = DEFAULT_CATEGORIES.find(c => c.name === tx.category) || { color: '#94a3b8', bgColor: 'rgba(148, 163, 184, 0.1)' };
+                    return (
+                      <View 
+                        style={{ backgroundColor: catConfig.bgColor, borderColor: catConfig.color + '33' }}
+                        className="w-11 h-11 rounded-full border items-center justify-center shadow-md"
+                      >
+                        <MaterialIcon name={getCategoryIcon(tx.category)} size={20} color={catConfig.color} />
+                      </View>
+                    );
+                  })()}
                   <View>
                     <Text className="text-[15px] text-white font-semibold">{tx.title}</Text>
                     <Text className="text-xs text-white font-bold mt-0.5">

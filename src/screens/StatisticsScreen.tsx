@@ -99,28 +99,30 @@ const bottomPadding = 70 + navbarBottomMargin + 4;
 
           {/* Spent Chart Card */}
           <GlassCard className="p-4 mb-6">
-            <View className="flex-row justify-between items-end mb-6">
-              <View>
+            <View className="mb-6">
+              {/* Top Row: Label & Trend Metric */}
+              <View className="flex-row justify-between items-center mb-1">
                 <Text 
                   allowFontScaling={false}
-                  style={{ fontSize: 12, lineHeight: 16, fontFamily: 'Montserrat-Regular', color: '#c2c6d6' }}
-                  className="uppercase tracking-wider mb-1"
+                  style={{ fontSize: 12, lineHeight: 16, fontFamily: 'Montserrat-Bold', fontWeight: 'bold', color: '#c2c6d6' }}
+                  className="uppercase tracking-wider"
                 >
                   Total Spent
                 </Text>
-                <Text 
-                  allowFontScaling={false}
-                  style={{ fontSize: 48, lineHeight: 56, fontWeight: 'bold', fontFamily: 'Montserrat-Bold', color: '#adc6ff', letterSpacing: -1 }}
-                >
-                  ₹{totalSpent.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
-                </Text>
+                <View className="flex-row items-center gap-1">
+                  <MaterialIcon name="trending_up" color="#4ade80" size={14} />
+                  <Text style={{ fontFamily: 'Montserrat-Bold' }} className="font-label-caps text-label-caps text-tertiary">
+                    +12% vs last month
+                  </Text>
+                </View>
               </View>
-              <View className="flex-row items-center gap-1">
-                <MaterialIcon name="trending_up" color="#4ade80" size={14} />
-                <Text style={{ fontFamily: 'Montserrat-Bold' }} className="font-label-caps text-label-caps text-tertiary">
-                  +12% vs last month
-                </Text>
-              </View>
+              {/* Bottom Row: Amount */}
+              <Text 
+                allowFontScaling={false}
+                style={{ fontSize: 48, lineHeight: 56, fontWeight: 'bold', fontFamily: 'Montserrat-Bold', color: '#adc6ff', letterSpacing: -1 }}
+              >
+                ₹{totalSpent.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+              </Text>
             </View>
 
             {/* SVG Spending Curve */}
@@ -175,9 +177,9 @@ const bottomPadding = 70 + navbarBottomMargin + 4;
 </Svg>
               {/* Axis labels */}
               <View className="flex-row justify-between mt-2">
-                <Text style={{ fontFamily: 'Montserrat-bold', fontWeight: '700', color: 'white' }} className="font-label-caps text-[30px] text-on-surface-variant">1st</Text>
-                <Text style={{ fontFamily: 'Montserrat-bold', fontWeight: '700', color: 'white' }} className="font-label-caps text-[30px] text-on-surface-variant">15th</Text>
-                <Text style={{ fontFamily: 'Montserrat-bold', fontWeight: '700', color: 'white' }} className="font-label-caps text-[30px] text-on-surface-variant">30th</Text>
+                <Text style={{ fontFamily: 'Montserrat-Bold', fontWeight: '700', color: 'rgba(255, 255, 255, 0.92)', fontSize: 15 }} className="font-label-caps">1st</Text>
+                <Text style={{ fontFamily: 'Montserrat-Bold', fontWeight: '700', color: 'rgba(255, 255, 255, 0.92)', fontSize: 15 }} className="font-label-caps">15th</Text>
+                <Text style={{ fontFamily: 'Montserrat-Bold', fontWeight: '700', color: 'rgba(255, 255, 255, 0.92)', fontSize: 15 }} className="font-label-caps">30th</Text>
               </View>
             </View>
           </GlassCard>

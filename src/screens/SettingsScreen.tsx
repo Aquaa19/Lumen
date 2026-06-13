@@ -5,6 +5,7 @@ import { GlassCard } from '../components/GlassCard';
 import GlobalLayout from '../components/GlobalLayout';
 import LinearGradient from 'react-native-linear-gradient';
 import MaterialIcon from '../components/MaterialIcon';
+import FingerprintIcon from '../public/assets/icons/FingerprintIcon';
 
 export const SettingsScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
   const { userProfile, logout, setBiometricLock } = useMockStore();
@@ -94,12 +95,12 @@ export const SettingsScreen: React.FC<{ navigation: any }> = ({ navigation }) =>
         {/* Settings Rows */}
         <View className="gap-3 mt-6">
           {/* Biometric Toggle */}
-          <GlassCard className="flex-row items-center justify-between p-4">
+          <GlassCard contentClassName="flex-row items-center justify-between p-4">
             <View className="flex-row items-center gap-3">
-              <View className="w-12 h-12 rounded-xl bg-primary/10 items-center justify-center">
-                <MaterialIcon name="fingerprint" color="#3B82F6" size={24} />
+              <View className="w-12 h-12 rounded-2xl bg-white/[0.06] items-center justify-center border border-white/5">
+                <FingerprintIcon color="white" size={22} />
               </View>
-              <Text className="font-title-md text-title-md text-on-surface font-semibold">
+              <Text style={{ fontFamily: 'Montserrat-Bold', fontSize: 20, color: 'white', fontWeight: 'bold' }}>
                 Biometric Lock
               </Text>
             </View>
@@ -113,46 +114,46 @@ export const SettingsScreen: React.FC<{ navigation: any }> = ({ navigation }) =>
 
           {/* Export to CSV */}
           <TouchableOpacity onPress={handleExportCSV} activeOpacity={0.9}>
-            <GlassCard className="flex-row items-center justify-between p-4">
+            <GlassCard contentClassName="flex-row items-center justify-between p-4">
               <View className="flex-row items-center gap-3">
-                <View className="w-12 h-12 rounded-xl bg-white/5 items-center justify-center">
-                  <MaterialIcon name="file_download" color="#3B82F6" size={24} />
+                <View className="w-12 h-12 rounded-2xl bg-white/[0.06] items-center justify-center border border-white/5">
+                  <MaterialIcon name="file_download" color="white" size={22} />
                 </View>
-                <Text className="font-title-md text-title-md text-on-surface font-semibold">
+                <Text style={{ fontFamily: 'Montserrat-Bold', fontSize: 20, color: 'white', fontWeight: 'bold' }}>
                   Export Data to CSV
                 </Text>
               </View>
-              <MaterialIcon name="chevron_right" color="#8c909f" size={18} />
+              <MaterialIcon name="chevron_right" color="#8c909f" size={24} />
             </GlassCard>
           </TouchableOpacity>
 
           {/* Custom Categories */}
           <TouchableOpacity onPress={handleCustomCategories} activeOpacity={0.9}>
-            <GlassCard className="flex-row items-center justify-between p-4">
+            <GlassCard contentClassName="flex-row items-center justify-between p-4">
               <View className="flex-row items-center gap-3">
-                <View className="w-12 h-12 rounded-xl bg-white/5 items-center justify-center">
-                  <MaterialIcon name="folder" color="#3B82F6" size={24} />
+                <View className="w-12 h-12 rounded-2xl bg-white/[0.06] items-center justify-center border border-white/5">
+                  <MaterialIcon name="folder" color="white" size={22} />
                 </View>
-                <Text className="font-title-md text-title-md text-on-surface font-semibold">
+                <Text style={{ fontFamily: 'Montserrat-Bold', fontSize: 20, color: 'white', fontWeight: 'bold' }}>
                   Custom Categories
                 </Text>
               </View>
-              <MaterialIcon name="chevron_right" color="#8c909f" size={18} />
+              <MaterialIcon name="chevron_right" color="#8c909f" size={24} />
             </GlassCard>
           </TouchableOpacity>
 
           {/* Sync with Firebase */}
           <TouchableOpacity onPress={handleFirebaseSync} activeOpacity={0.9}>
-            <GlassCard className="flex-row items-center justify-between p-4">
+            <GlassCard contentClassName="flex-row items-center justify-between p-4">
               <View className="flex-row items-center gap-3">
-                <View className="w-12 h-12 rounded-xl bg-white/5 items-center justify-center">
-                  <MaterialIcon name="sync" color="#3B82F6" size={24} />
+                <View className="w-12 h-12 rounded-2xl bg-white/[0.06] items-center justify-center border border-white/5">
+                  <MaterialIcon name="sync" color="white" size={22} />
                 </View>
-                <Text className="font-title-md text-title-md text-on-surface font-semibold">
+                <Text style={{ fontFamily: 'Montserrat-Bold', fontSize: 20, color: 'white', fontWeight: 'bold' }}>
                   Sync with Firebase
                 </Text>
               </View>
-              <Text className="font-body-sm text-body-sm text-on-surface-variant">Just now</Text>
+              <Text style={{ fontFamily: 'Montserrat-Regular' }} className="font-body-sm text-body-sm text-on-surface-variant">Just now</Text>
             </GlassCard>
           </TouchableOpacity>
         </View>

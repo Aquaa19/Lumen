@@ -105,10 +105,10 @@ export const DashboardScreen: React.FC<{ navigation: any }> = ({ navigation }) =
             backgroundChildren={
               <GlowOrb 
                 size={260} 
-                color="#FFFFFF" 
-                opacity={0.25} 
+                color="#adc6ff" 
+                opacity={0.2} 
                 style={{ position: 'absolute', top: -130, right: -130 }} 
-                gradientId="balance-glow"
+                gradientId="balance-card-glow"
               />
             }
           >

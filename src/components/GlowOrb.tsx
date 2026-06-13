@@ -27,7 +27,7 @@ export const GlowOrb: React.FC<GlowOrbProps> = ({
             <Stop offset="100%" stopColor={color} stopOpacity={0} />
           </RadialGradient>
         </Defs>
-        <Circle cx="50%" cy="50%" r="50%" fill={`url(#${gradientId})`} />
+        <Circle cx="50" cy="50" r="50" fill={`url(#${gradientId})`} />
       </Svg>
     </View>
   );

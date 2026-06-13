@@ -2,8 +2,7 @@ import React from 'react';
 import { View, Text, TouchableOpacity, Image, Alert, Switch, ScrollView } from 'react-native';
 import { useMockStore } from '../store/mockStore';
 import { GlassCard } from '../components/GlassCard';
-import BackgroundLayout from '../components/BackgroundLayout';
-import GlowOrb from '../components/GlowOrb';
+import GlobalLayout from '../components/GlobalLayout';
 import LinearGradient from 'react-native-linear-gradient';
 import MaterialIcon from '../components/MaterialIcon';
 
@@ -28,31 +27,15 @@ export const SettingsScreen: React.FC<{ navigation: any }> = ({ navigation }) =>
   };
 
   return (
-    <BackgroundLayout style={{ paddingHorizontal: 24 }}>
-      {/* Background ambient lighting */}
-      <GlowOrb size={250} color="#3B82F6" opacity={0.15} style={{ top: '-5%', left: '-10%' }} />
-      <GlowOrb size={220} color="#df7412" opacity={0.06} style={{ bottom: '10%', right: '-10%' }} />
-
-      <View className="flex-1 z-10 w-full">
-
-      {/* Header */}
-      <View className="flex-row justify-between items-center pt-12 pb-4 border-b border-white/5">
-        <View className="w-10 h-10 rounded-full overflow-hidden bg-surface-variant flex-row justify-center items-center">
-          <MaterialIcon name="person" color="#3B82F6" size={20} />
-        </View>
-        <Text className="font-display-lg text-display-lg text-primary text-[24px] tracking-tighter">
-          Financier
-        </Text>
-        <TouchableOpacity
-          onPress={handleSignOut}
-          className="w-10 h-10 items-center justify-center rounded-full hover:bg-white/5"
-        >
-          <MaterialIcon name="logout" color="#3B82F6" size={22} />
-        </TouchableOpacity>
-      </View>
+    <GlobalLayout
+      activeTab="settings"
+      navigation={navigation}
+      title="Lumen"
+      rightAction="logout"
+    >
 
       <ScrollView 
-        className="flex-1 mt-6" 
+        className="flex-1 mt-6 px-6" 
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 90 }}
       >
@@ -175,8 +158,7 @@ export const SettingsScreen: React.FC<{ navigation: any }> = ({ navigation }) =>
           </TouchableOpacity>
         </View>
       </ScrollView>
-      </View>
-    </BackgroundLayout>
+    </GlobalLayout>
   );
 };
 export default SettingsScreen;

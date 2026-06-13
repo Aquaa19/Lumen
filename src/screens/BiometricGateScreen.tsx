@@ -43,15 +43,15 @@ export const BiometricGateScreen: React.FC<{ navigation: any }> = ({ navigation 
   return (
     <BackgroundLayout>
       {/* Ambient backgrounds */}
-      <GlowOrb size={300} color="#3B82F6" opacity={0.15} style={{ top: '10%', left: '-10%' }} />
-      <GlowOrb size={350} color="#3B82F6" opacity={0.1} style={{ bottom: '-10%', right: '-15%' }} />
+      <GlowOrb size={300} color="#3B82F6" opacity={0.15} style={{ top: '10%', left: '-10%' }} gradientId="gate-glow-top" />
+      <GlowOrb size={350} color="#3B82F6" opacity={0.1} style={{ bottom: '-10%', right: '-15%' }} gradientId="gate-glow-bottom" />
 
       <View className="flex-1 justify-between items-center py-12 px-6 z-10 w-full">
 
       {/* Header */}
       <View className="w-full flex-row items-center justify-between mt-4">
         <Text className="font-display-lg text-display-lg tracking-tighter text-primary text-[28px]">
-          STUDENTSPEND
+          LUMEN
         </Text>
         <View className="w-10 h-10 rounded-full items-center justify-center bg-white/5 border border-white/10">
           <MaterialIcon name="shield" size={20} color="#3B82F6" />

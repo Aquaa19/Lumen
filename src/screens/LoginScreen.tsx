@@ -14,8 +14,8 @@ export const LoginScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
   return (
     <BackgroundLayout>
       {/* Background ambient lights */}
-      <GlowOrb size={250} color="#3B82F6" opacity={0.15} style={{ top: '25%', left: '10%' }} />
-      <GlowOrb size={380} color="#3B82F6" opacity={0.12} style={{ bottom: '20%', right: '5%' }} />
+      <GlowOrb size={250} color="#3B82F6" opacity={0.15} style={{ top: '25%', left: '10%' }} gradientId="login-glow-top" />
+      <GlowOrb size={380} color="#3B82F6" opacity={0.12} style={{ bottom: '20%', right: '5%' }} gradientId="login-glow-bottom" />
 
       <View className="flex-1 justify-center items-center px-6 z-10 w-full">
 
@@ -26,7 +26,7 @@ export const LoginScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
             <MaterialIcon name="credit_card" color="#3B82F6" size={32} />
           </View>
           <Text className="font-display-lg text-display-lg text-on-surface tracking-tighter">
-            STUDENTSPEND
+            LUMEN
           </Text>
         </View>
 

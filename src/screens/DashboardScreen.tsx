@@ -1,18 +1,17 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Platform, StyleSheet } from 'react-native';
 import { useMockStore } from '../store/mockStore';
 import { GlassCard } from '../components/GlassCard';
 import LogPaymentModal from '../components/LogPaymentModal';
-import BackgroundLayout from '../components/BackgroundLayout';
+import GlobalLayout from '../components/GlobalLayout';
 import GlowOrb from '../components/GlowOrb';
+import { BlurView } from '@react-native-community/blur';
 import MaterialIcon from '../components/MaterialIcon';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export const DashboardScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
   const { cashBalance, upiBalance, userProfile, transactions } = useMockStore();
   const [activeTab, setActiveTab] = useState<'total' | 'cash' | 'upi'>('total');
   const [isLogModalVisible, setIsLogModalVisible] = useState(false);
-  const insets = useSafeAreaInsets();
 
   // Compute balance safely
   const safeCashBalance = typeof cashBalance === 'number' && !isNaN(cashBalance) ? cashBalance : 0;
@@ -58,35 +57,11 @@ export const DashboardScreen: React.FC<{ navigation: any }> = ({ navigation }) =
   };
 
   return (
-    <BackgroundLayout>
-      {/* Ambient background glows */}
-      <GlowOrb size={300} color="#3B82F6" opacity={0.15} style={{ top: '20%', left: '10%' }} />
-      <GlowOrb size={280} color="#3B82F6" opacity={0.08} style={{ bottom: '30%', right: '0%' }} />
-
-      <View className="flex-1 z-10 w-full">
-
-      {/* Header */}
-      <View 
-        style={{ paddingTop: Math.max(insets.top, 16) }}
-        className="flex-row items-center justify-between px-6 pb-4"
-      >
-        <View className="flex-row items-center gap-2">
-          <Text 
-            allowFontScaling={false}
-            style={{ fontSize: 28, lineHeight: 34, fontWeight: 'bold', fontFamily: 'sans-serif-medium', color: 'white', letterSpacing: -0.5 }}
-            className="tracking-tight"
-          >
-            Hi, {userProfile.name || 'Aqua'}
-          </Text>
-          <View className="w-2.5 h-2.5 rounded-full bg-green-400 animate-pulse mt-2" />
-        </View>
-        <TouchableOpacity
-          onPress={() => navigation.navigate('BiometricGate')}
-          className="w-11 h-11 rounded-full bg-white/5 border border-white/10 items-center justify-center shadow-lg"
-        >
-          <MaterialIcon name="fingerprint" size={22} color="#a5c3ff" />
-        </TouchableOpacity>
-      </View>
+    <GlobalLayout
+      activeTab="dashboard"
+      navigation={navigation}
+      rightAction="biometric"
+    >
 
       <ScrollView contentContainerStyle={{ paddingBottom: 120 }} className="flex-1">
         {/* Wallet Segmented Toggle */}
@@ -122,8 +97,21 @@ export const DashboardScreen: React.FC<{ navigation: any }> = ({ navigation }) =
         </View>
 
         {/* Dynamic Balance Card */}
-        <View className="px-6 mt-6">
-          <GlassCard active={true} className="px-6" contentClassName="pt-3 pb-6">
+        <View className="px-6 mt-6 relative">
+          <GlassCard 
+            active={true} 
+            className="px-6" 
+            contentClassName="pt-3 pb-6"
+            backgroundChildren={
+              <GlowOrb 
+                size={260} 
+                color="#FFFFFF" 
+                opacity={0.25} 
+                style={{ position: 'absolute', top: -130, right: -130 }} 
+                gradientId="balance-glow"
+              />
+            }
+          >
             <View className="items-start">
               <Text 
                 allowFontScaling={false}
@@ -169,7 +157,7 @@ export const DashboardScreen: React.FC<{ navigation: any }> = ({ navigation }) =
                   <MaterialIcon name="restaurant" size={18} color="#adc6ff" />
                   <Text style={{ fontSize: 16, lineHeight: 24, fontWeight: '500', fontFamily: 'sans-serif-medium', color: 'white' }}>Food</Text>
                 </View>
-                <Text style={{ fontSize: 14, lineHeight: 20, fontWeight: '600', fontFamily: 'sans-serif-medium', color: 'rgba(194, 198, 214, 0.8)' }}>
+                <Text style={{ fontSize: 14, lineHeight: 20, fontWeight: 'bold', fontFamily: 'sans-serif-medium', color: 'white' }}>
                   ₹{foodSpent.toLocaleString('en-IN')} / ₹{budgetLimits.Food.toLocaleString('en-IN')} ({Math.round(getProgress(foodSpent, budgetLimits.Food))}%)
                 </Text>
               </View>
@@ -191,7 +179,7 @@ export const DashboardScreen: React.FC<{ navigation: any }> = ({ navigation }) =
                   <MaterialIcon name="directions_car" size={18} color="#22d3ee" />
                   <Text style={{ fontSize: 16, lineHeight: 24, fontWeight: '500', fontFamily: 'sans-serif-medium', color: 'white' }}>Travel</Text>
                 </View>
-                <Text style={{ fontSize: 14, lineHeight: 20, fontWeight: '600', fontFamily: 'sans-serif-medium', color: 'rgba(194, 198, 214, 0.8)' }}>
+                <Text style={{ fontSize: 14, lineHeight: 20, fontWeight: 'bold', fontFamily: 'sans-serif-medium', color: 'white' }}>
                   ₹{travelSpent.toLocaleString('en-IN')} / ₹{budgetLimits.Travel.toLocaleString('en-IN')} ({Math.round(getProgress(travelSpent, budgetLimits.Travel))}%)
                 </Text>
               </View>
@@ -213,7 +201,7 @@ export const DashboardScreen: React.FC<{ navigation: any }> = ({ navigation }) =
                   <MaterialIcon name="menu_book" size={18} color="#fbbf24" />
                   <Text style={{ fontSize: 16, lineHeight: 24, fontWeight: '500', fontFamily: 'sans-serif-medium', color: 'white' }}>Stationery</Text>
                 </View>
-                <Text style={{ fontSize: 14, lineHeight: 20, fontWeight: '600', fontFamily: 'sans-serif-medium', color: 'rgba(194, 198, 214, 0.8)' }}>
+                <Text style={{ fontSize: 14, lineHeight: 20, fontWeight: 'bold', fontFamily: 'sans-serif-medium', color: 'white' }}>
                   ₹{stationerySpent.toLocaleString('en-IN')} / ₹{budgetLimits.Stationery.toLocaleString('en-IN')} ({Math.round(getProgress(stationerySpent, budgetLimits.Stationery))}%)
                 </Text>
               </View>
@@ -263,7 +251,7 @@ export const DashboardScreen: React.FC<{ navigation: any }> = ({ navigation }) =
                   </View>
                   <View>
                     <Text className="text-[15px] text-white font-semibold">{tx.title}</Text>
-                    <Text className="text-xs text-on-surface-variant/80 mt-0.5">
+                    <Text className="text-xs text-white font-bold mt-0.5">
                       {tx.title === 'Photocopy' ? 'Yesterday' : tx.timestamp}
                     </Text>
                   </View>
@@ -281,9 +269,34 @@ export const DashboardScreen: React.FC<{ navigation: any }> = ({ navigation }) =
       <TouchableOpacity
         onPress={() => setIsLogModalVisible(true)}
         activeOpacity={0.8}
-        className="absolute bottom-24 right-6 w-14 h-14 bg-primary-container rounded-full items-center justify-center shadow-[0_0_20px_rgba(59,130,246,0.4)] z-50"
+        className="absolute bottom-24 right-6 w-14 h-14 rounded-full border border-white/20 items-center justify-center overflow-hidden shadow-[0_0_20px_rgba(59,130,246,0.25)] z-50"
       >
-        <MaterialIcon name="add" size={28} color="#00285d" />
+        {Platform.OS === 'android' ? (
+          <BlurView
+            style={StyleSheet.absoluteFill}
+            blurRadius={10}
+            overlayColor="rgba(255, 255, 255, 0.15)"
+          />
+        ) : Platform.OS === 'ios' ? (
+          <BlurView
+            style={StyleSheet.absoluteFill}
+            blurType="light"
+            blurAmount={15}
+            reducedTransparencyFallbackColor="rgba(255, 255, 255, 0.2)"
+          />
+        ) : (
+          <View
+            style={[
+              StyleSheet.absoluteFill,
+              {
+                backgroundColor: 'rgba(255, 255, 255, 0.15)',
+              }
+            ]}
+          />
+        )}
+        <View className="z-10 items-center justify-center">
+          <MaterialIcon name="add" size={28} color="#FFFFFF" />
+        </View>
       </TouchableOpacity>
 
       {/* Log Payment Modal Sheet */}
@@ -291,8 +304,7 @@ export const DashboardScreen: React.FC<{ navigation: any }> = ({ navigation }) =
         visible={isLogModalVisible} 
         onClose={() => setIsLogModalVisible(false)} 
       />
-      </View>
-    </BackgroundLayout>
+    </GlobalLayout>
   );
 };
 export default DashboardScreen;

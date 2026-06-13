@@ -1,4 +1,4 @@
-package com.studentspend
+package com.lumen
 
 import android.app.Application
 import com.facebook.react.PackageList

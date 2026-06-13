@@ -5,7 +5,8 @@ trigger: always_on
 # ANTIGRAVITY IDE - CORE DIRECTIVES FOR STUDENTSPEND (STATIC-FIRST & UI MIRROR)
 
 ## 1. Workflow & Implementation Standards
-- **Always Create a Plan:** Before writing any code, output a step-by-step Implementation Plan detailing the tasks, components to build, and file structure.
+- **Always Create a Plan for Major Implementation:** Before writing any code, output a step-by-step Implementation Plan detailing the tasks, components to build, and file structure.
+- **For smaller code fixex, small optimization or implementations:** No need to create implementation plan, proceed directly.
 - **Wait for Approval:** Continue step-by-step and ALWAYS wait for user approval before moving to the next step, installing libraries, modifying configs, or generating multiple files.
 - **Generate File-by-File:** Present code separately for each component, labeled with its exact file name and path. Never combine unrelated files.
 - **No Hallucination:** Use only latest stable React Native standards and official APIs. Never invent packages, hooks, methods, or native modules.

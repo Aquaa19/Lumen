@@ -4,11 +4,10 @@ import Svg, { Path, Defs, LinearGradient, Stop } from 'react-native-svg';
 import { useMockStore } from '../store/mockStore';
 import { GlassCard } from '../components/GlassCard';
 import { DEFAULT_CATEGORIES } from '../utils/constants';
-import BackgroundLayout from '../components/BackgroundLayout';
-import GlowOrb from '../components/GlowOrb';
+import GlobalLayout from '../components/GlobalLayout';
 import MaterialIcon from '../components/MaterialIcon';
 
-export const StatisticsScreen: React.FC = () => {
+export const StatisticsScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
   const { transactions } = useMockStore();
 
   // Compute total spent dynamically
@@ -40,25 +39,12 @@ export const StatisticsScreen: React.FC = () => {
   };
 
   return (
-    <BackgroundLayout>
-      {/* Background Glows */}
-      <GlowOrb size={280} color="#3B82F6" opacity={0.15} style={{ top: 0, left: -100 }} />
-      <GlowOrb size={250} color="#3B82F6" opacity={0.08} style={{ bottom: '20%', right: -50 }} />
-
-      <View className="flex-1 z-10 w-full">
-
-      {/* Header */}
-      <View className="flex-row items-center justify-between px-6 pt-12 pb-4 border-b border-white/5">
-        <TouchableOpacity className="w-10 h-10 items-center justify-center">
-          <MaterialIcon name="menu" color="#3B82F6" size={24} />
-        </TouchableOpacity>
-        <Text className="font-label-caps text-label-caps tracking-widest text-primary">
-          FINANCE INTELLIGENCE
-        </Text>
-        <View className="w-10 h-10 rounded-full bg-surface-variant justify-center items-center">
-          <MaterialIcon name="person" color="#3B82F6" size={20} />
-        </View>
-      </View>
+    <GlobalLayout
+      activeTab="statistics"
+      navigation={navigation}
+      title="FINANCE INTELLIGENCE"
+      rightAction="profile"
+    >
 
       <ScrollView contentContainerStyle={{ paddingBottom: 100 }} className="flex-1 px-6 pt-6">
         {/* Month Selector */}
@@ -166,8 +152,7 @@ export const StatisticsScreen: React.FC = () => {
           ))}
         </View>
       </ScrollView>
-      </View>
-    </BackgroundLayout>
+    </GlobalLayout>
   );
 };
 export default StatisticsScreen;

@@ -2,8 +2,7 @@ import React, { useState, useRef } from 'react';
 import { View, Text, ScrollView, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform } from 'react-native';
 import { useMockStore } from '../store/mockStore';
 import { GlassCard } from '../components/GlassCard';
-import BackgroundLayout from '../components/BackgroundLayout';
-import GlowOrb from '../components/GlowOrb';
+import GlobalLayout from '../components/GlobalLayout';
 import MaterialIcon from '../components/MaterialIcon';
 
 interface Message {
@@ -13,7 +12,7 @@ interface Message {
   transactions?: any[];
 }
 
-export const AssistantScreen: React.FC = () => {
+export const AssistantScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
   const { transactions } = useMockStore();
   const [messages, setMessages] = useState<Message[]>([
     {
@@ -84,29 +83,12 @@ export const AssistantScreen: React.FC = () => {
   };
 
   return (
-    <BackgroundLayout>
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        className="flex-1"
-      >
-        {/* Background orbs */}
-        <GlowOrb size={280} color="#3B82F6" opacity={0.15} style={{ top: '-10%', left: '-10%' }} />
-        <GlowOrb size={300} color="#3B82F6" opacity={0.05} style={{ bottom: '-20%', right: '-10%' }} />
-
-        <View className="flex-1 z-10 w-full">
-
-      {/* Header */}
-      <View className="flex-row items-center justify-between px-6 pt-12 pb-4 border-b border-white/5 bg-transparent">
-        <TouchableOpacity className="w-10 h-10 items-center justify-center">
-          <MaterialIcon name="menu" color="#3B82F6" size={24} />
-        </TouchableOpacity>
-        <Text className="font-label-caps text-label-caps tracking-widest text-primary">
-          FINANCE INTELLIGENCE
-        </Text>
-        <View className="w-10 h-10 rounded-full bg-surface-variant justify-center items-center">
-          <MaterialIcon name="person" color="#3B82F6" size={20} />
-        </View>
-      </View>
+    <GlobalLayout
+      activeTab="assistant"
+      navigation={navigation}
+      title="FINANCE INTELLIGENCE"
+      rightAction="profile"
+    >
 
       {/* Chat Space */}
       <View className="flex-1 px-6 pt-6">
@@ -207,9 +189,7 @@ export const AssistantScreen: React.FC = () => {
           </TouchableOpacity>
       </View>
       </View>
-      </View>
-    </KeyboardAvoidingView>
-  </BackgroundLayout>
+    </GlobalLayout>
   );
 };
 export default AssistantScreen;

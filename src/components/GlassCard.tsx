@@ -7,17 +7,19 @@ interface GlassCardProps {
   className?: string;
   active?: boolean;
   contentClassName?: string;
+  backgroundChildren?: React.ReactNode;
 }
 
 export const GlassCard: React.FC<GlassCardProps> = ({ 
   children, 
   className = '', 
   active = false,
-  contentClassName = 'p-4'
+  contentClassName = 'p-4',
+  backgroundChildren
 }) => {
   return (
     <View 
-      className={`rounded-2xl overflow-hidden border border-white/10 ${
+      className={`rounded-2xl overflow-hidden border border-white/20 ${
         active 
           ? 'bg-white/10' 
           : 'bg-white/5 shadow-lg'
@@ -40,6 +42,7 @@ export const GlassCard: React.FC<GlassCardProps> = ({
           ]}
         />
       )}
+      {backgroundChildren}
       <View className={`${contentClassName} relative z-10`}>
         {children}
       </View>

@@ -2,8 +2,7 @@ import React from 'react';
 import { View, Text, TouchableOpacity, Alert } from 'react-native';
 import { useMockStore } from '../store/mockStore';
 import { GlassCard } from '../components/GlassCard';
-import BackgroundLayout from '../components/BackgroundLayout';
-import GlowOrb from '../components/GlowOrb';
+import GlobalLayout from '../components/GlobalLayout';
 import MaterialIcon from '../components/MaterialIcon';
 
 export const TransactionDetailScreen: React.FC<{ route: any; navigation: any }> = ({ route, navigation }) => {
@@ -42,29 +41,12 @@ export const TransactionDetailScreen: React.FC<{ route: any; navigation: any }> 
   };
 
   return (
-    <BackgroundLayout>
-      {/* Background ambient gradient */}
-      <GlowOrb size={300} color="#3B82F6" opacity={0.12} style={{ top: '10%', left: -50 }} />
-      <GlowOrb size={300} color="#3B82F6" opacity={0.06} style={{ bottom: '20%', right: -50 }} />
-
-      <View className="flex-1 z-10 w-full">
-
-      {/* Header */}
-      <View className="flex-row justify-between items-center px-6 pt-12 pb-4 border-b border-white/5 bg-transparent">
-        <TouchableOpacity 
-          onPress={() => navigation.goBack()}
-          className="w-10 h-10 items-center justify-center rounded-full hover:bg-white/5"
-        >
-          <MaterialIcon name="arrow_back" color="#8c909f" size={24} />
-        </TouchableOpacity>
-        <Text 
-          allowFontScaling={false}
-          style={{ fontSize: 20, lineHeight: 28, fontWeight: 'bold', fontFamily: 'sans-serif-medium', color: '#e1e2ec' }}
-        >
-          Transaction Detail
-        </Text>
-        <View className="w-10" /> {/* Spacer */}
-      </View>
+    <GlobalLayout
+      activeTab="none"
+      navigation={navigation}
+      title="Transaction Detail"
+      showBack={true}
+    >
 
       <View className="flex-1 px-6 pt-8 max-w-md mx-auto justify-between pb-12">
         <View>
@@ -167,8 +149,7 @@ export const TransactionDetailScreen: React.FC<{ route: any; navigation: any }> 
           </TouchableOpacity>
         </View>
       </View>
-      </View>
-    </BackgroundLayout>
+    </GlobalLayout>
   );
 };
 export default TransactionDetailScreen;

@@ -29,8 +29,8 @@ export const SetupWizardScreen: React.FC<{ navigation: any }> = ({ navigation })
   return (
     <BackgroundLayout>
       {/* Background lights */}
-      <GlowOrb size={320} color="#3B82F6" opacity={0.15} style={{ top: '-10%', left: '-5%' }} />
-      <GlowOrb size={320} color="#df7412" opacity={0.12} style={{ bottom: '-10%', right: '-5%' }} />
+      <GlowOrb size={320} color="#3B82F6" opacity={0.15} style={{ top: '-10%', left: '-5%' }} gradientId="wizard-glow-top" />
+      <GlowOrb size={320} color="#df7412" opacity={0.12} style={{ bottom: '-10%', right: '-5%' }} gradientId="wizard-glow-bottom" />
 
       <View className="flex-1 justify-between py-12 px-6 z-10 w-full">
         {/* Header */}

@@ -2,8 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, TextInput, Alert } from 'react-native';
 import { useMockStore } from '../store/mockStore';
 import { GlassCard } from '../components/GlassCard';
-import BackgroundLayout from '../components/BackgroundLayout';
-import GlowOrb from '../components/GlowOrb';
+import GlobalLayout from '../components/GlobalLayout';
 import MaterialIcon from '../components/MaterialIcon';
 
 export const SelfTransferScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
@@ -40,29 +39,12 @@ export const SelfTransferScreen: React.FC<{ navigation: any }> = ({ navigation }
   };
 
   return (
-    <BackgroundLayout>
-      {/* Background ambient lighting */}
-      <GlowOrb size={300} color="#3B82F6" opacity={0.15} style={{ top: -100, right: -100 }} />
-      <GlowOrb size={300} color="#df7412" opacity={0.06} style={{ bottom: -100, left: -100 }} />
-
-      <View className="flex-1 z-10 w-full">
-
-      {/* Header */}
-      <View className="flex-row items-center justify-between px-6 pt-12 pb-4 border-b border-white/5">
-        <TouchableOpacity 
-          onPress={() => navigation.goBack()}
-          className="w-10 h-10 items-center justify-center rounded-full hover:bg-white/5"
-        >
-          <MaterialIcon name="arrow_back" color="#8c909f" size={24} />
-        </TouchableOpacity>
-        <Text 
-          allowFontScaling={false}
-          style={{ fontSize: 20, lineHeight: 28, fontWeight: 'bold', fontFamily: 'sans-serif-medium', color: 'white' }}
-        >
-          Self Transfer
-        </Text>
-        <View className="w-10" />
-      </View>
+    <GlobalLayout
+      activeTab="none"
+      navigation={navigation}
+      title="Self Transfer"
+      showBack={true}
+    >
 
       <View className="flex-1 px-6 pt-6 justify-between pb-12 max-w-md mx-auto">
         <View className="gap-6">
@@ -158,8 +140,7 @@ export const SelfTransferScreen: React.FC<{ navigation: any }> = ({ navigation }
           </Text>
         </TouchableOpacity>
       </View>
-      </View>
-    </BackgroundLayout>
+    </GlobalLayout>
   );
 };
 export default SelfTransferScreen;

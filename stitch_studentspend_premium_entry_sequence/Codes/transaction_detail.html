@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Transaction Detail</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "inverse-on-surface": "#2e3038",
+                        "surface-dim": "#10131a",
+                        "surface-container-lowest": "#0b0e15",
+                        "on-secondary-container": "#a7b6cc",
+                        "on-tertiary-container": "#461f00",
+                        "surface-container": "#1d2027",
+                        "primary": "#adc6ff",
+                        "inverse-primary": "#005ac2",
+                        "tertiary-fixed": "#ffdcc6",
+                        "primary-fixed": "#d8e2ff",
+                        "secondary-container": "#39485a",
+                        "primary-container": "#4d8eff",
+                        "tertiary": "#ffb786",
+                        "outline": "#8c909f",
+                        "on-surface-variant": "#c2c6d6",
+                        "background": "#10131a",
+                        "on-primary-fixed": "#001a42",
+                        "secondary-fixed": "#d4e4fa",
+                        "on-primary": "#002e6a",
+                        "on-error-container": "#ffdad6",
+                        "on-tertiary-fixed-variant": "#723600",
+                        "tertiary-container": "#df7412",
+                        "error-container": "#93000a",
+                        "surface": "#10131a",
+                        "secondary": "#b9c8de",
+                        "on-secondary": "#233143",
+                        "surface-container-highest": "#32353c",
+                        "on-secondary-fixed": "#0d1c2d",
+                        "error": "#ffb4ab",
+                        "tertiary-fixed-dim": "#ffb786",
+                        "on-error": "#690005",
+                        "on-surface": "#e1e2ec",
+                        "outline-variant": "#424754",
+                        "on-background": "#e1e2ec",
+                        "surface-tint": "#adc6ff",
+                        "on-tertiary-fixed": "#311400",
+                        "primary-fixed-dim": "#adc6ff",
+                        "surface-bright": "#363941",
+                        "surface-container-high": "#272a31",
+                        "secondary-fixed-dim": "#b9c8de",
+                        "surface-container-low": "#191b23",
+                        "on-primary-fixed-variant": "#004395",
+                        "on-tertiary": "#502400",
+                        "on-secondary-fixed-variant": "#39485a",
+                        "on-primary-container": "#00285d",
+                        "surface-variant": "#32353c",
+                        "inverse-surface": "#e1e2ec"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "unit": "4px",
+                        "sm": "8px",
+                        "gutter": "12px",
+                        "xl": "32px",
+                        "md": "16px",
+                        "xs": "4px",
+                        "lg": "24px",
+                        "container-padding": "20px"
+                    },
+                    "fontFamily": {
+                        "title-md": ["Inter"],
+                        "label-caps": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "display-lg": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "headline-lg-mobile": ["Inter"],
+                        "body-sm": ["Inter"]
+                    },
+                    "fontSize": {
+                        "title-md": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "label-caps": ["12px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700" }],
+                        "display-lg": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "headline-lg-mobile": ["28px", { "lineHeight": "34px", "fontWeight": "700" }],
+                        "body-sm": ["14px", { "lineHeight": "20px", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body {
+            background-color: #0F172A; /* Requested deep navy */
+            color: #e1e2ec;
+            position: relative;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+        
+        /* Subtle mesh gradient background */
+        .mesh-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -1;
+            background: 
+                radial-gradient(circle at 15% 50%, rgba(59, 130, 246, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 85% 30%, rgba(168, 85, 247, 0.05) 0%, transparent 50%);
+            filter: blur(60px);
+        }
+
+        .glass-card {
+            background: rgba(30, 41, 59, 0.4);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            background-image: linear-gradient(to bottom right, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0) 100%);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+        }
+
+        .glass-pill {
+            background: rgba(59, 130, 246, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+        }
+
+        .btn-refund {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            box-shadow: 0 0 15px rgba(16, 185, 129, 0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .btn-refund:hover {
+            background: rgba(16, 185, 129, 0.15);
+            box-shadow: 0 0 20px rgba(16, 185, 129, 0.2);
+        }
+
+        .btn-delete {
+            background: transparent;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #ffb4ab; /* on-error */
+            transition: all 0.3s ease;
+        }
+
+        .btn-delete:hover {
+            background: rgba(239, 68, 68, 0.05);
+        }
+        
+        /* Utility for negative amount styling */
+        .text-negative {
+            color: #ffb4ab; /* Using error color from config */
+            text-shadow: 0 0 20px rgba(255, 180, 171, 0.2);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="antialiased selection:bg-primary selection:text-on-primary">
+<div class="mesh-bg"></div>
+<!-- Top Navigation (Contextual departure, back button present) -->
+<header class="fixed top-0 w-full z-50 flex justify-between items-center px-container-padding h-16 backdrop-blur-md bg-surface/10 border-b border-white/5">
+<button class="text-on-surface-variant hover:text-primary transition-colors flex items-center justify-center p-2 -ml-2 rounded-full hover:bg-white/5">
+<span class="material-symbols-outlined">arrow_back</span>
+</button>
+<h1 class="font-title-md text-title-md text-on-surface absolute left-1/2 -translate-x-1/2">Transaction</h1>
+<div class="w-10"></div> <!-- Spacer for centering -->
+</header>
+<main class="pt-24 px-container-padding pb-32 max-w-md mx-auto md:max-w-2xl md:pt-32">
+<!-- Main Transaction Detail Card -->
+<article class="glass-card rounded-[24px] p-8 flex flex-col items-center relative overflow-hidden mb-8">
+<!-- Decorative merchant logo placeholder / icon -->
+<div class="w-20 h-20 rounded-full bg-surface-container-high border border-white/10 flex items-center justify-center mb-6 shadow-lg relative z-10">
+<span class="material-symbols-outlined text-4xl text-on-surface-variant">directions_car</span>
+</div>
+<!-- Merchant Name -->
+<h2 class="font-headline-lg-mobile text-headline-lg-mobile text-on-surface mb-2 relative z-10">Uber</h2>
+<!-- Timestamp -->
+<p class="font-body-sm text-body-sm text-on-surface-variant mb-8 relative z-10">14:20, 24 JUN</p>
+<!-- Amount -->
+<div class="font-display-lg text-display-lg text-negative mb-8 relative z-10 tracking-tight">
+                -₹150.00
+            </div>
+<!-- Badges/Details -->
+<div class="flex gap-4 relative z-10 w-full justify-center">
+<div class="glass-pill rounded-full px-4 py-2 flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px] text-primary">account_balance_wallet</span>
+<span class="font-label-caps text-label-caps text-primary">UPI</span>
+</div>
+<div class="glass-pill rounded-full px-4 py-2 flex items-center gap-2" style="background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.1);">
+<span class="material-symbols-outlined text-[16px] text-on-surface-variant">category</span>
+<span class="font-label-caps text-label-caps text-on-surface-variant">TRANSPORT</span>
+</div>
+</div>
+<!-- Ambient glow behind the card content -->
+<div class="absolute inset-0 bg-gradient-to-b from-transparent to-surface-container-lowest/50 pointer-events-none"></div>
+</article>
+<!-- Additional Information Section -->
+<section class="glass-card rounded-[20px] p-6 mb-12">
+<h3 class="font-title-md text-title-md text-on-surface mb-4">Transaction Details</h3>
+<div class="space-y-4">
+<div class="flex justify-between items-center py-3 border-b border-white/5">
+<span class="font-body-sm text-body-sm text-on-surface-variant">Transaction ID</span>
+<span class="font-body-sm text-body-sm text-on-surface font-mono">TXN-847291048A</span>
+</div>
+<div class="flex justify-between items-center py-3 border-b border-white/5">
+<span class="font-body-sm text-body-sm text-on-surface-variant">Status</span>
+<span class="font-body-sm text-body-sm text-[#10B981] flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">check_circle</span> Completed
+                    </span>
+</div>
+<div class="flex justify-between items-center py-3">
+<span class="font-body-sm text-body-sm text-on-surface-variant">Note</span>
+<span class="font-body-sm text-body-sm text-on-surface italic">Trip to Airport</span>
+</div>
+</div>
+</section>
+<!-- Action Buttons -->
+<div class="flex flex-col gap-4">
+<button class="btn-refund w-full py-4 rounded-xl font-title-md text-title-md text-[#10B981] flex items-center justify-center gap-2">
+<span class="material-symbols-outlined">replay</span>
+                Mark as Refunded
+            </button>
+<button class="btn-delete w-full py-4 rounded-xl font-title-md text-title-md flex items-center justify-center gap-2">
+<span class="material-symbols-outlined">delete</span>
+                Delete Record
+            </button>
+</div>
+</main>
+<!-- Navigation shell suppressed as this is a focused, task-oriented sub-page with a back button. -->
+</body></html>

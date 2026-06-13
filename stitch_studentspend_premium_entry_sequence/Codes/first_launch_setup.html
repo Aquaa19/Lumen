@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>First Launch Setup - StudentSpend</title>
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Theme Configuration -->
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "inverse-surface": "#e1e2ec",
+                        "on-background": "#e1e2ec",
+                        "secondary-container": "#39485a",
+                        "surface-container-highest": "#32353c",
+                        "error": "#ffb4ab",
+                        "tertiary": "#ffb786",
+                        "secondary-fixed-dim": "#b9c8de",
+                        "error-container": "#93000a",
+                        "surface-tint": "#adc6ff",
+                        "surface-variant": "#32353c",
+                        "surface-bright": "#363941",
+                        "on-surface": "#e1e2ec",
+                        "on-error": "#690005",
+                        "surface-container-low": "#191b23",
+                        "on-secondary": "#233143",
+                        "surface-container-high": "#272a31",
+                        "on-tertiary-fixed-variant": "#723600",
+                        "on-tertiary": "#502400",
+                        "background": "#10131a",
+                        "on-tertiary-fixed": "#311400",
+                        "surface": "#10131a",
+                        "on-primary-container": "#00285d",
+                        "primary-fixed": "#d8e2ff",
+                        "on-primary": "#002e6a",
+                        "tertiary-fixed-dim": "#ffb786",
+                        "outline": "#8c909f",
+                        "inverse-on-surface": "#2e3038",
+                        "tertiary-container": "#df7412",
+                        "on-secondary-fixed-variant": "#39485a",
+                        "on-secondary-container": "#a7b6cc",
+                        "on-tertiary-container": "#461f00",
+                        "primary-fixed-dim": "#adc6ff",
+                        "inverse-primary": "#005ac2",
+                        "surface-container-lowest": "#0b0e15",
+                        "secondary-fixed": "#d4e4fa",
+                        "tertiary-fixed": "#ffdcc6",
+                        "on-surface-variant": "#c2c6d6",
+                        "primary-container": "#4d8eff",
+                        "outline-variant": "#424754",
+                        "on-primary-fixed-variant": "#004395",
+                        "secondary": "#b9c8de",
+                        "surface-dim": "#10131a",
+                        "on-primary-fixed": "#001a42",
+                        "on-error-container": "#ffdad6",
+                        "primary": "#adc6ff",
+                        "on-secondary-fixed": "#0d1c2d",
+                        "surface-container": "#1d2027"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "2xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "gutter": "12px",
+                        "container-padding": "20px",
+                        "xl": "32px",
+                        "lg": "24px",
+                        "md": "16px",
+                        "xs": "4px",
+                        "unit": "4px",
+                        "sm": "8px"
+                    },
+                    "fontFamily": {
+                        "label-caps": ["Inter", "sans-serif"],
+                        "body-lg": ["Inter", "sans-serif"],
+                        "body-sm": ["Inter", "sans-serif"],
+                        "title-md": ["Inter", "sans-serif"],
+                        "display-lg": ["Inter", "sans-serif"],
+                        "headline-lg": ["Inter", "sans-serif"],
+                        "headline-lg-mobile": ["Inter", "sans-serif"]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+        /* Custom scrollbar for webkit */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(140, 144, 159, 0.3); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(140, 144, 159, 0.5); }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background antialiased selection:bg-primary/30 selection:text-primary-fixed min-h-screen overflow-x-hidden relative">
+<!-- Ambient Background Glows -->
+<div class="fixed top-[-20%] left-[-10%] w-[60vw] h-[60vw] rounded-full bg-primary-container/10 blur-[120px] pointer-events-none"></div>
+<div class="fixed bottom-[-20%] right-[-10%] w-[50vw] h-[50vw] rounded-full bg-secondary-container/10 blur-[100px] pointer-events-none"></div>
+<!-- Main Container -->
+<div class="relative flex min-h-screen w-full flex-col max-w-md mx-auto z-10 shadow-2xl bg-surface/40 backdrop-blur-3xl border-x border-white/[0.02]">
+<!-- Header (Focused View: Back Button Exception) -->
+<div class="flex items-center p-4 pb-2 justify-between">
+<button class="h-10 w-10 flex items-center justify-center rounded-full bg-white/5 hover:bg-white/10 transition-colors backdrop-blur-md border border-white/5 text-on-surface">
+<span class="material-symbols-outlined text-[20px]">arrow_back</span>
+</button>
+<h2 class="text-on-background text-title-md font-bold leading-tight tracking-[-0.015em] flex-1 text-center pr-10">First Launch Setup</h2>
+</div>
+<!-- Progress Indicator -->
+<div class="flex w-full flex-row items-center justify-center gap-3 py-6">
+<div class="h-2 w-8 rounded-full bg-primary shadow-[0_0_12px_rgba(173,198,255,0.5)] transition-all"></div>
+<div class="h-2 w-2 rounded-full bg-surface-container-highest transition-all"></div>
+<div class="h-2 w-2 rounded-full bg-surface-container-highest transition-all"></div>
+</div>
+<!-- Title -->
+<h1 class="text-on-background text-headline-lg-mobile md:text-headline-lg font-bold leading-tight tracking-[-0.01em] px-container-padding text-center pb-8 pt-4">Input your current<br/>Cash on hand</h1>
+<!-- Input Area -->
+<div class="flex flex-col flex-1 px-container-padding py-4">
+<!-- Glassmorphic Input Container -->
+<div class="relative group mt-4">
+<!-- Frost Layer & Border -->
+<div class="absolute inset-0 bg-white/[0.03] backdrop-blur-[20px] rounded-2xl border border-white/[0.08] group-focus-within:border-primary/50 group-focus-within:bg-white/[0.05] transition-all duration-300 group-focus-within:shadow-[0_0_30px_rgba(173,198,255,0.1)]"></div>
+<!-- Input Field -->
+<label class="flex flex-col relative z-10 w-full h-32 justify-center">
+<span class="text-center text-label-caps text-on-surface-variant mb-2 opacity-70 group-focus-within:text-primary transition-colors">AVAILABLE BALANCE</span>
+<input autofocus="" class="form-input w-full bg-transparent border-none focus:ring-0 text-center text-display-lg text-white placeholder:text-on-surface-variant/30 px-4 py-2" placeholder="$0.00" type="text" value=""/>
+</label>
+</div>
+<!-- Contextual Note -->
+<p class="text-center text-body-sm text-on-surface-variant mt-6 px-4">
+                This helps establish your baseline for upcoming budget calculations.
+            </p>
+<!-- Spacer to push button to bottom -->
+<div class="flex-1"></div>
+<!-- Action Button -->
+<div class="pt-8 pb-6">
+<button class="relative w-full group overflow-hidden rounded-xl h-14 bg-primary text-on-primary text-title-md font-bold shadow-[0_0_20px_rgba(173,198,255,0.2)] hover:shadow-[0_0_30px_rgba(173,198,255,0.4)] transition-all duration-300">
+<!-- Subtle inner glow effect -->
+<div class="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+<!-- Glow behind text -->
+<div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+<div class="w-1/2 h-1/2 bg-white/20 blur-xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+</div>
+<span class="relative z-10 flex items-center justify-center gap-2">
+                        Next
+                        <span class="material-symbols-outlined text-[20px]">arrow_forward</span>
+</span>
+</button>
+</div>
+</div>
+<div class="h-2 w-1/3 mx-auto bg-surface-container-highest rounded-full mb-4 opacity-50"></div>
+</div>
+<script>
+        // Simple script to format the input as currency while typing
+        const input = document.querySelector('input');
+        input.addEventListener('input', function(e) {
+            // Remove non-numeric characters except decimal point
+            let val = this.value.replace(/[^0-9.]/g, '');
+            
+            // Ensure only one decimal point
+            const parts = val.split('.');
+            if (parts.length > 2) {
+                val = parts[0] + '.' + parts.slice(1).join('');
+            }
+            
+            // Limit decimal places to 2
+            if (val.includes('.')) {
+                const dec = val.split('.')[1];
+                if (dec.length > 2) {
+                    val = val.substring(0, val.length - (dec.length - 2));
+                }
+            }
+
+            // Format with dollar sign and commas
+            if (val) {
+                if (val === '.') {
+                    this.value = '$0.';
+                } else {
+                    const numberParts = val.split('.');
+                    numberParts[0] = numberParts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+                    this.value = '$' + numberParts.join('.');
+                }
+            } else {
+                this.value = '';
+            }
+        });
+    </script>
+</body></html>

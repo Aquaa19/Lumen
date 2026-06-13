@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Self Transfer</title>
+<!-- Google Fonts: Inter -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Theme Configuration -->
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "outline": "#8c909f",
+                    "on-surface": "#e1e2ec",
+                    "on-tertiary-container": "#461f00",
+                    "on-primary-fixed-variant": "#004395",
+                    "surface-container-low": "#191b23",
+                    "surface-variant": "#32353c",
+                    "on-secondary-fixed-variant": "#39485a",
+                    "surface-tint": "#adc6ff",
+                    "tertiary": "#ffb786",
+                    "secondary-fixed": "#d4e4fa",
+                    "tertiary-fixed": "#ffdcc6",
+                    "on-error-container": "#ffdad6",
+                    "on-tertiary": "#502400",
+                    "error-container": "#93000a",
+                    "on-error": "#690005",
+                    "on-primary-container": "#00285d",
+                    "error": "#ffb4ab",
+                    "surface-container": "#1d2027",
+                    "on-primary-fixed": "#001a42",
+                    "on-background": "#e1e2ec",
+                    "primary-container": "#4d8eff",
+                    "inverse-primary": "#005ac2",
+                    "surface-container-highest": "#32353c",
+                    "tertiary-container": "#df7412",
+                    "surface-dim": "#10131a",
+                    "surface-container-lowest": "#0b0e15",
+                    "primary-fixed": "#d8e2ff",
+                    "on-secondary-fixed": "#0d1c2d",
+                    "inverse-surface": "#e1e2ec",
+                    "on-secondary-container": "#a7b6cc",
+                    "surface": "#10131a",
+                    "on-primary": "#002e6a",
+                    "surface-container-high": "#272a31",
+                    "inverse-on-surface": "#2e3038",
+                    "on-tertiary-fixed-variant": "#723600",
+                    "secondary-container": "#39485a",
+                    "primary": "#adc6ff",
+                    "on-tertiary-fixed": "#311400",
+                    "tertiary-fixed-dim": "#ffb786",
+                    "secondary-fixed-dim": "#b9c8de",
+                    "secondary": "#b9c8de",
+                    "primary-fixed-dim": "#adc6ff",
+                    "surface-bright": "#363941",
+                    "on-secondary": "#233143",
+                    "on-surface-variant": "#c2c6d6",
+                    "outline-variant": "#424754",
+                    "background": "#10131a"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "gutter": "12px",
+                    "md": "16px",
+                    "lg": "24px",
+                    "unit": "4px",
+                    "xl": "32px",
+                    "sm": "8px",
+                    "container-padding": "20px",
+                    "xs": "4px"
+            },
+            "fontFamily": {
+                    "body-lg": [
+                            "Inter"
+                    ],
+                    "label-caps": [
+                            "Inter"
+                    ],
+                    "title-md": [
+                            "Inter"
+                    ],
+                    "headline-lg-mobile": [
+                            "Inter"
+                    ],
+                    "display-lg": [
+                            "Inter"
+                    ],
+                    "body-sm": [
+                            "Inter"
+                    ],
+                    "headline-lg": [
+                            "Inter"
+                    ]
+            },
+            "fontSize": {
+                    "body-lg": [
+                            "16px",
+                            {
+                                    "lineHeight": "24px",
+                                    "fontWeight": "400"
+                            }
+                    ],
+                    "label-caps": [
+                            "12px",
+                            {
+                                    "lineHeight": "16px",
+                                    "letterSpacing": "0.05em",
+                                    "fontWeight": "600"
+                            }
+                    ],
+                    "title-md": [
+                            "20px",
+                            {
+                                    "lineHeight": "28px",
+                                    "fontWeight": "600"
+                            }
+                    ],
+                    "headline-lg-mobile": [
+                            "28px",
+                            {
+                                    "lineHeight": "34px",
+                                    "fontWeight": "700"
+                            }
+                    ],
+                    "display-lg": [
+                            "48px",
+                            {
+                                    "lineHeight": "56px",
+                                    "letterSpacing": "-0.02em",
+                                    "fontWeight": "700"
+                            }
+                    ],
+                    "body-sm": [
+                            "14px",
+                            {
+                                    "lineHeight": "20px",
+                                    "fontWeight": "400"
+                            }
+                    ],
+                    "headline-lg": [
+                            "32px",
+                            {
+                                    "lineHeight": "40px",
+                                    "letterSpacing": "-0.01em",
+                                    "fontWeight": "700"
+                            }
+                    ]
+            }
+    },
+        },
+      }
+    </script>
+<style>
+        /* Base typography defaults from design system */
+        body {
+            font-family: 'Inter', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        
+        /* Custom scrollbar for a cleaner look */
+        ::-webkit-scrollbar {
+            width: 4px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #32353c; /* surface-variant */
+            border-radius: 4px;
+        }
+
+        /* Glassmorphism utilities */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Ambient glow animation */
+        @keyframes pulse-glow {
+            0%, 100% { opacity: 0.4; transform: scale(1); }
+            50% { opacity: 0.6; transform: scale(1.05); }
+        }
+        .ambient-glow {
+            animation: pulse-glow 8s ease-in-out infinite;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-surface min-h-screen relative overflow-x-hidden flex flex-col items-center">
+<!-- Ambient Background Effects -->
+<div class="fixed inset-0 pointer-events-none overflow-hidden z-0">
+<!-- Top right primary glow -->
+<div class="absolute -top-32 -right-32 w-96 h-96 bg-primary-container/20 rounded-full blur-[100px] ambient-glow"></div>
+<!-- Bottom left tertiary glow -->
+<div class="absolute -bottom-32 -left-32 w-96 h-96 bg-tertiary-container/10 rounded-full blur-[100px] ambient-glow" style="animation-delay: -4s;"></div>
+</div>
+<!-- Mobile Container (Max Width 480px typical for fintech mobile views) -->
+<div class="w-full max-w-[480px] min-h-screen flex flex-col relative z-10">
+<!-- Minimal Header (Back-to-Main Exception) -->
+<header class="flex items-center justify-between p-container-padding pb-md">
+<button class="flex items-center justify-center w-10 h-10 rounded-full bg-surface-container hover:bg-surface-container-high transition-colors text-on-surface">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">arrow_back</span>
+</button>
+<h1 class="font-title-md text-white tracking-[-0.015em]">Self Transfer</h1>
+<div class="w-10"></div> <!-- Spacer for centering -->
+</header>
+<!-- Main Content Area -->
+<main class="flex-1 flex flex-col px-container-padding gap-md pb-xl">
+<!-- Cards Section Container -->
+<div class="relative flex flex-col mt-sm">
+<!-- Card 1: From (Cash Wallet) -->
+<div class="glass-panel rounded-xl p-md relative overflow-hidden group cursor-pointer transition-all hover:bg-white/[0.05]">
+<!-- Amber inner glow accent -->
+<div class="absolute -top-10 -right-10 w-32 h-32 bg-tertiary/20 blur-[40px] rounded-full pointer-events-none"></div>
+<div class="flex items-start justify-between relative z-10">
+<div class="flex items-center gap-md">
+<!-- Icon Container -->
+<div class="w-12 h-12 rounded-lg bg-tertiary/10 border border-tertiary/20 flex items-center justify-center text-tertiary shrink-0">
+<span class="material-symbols-outlined text-[24px]">payments</span>
+</div>
+<!-- Wallet Details -->
+<div class="flex flex-col gap-xs">
+<span class="font-label-caps text-on-surface-variant uppercase tracking-widest text-[10px]">From</span>
+<h3 class="font-title-md text-white leading-tight">Cash Wallet</h3>
+<p class="font-body-sm text-on-surface-variant mt-1">Balance: <span class="text-white">$500.00</span></p>
+</div>
+</div>
+</div>
+</div>
+<!-- Center: Sleek Glowing Arrow -->
+<div class="relative z-20 flex justify-center -my-4">
+<div class="w-10 h-10 rounded-full bg-surface-container-highest border border-outline-variant/30 flex items-center justify-center shadow-[0_0_20px_rgba(173,198,255,0.15)] relative">
+<!-- Subtle outer ring glow -->
+<div class="absolute inset-0 rounded-full bg-primary/10 blur-sm pointer-events-none"></div>
+<span class="material-symbols-outlined text-primary text-[20px] relative z-10">arrow_downward</span>
+</div>
+</div>
+<!-- Card 2: To (UPI Wallet) -->
+<div class="glass-panel rounded-xl p-md relative overflow-hidden group cursor-pointer transition-all hover:bg-white/[0.05]">
+<!-- Electric Blue inner glow accent -->
+<div class="absolute -bottom-10 -right-10 w-32 h-32 bg-primary/20 blur-[40px] rounded-full pointer-events-none"></div>
+<div class="flex items-start justify-between relative z-10">
+<div class="flex items-center gap-md">
+<!-- Icon Container -->
+<div class="w-12 h-12 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center text-primary shrink-0">
+<span class="material-symbols-outlined text-[24px]">qr_code_scanner</span>
+</div>
+<!-- Wallet Details -->
+<div class="flex flex-col gap-xs">
+<span class="font-label-caps text-on-surface-variant uppercase tracking-widest text-[10px]">To</span>
+<h3 class="font-title-md text-white leading-tight">UPI Wallet</h3>
+<p class="font-body-sm text-on-surface-variant mt-1">Balance: <span class="text-white">$120.00</span></p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Amount Input Section -->
+<div class="mt-lg flex flex-col items-center justify-center flex-1">
+<label class="font-label-caps text-on-surface-variant mb-md tracking-widest" for="transfer-amount">Amount to transfer</label>
+<div class="relative w-full max-w-[280px] flex items-center justify-center group">
+<span class="absolute left-4 top-1/2 -translate-y-1/2 font-headline-lg text-on-surface-variant pointer-events-none transition-colors group-focus-within:text-primary">$</span>
+<input class="w-full bg-transparent border-0 border-b-2 border-outline-variant/50 text-center font-display-lg text-white focus:ring-0 focus:border-primary transition-all pb-2 pl-12 pr-4 placeholder:text-on-surface-variant/30 [appearance:textfield] [&amp;::-webkit-outer-spin-button]:appearance-none [&amp;::-webkit-inner-spin-button]:appearance-none" id="transfer-amount" placeholder="0.00" type="number"/>
+<!-- Neon blue glow effect on focus line -->
+<div class="absolute bottom-0 left-0 right-0 h-[2px] bg-primary scale-x-0 opacity-0 group-focus-within:scale-x-100 group-focus-within:opacity-100 transition-all duration-300 shadow-[0_0_12px_rgba(173,198,255,0.6)]"></div>
+</div>
+</div>
+<!-- Bottom Action Area -->
+<div class="mt-auto pt-xl w-full">
+<button class="w-full relative overflow-hidden rounded-xl bg-[#3B82F6] text-white font-title-md py-4 transition-transform active:scale-[0.98] flex items-center justify-center gap-sm shadow-[0_0_24px_rgba(59,130,246,0.3)] group">
+<!-- Intense hover glow behind text -->
+<div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700 ease-in-out"></div>
+<span class="relative z-10">Confirm Transfer</span>
+<span class="material-symbols-outlined text-[20px] relative z-10" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</button>
+</div>
+</main>
+</div>
+<!-- Optional: Micro-interaction script for input styling -->
+<script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const amountInput = document.getElementById('transfer-amount');
+            
+            // Auto-resize or format could go here, keeping it minimal for UI focus
+            amountInput.addEventListener('input', (e) => {
+                // Ensure only positive numbers
+                if(e.target.value < 0) e.target.value = 0;
+            });
+        });
+    </script>
+</body></html>

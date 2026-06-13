@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Log Payment Modal</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "inverse-on-surface": "#2e3038",
+                      "surface-dim": "#10131a",
+                      "surface-container-lowest": "#0b0e15",
+                      "on-secondary-container": "#a7b6cc",
+                      "on-tertiary-container": "#461f00",
+                      "surface-container": "#1d2027",
+                      "primary": "#adc6ff",
+                      "inverse-primary": "#005ac2",
+                      "tertiary-fixed": "#ffdcc6",
+                      "primary-fixed": "#d8e2ff",
+                      "secondary-container": "#39485a",
+                      "primary-container": "#4d8eff",
+                      "tertiary": "#ffb786",
+                      "outline": "#8c909f",
+                      "on-surface-variant": "#c2c6d6",
+                      "background": "#10131a",
+                      "on-primary-fixed": "#001a42",
+                      "secondary-fixed": "#d4e4fa",
+                      "on-primary": "#002e6a",
+                      "on-error-container": "#ffdad6",
+                      "on-tertiary-fixed-variant": "#723600",
+                      "tertiary-container": "#df7412",
+                      "error-container": "#93000a",
+                      "surface": "#10131a",
+                      "secondary": "#b9c8de",
+                      "on-secondary": "#233143",
+                      "surface-container-highest": "#32353c",
+                      "on-secondary-fixed": "#0d1c2d",
+                      "error": "#ffb4ab",
+                      "tertiary-fixed-dim": "#ffb786",
+                      "on-error": "#690005",
+                      "on-surface": "#e1e2ec",
+                      "outline-variant": "#424754",
+                      "on-background": "#e1e2ec",
+                      "surface-tint": "#adc6ff",
+                      "on-tertiary-fixed": "#311400",
+                      "primary-fixed-dim": "#adc6ff",
+                      "surface-bright": "#363941",
+                      "surface-container-high": "#272a31",
+                      "secondary-fixed-dim": "#b9c8de",
+                      "surface-container-low": "#191b23",
+                      "on-primary-fixed-variant": "#004395",
+                      "on-tertiary": "#502400",
+                      "on-secondary-fixed-variant": "#39485a",
+                      "on-primary-container": "#00285d",
+                      "surface-variant": "#32353c",
+                      "inverse-surface": "#e1e2ec"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "unit": "4px",
+                      "sm": "8px",
+                      "gutter": "12px",
+                      "xl": "32px",
+                      "md": "16px",
+                      "xs": "4px",
+                      "lg": "24px",
+                      "container-padding": "20px"
+              },
+              "fontFamily": {
+                      "title-md": ["Inter"],
+                      "label-caps": ["Inter"],
+                      "headline-lg": ["Inter"],
+                      "display-lg": ["Inter"],
+                      "body-lg": ["Inter"],
+                      "headline-lg-mobile": ["Inter"],
+                      "body-sm": ["Inter"]
+              },
+              "fontSize": {
+                      "title-md": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                      "label-caps": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                      "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+                      "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                      "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                      "headline-lg-mobile": ["28px", {"lineHeight": "34px", "fontWeight": "700"}],
+                      "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}]
+              }
+            }
+          }
+        }
+    </script>
+<style>
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.4);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            background-image: linear-gradient(to bottom right, rgba(255,255,255,0.05) 0%, transparent 100%);
+        }
+        
+        .glass-active {
+            background: rgba(59, 130, 246, 0.15);
+            backdrop-filter: blur(40px);
+            -webkit-backdrop-filter: blur(40px);
+            border: 1px solid rgba(173, 198, 255, 0.3);
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.2);
+        }
+
+        .neon-text-glow {
+            text-shadow: 0 0 20px rgba(173, 198, 255, 0.6);
+        }
+
+        .ambient-glow {
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(59,130,246,0.15) 0%, transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .numpad-btn {
+            transition: all 0.2s ease;
+        }
+        .numpad-btn:active {
+            transform: scale(0.95);
+            background: rgba(255,255,255,0.1);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-[#0F172A] text-on-surface font-sans min-h-screen flex flex-col items-center justify-end md:justify-center overflow-hidden relative selection:bg-primary-container selection:text-on-primary-container">
+<!-- Ambient Background Glows -->
+<div class="ambient-glow top-0 left-0 translate-x-[-50%] translate-y-[-50%]"></div>
+<div class="ambient-glow bottom-0 right-0 translate-x-[50%] translate-y-[50%]" style="background: radial-gradient(circle, rgba(173,198,255,0.1) 0%, transparent 70%);"></div>
+<!-- Main Bottom Sheet Container -->
+<main class="w-full max-w-[428px] glass-panel rounded-t-[32px] md:rounded-[32px] p-container-padding flex flex-col gap-xl relative z-10 animate-[slideUp_0.3s_ease-out]">
+<!-- Drag Handle (Mobile) -->
+<div class="w-12 h-1.5 bg-outline-variant/50 rounded-full mx-auto mb-xs md:hidden"></div>
+<!-- Amount Display -->
+<section class="flex flex-col items-center justify-center pt-md">
+<h1 class="font-display-lg text-display-lg text-primary neon-text-glow tracking-tighter" id="amountDisplay">₹0</h1>
+<p class="font-label-caps text-label-caps text-on-surface-variant mt-sm">ENTER AMOUNT</p>
+</section>
+<!-- Source Toggle -->
+<section class="flex bg-surface-container-highest/50 rounded-full p-1 border border-white/5 relative overflow-hidden">
+<button class="flex-1 py-sm rounded-full font-label-caps text-label-caps transition-all duration-300 z-10 text-on-surface glass-active" id="btnCash">
+                Cash
+            </button>
+<button class="flex-1 py-sm rounded-full font-label-caps text-label-caps transition-all duration-300 z-10 text-on-surface-variant hover:text-on-surface" id="btnUpi">
+                UPI
+            </button>
+</section>
+<!-- Category Grid -->
+<section class="grid grid-cols-3 gap-md">
+<!-- Category Item -->
+<button class="flex flex-col items-center gap-xs group">
+<div class="w-14 h-14 rounded-full bg-surface-container-high border border-white/10 flex items-center justify-center transition-all group-hover:glass-active group-hover:scale-105">
+<span class="material-symbols-outlined text-outline group-hover:text-primary transition-colors" data-icon="restaurant" data-weight="fill" style="font-variation-settings: 'FILL' 1;">restaurant</span>
+</div>
+<span class="font-label-caps text-[10px] text-on-surface-variant group-hover:text-on-surface transition-colors">Food</span>
+</button>
+<button class="flex flex-col items-center gap-xs group">
+<div class="w-14 h-14 rounded-full bg-surface-container-high border border-white/10 flex items-center justify-center transition-all group-hover:glass-active group-hover:scale-105">
+<span class="material-symbols-outlined text-outline group-hover:text-primary transition-colors" data-icon="flight_takeoff" data-weight="fill" style="font-variation-settings: 'FILL' 1;">flight_takeoff</span>
+</div>
+<span class="font-label-caps text-[10px] text-on-surface-variant group-hover:text-on-surface transition-colors">Travel</span>
+</button>
+<button class="flex flex-col items-center gap-xs group">
+<div class="w-14 h-14 rounded-full bg-surface-container-high border border-white/10 flex items-center justify-center transition-all group-hover:glass-active group-hover:scale-105">
+<span class="material-symbols-outlined text-outline group-hover:text-primary transition-colors" data-icon="edit" data-weight="fill" style="font-variation-settings: 'FILL' 1;">edit</span>
+</div>
+<span class="font-label-caps text-[10px] text-on-surface-variant group-hover:text-on-surface transition-colors">Stationery</span>
+</button>
+<button class="flex flex-col items-center gap-xs group">
+<div class="w-14 h-14 rounded-full bg-surface-container-high border border-white/10 flex items-center justify-center transition-all group-hover:glass-active group-hover:scale-105">
+<span class="material-symbols-outlined text-outline group-hover:text-primary transition-colors" data-icon="local_mall" data-weight="fill" style="font-variation-settings: 'FILL' 1;">local_mall</span>
+</div>
+<span class="font-label-caps text-[10px] text-on-surface-variant group-hover:text-on-surface transition-colors">Shopping</span>
+</button>
+<button class="flex flex-col items-center gap-xs group">
+<div class="w-14 h-14 rounded-full bg-surface-container-high border border-white/10 flex items-center justify-center transition-all group-hover:glass-active group-hover:scale-105">
+<span class="material-symbols-outlined text-outline group-hover:text-primary transition-colors" data-icon="movie" data-weight="fill" style="font-variation-settings: 'FILL' 1;">movie</span>
+</div>
+<span class="font-label-caps text-[10px] text-on-surface-variant group-hover:text-on-surface transition-colors">Entertainment</span>
+</button>
+<button class="flex flex-col items-center gap-xs group">
+<div class="w-14 h-14 rounded-full bg-surface-container-high border border-white/10 flex items-center justify-center transition-all group-hover:glass-active group-hover:scale-105">
+<span class="material-symbols-outlined text-outline group-hover:text-primary transition-colors" data-icon="category" data-weight="fill" style="font-variation-settings: 'FILL' 1;">category</span>
+</div>
+<span class="font-label-caps text-[10px] text-on-surface-variant group-hover:text-on-surface transition-colors">Others</span>
+</button>
+</section>
+<!-- Custom Numpad -->
+<section class="grid grid-cols-3 gap-y-sm gap-x-xs mt-md">
+<button class="numpad-btn h-16 rounded-2xl flex items-center justify-center font-headline-lg-mobile text-headline-lg-mobile text-on-surface">1</button>
+<button class="numpad-btn h-16 rounded-2xl flex items-center justify-center font-headline-lg-mobile text-headline-lg-mobile text-on-surface">2</button>
+<button class="numpad-btn h-16 rounded-2xl flex items-center justify-center font-headline-lg-mobile text-headline-lg-mobile text-on-surface">3</button>
+<button class="numpad-btn h-16 rounded-2xl flex items-center justify-center font-headline-lg-mobile text-headline-lg-mobile text-on-surface">4</button>
+<button class="numpad-btn h-16 rounded-2xl flex items-center justify-center font-headline-lg-mobile text-headline-lg-mobile text-on-surface">5</button>
+<button class="numpad-btn h-16 rounded-2xl flex items-center justify-center font-headline-lg-mobile text-headline-lg-mobile text-on-surface">6</button>
+<button class="numpad-btn h-16 rounded-2xl flex items-center justify-center font-headline-lg-mobile text-headline-lg-mobile text-on-surface">7</button>
+<button class="numpad-btn h-16 rounded-2xl flex items-center justify-center font-headline-lg-mobile text-headline-lg-mobile text-on-surface">8</button>
+<button class="numpad-btn h-16 rounded-2xl flex items-center justify-center font-headline-lg-mobile text-headline-lg-mobile text-on-surface">9</button>
+<button class="numpad-btn h-16 rounded-2xl flex items-center justify-center font-headline-lg-mobile text-headline-lg-mobile text-on-surface">.</button>
+<button class="numpad-btn h-16 rounded-2xl flex items-center justify-center font-headline-lg-mobile text-headline-lg-mobile text-on-surface">0</button>
+<button class="numpad-btn h-16 rounded-2xl flex items-center justify-center text-outline-variant hover:text-on-surface">
+<span class="material-symbols-outlined" data-icon="backspace">backspace</span>
+</button>
+</section>
+<!-- Save Button -->
+<button class="w-full py-md rounded-xl bg-primary-container text-on-primary-container font-title-md text-title-md shadow-[0_0_20px_rgba(77,142,255,0.4)] hover:shadow-[0_0_30px_rgba(77,142,255,0.6)] transition-all duration-300 relative overflow-hidden group mt-sm">
+<span class="relative z-10">Save Payment</span>
+<div class="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-in-out"></div>
+</button>
+</main>
+<script>
+        // Simple Interaction Logic
+        document.addEventListener('DOMContentLoaded', () => {
+            const btnCash = document.getElementById('btnCash');
+            const btnUpi = document.getElementById('btnUpi');
+            
+            btnCash.addEventListener('click', () => {
+                btnCash.classList.add('glass-active', 'text-on-surface');
+                btnCash.classList.remove('text-on-surface-variant');
+                btnUpi.classList.remove('glass-active', 'text-on-surface');
+                btnUpi.classList.add('text-on-surface-variant');
+            });
+
+            btnUpi.addEventListener('click', () => {
+                btnUpi.classList.add('glass-active', 'text-on-surface');
+                btnUpi.classList.remove('text-on-surface-variant');
+                btnCash.classList.remove('glass-active', 'text-on-surface');
+                btnCash.classList.add('text-on-surface-variant');
+            });
+
+            // Numpad logic (visual only for mockup)
+            const numpadBtns = document.querySelectorAll('.numpad-btn');
+            const display = document.getElementById('amountDisplay');
+            let currentVal = '0';
+
+            numpadBtns.forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const val = e.target.innerText.trim();
+                    if(val === 'backspace' || e.target.closest('span')) {
+                        currentVal = currentVal.length > 1 ? currentVal.slice(0, -1) : '0';
+                    } else if (val && val.length === 1) {
+                        if(currentVal === '0' && val !== '.') {
+                            currentVal = val;
+                        } else {
+                            if(currentVal.length < 8) currentVal += val;
+                        }
+                    }
+                    display.innerText = `₹${currentVal}`;
+                });
+            });
+        });
+    </script>
+</body></html>

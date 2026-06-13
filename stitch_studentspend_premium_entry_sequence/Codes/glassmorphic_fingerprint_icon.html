@@ -1,0 +1,14 @@
+<svg width="120" height="120" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <filter id="glass-glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="5" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  <rect x="10" y="10" width="100" height="100" rx="24" fill="rgba(255, 255, 255, 0.1)" stroke="rgba(255, 255, 255, 0.2)" stroke-width="1.5" style="backdrop-filter: blur(10px);"/>
+  <path d="M45 40 C45 35 55 30 60 30 C65 30 75 35 75 40 M35 50 C35 40 50 35 60 35 C70 35 85 40 85 50 M30 65 C30 50 50 45 60 45 C70 45 90 50 90 65 M35 80 C35 70 50 65 60 65 C70 65 85 70 85 80 M45 90 C45 85 55 80 60 80 C65 80 75 85 75 90" fill="none" stroke="#3B82F6" stroke-width="3" stroke-linecap="round" filter="url(#glass-glow)"/>
+  <circle cx="60" cy="60" r="10" fill="#3B82F6" opacity="0.3" filter="url(#glass-glow)"/>
+</svg>

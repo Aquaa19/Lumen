@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>STUDENTSPEND - Biometric Verification</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "tertiary-container": "#df7412",
+                        "on-primary": "#002e6a",
+                        "on-error-container": "#ffdad6",
+                        "on-tertiary-fixed-variant": "#723600",
+                        "background": "#10131a",
+                        "tertiary": "#ffb786",
+                        "on-surface-variant": "#c2c6d6",
+                        "outline": "#8c909f",
+                        "on-primary-fixed": "#001a42",
+                        "secondary-fixed": "#d4e4fa",
+                        "primary-container": "#4d8eff",
+                        "secondary-container": "#39485a",
+                        "on-tertiary-container": "#461f00",
+                        "surface-container": "#1d2027",
+                        "primary": "#adc6ff",
+                        "inverse-primary": "#005ac2",
+                        "tertiary-fixed": "#ffdcc6",
+                        "primary-fixed": "#d8e2ff",
+                        "inverse-on-surface": "#2e3038",
+                        "surface-container-lowest": "#0b0e15",
+                        "surface-dim": "#10131a",
+                        "on-secondary-container": "#a7b6cc",
+                        "on-tertiary": "#502400",
+                        "on-primary-container": "#00285d",
+                        "on-secondary-fixed-variant": "#39485a",
+                        "inverse-surface": "#e1e2ec",
+                        "surface-variant": "#32353c",
+                        "surface-bright": "#363941",
+                        "surface-container-high": "#272a31",
+                        "secondary-fixed-dim": "#b9c8de",
+                        "surface-container-low": "#191b23",
+                        "on-primary-fixed-variant": "#004395",
+                        "on-tertiary-fixed": "#311400",
+                        "primary-fixed-dim": "#adc6ff",
+                        "on-surface": "#e1e2ec",
+                        "outline-variant": "#424754",
+                        "on-background": "#e1e2ec",
+                        "surface-tint": "#adc6ff",
+                        "on-error": "#690005",
+                        "error": "#ffb4ab",
+                        "tertiary-fixed-dim": "#ffb786",
+                        "on-secondary": "#233143",
+                        "secondary": "#b9c8de",
+                        "surface": "#10131a",
+                        "surface-container-highest": "#32353c",
+                        "on-secondary-fixed": "#0d1c2d",
+                        "error-container": "#93000a"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "lg": "24px",
+                        "container-padding": "20px",
+                        "xs": "4px",
+                        "md": "16px",
+                        "xl": "32px",
+                        "gutter": "12px",
+                        "sm": "8px",
+                        "unit": "4px"
+                    },
+                    "fontFamily": {
+                        "body-lg": ["Inter"],
+                        "body-sm": ["Inter"],
+                        "headline-lg-mobile": ["Inter"],
+                        "title-md": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "label-caps": ["Inter"],
+                        "display-lg": ["Inter"]
+                    },
+                    "fontSize": {
+                        "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "body-sm": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "headline-lg-mobile": ["28px", { "lineHeight": "34px", "fontWeight": "700" }],
+                        "title-md": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700" }],
+                        "label-caps": ["12px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600" }],
+                        "display-lg": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body {
+            background-color: #0F172A; /* Overriding for specific prompt requirement */
+        }
+        
+        .pulse-glow {
+            animation: pulse-glow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+
+        @keyframes pulse-glow {
+            0%, 100% {
+                filter: drop-shadow(0 0 15px rgba(59, 130, 246, 0.3)) drop-shadow(0 0 30px rgba(59, 130, 246, 0.2));
+                opacity: 1;
+            }
+            50% {
+                filter: drop-shadow(0 0 25px rgba(59, 130, 246, 0.5)) drop-shadow(0 0 50px rgba(59, 130, 246, 0.3));
+                opacity: 0.8;
+            }
+        }
+
+        .ambient-blob {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.15;
+            z-index: 0;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body class="text-on-surface min-h-screen flex flex-col items-center justify-between p-container-padding relative overflow-hidden font-body-lg">
+<!-- Ambient Lighting Orbs -->
+<div class="ambient-blob w-[40vw] h-[40vw] bg-primary top-[10%] left-[-10%]"></div>
+<div class="ambient-blob w-[60vw] h-[60vw] bg-secondary-fixed right-[-20%] bottom-[-10%] opacity-10"></div>
+<!-- Top AppBar (Simplified for Gate Screen) -->
+<header class="w-full flex items-center justify-between z-10 pt-safe">
+<h1 class="font-display-lg text-display-lg tracking-tighter text-primary">FINTECH</h1>
+<div class="w-10 h-10 rounded-full flex items-center justify-center bg-surface-container/20 backdrop-blur-md border border-white/5">
+<span class="material-symbols-outlined text-primary" data-icon="shield">shield</span>
+</div>
+</header>
+<!-- Main Content Area -->
+<main class="flex-1 flex flex-col items-center justify-center w-full z-10 space-y-xl">
+<!-- Glassmorphic Icon Container -->
+<div class="relative w-40 h-40 flex items-center justify-center rounded-[2rem] bg-surface-container/10 backdrop-blur-[20px] border border-white/5 shadow-[0_8px_32px_rgba(59,130,246,0.15)] group transition-all duration-500 ease-in-out hover:bg-surface-container/20">
+<!-- Inner Glow -->
+<div class="absolute inset-0 rounded-[2rem] bg-gradient-to-br from-white/10 to-transparent pointer-events-none"></div>
+<!-- STITCH_SVG_START:ANIMATION_8 class="w-32 h-32" --><div class="w-32 h-32" id="animated-svg-ANIMATION_8" style="display:block;"><svg height="120" viewbox="0 0 120 120" width="120" xmlns="http://www.w3.org/2000/svg">
+<defs>
+<filter height="200%" id="glass-glow" width="200%" x="-50%" y="-50%">
+<fegaussianblur result="blur" stddeviation="5"></fegaussianblur>
+<femerge>
+<femergenode in="blur"></femergenode>
+<femergenode in="SourceGraphic"></femergenode>
+</femerge>
+</filter>
+<style>
+      @keyframes pulse {
+        0%, 100% { opacity: 0.6; transform: scale(1); }
+        50% { opacity: 1; transform: scale(1.05); }
+      }
+      .pulse-ring {
+        animation: pulse 3s ease-in-out infinite;
+        transform-origin: center;
+      }
+      .fingerprint-path {
+        stroke-dasharray: 200;
+        stroke-dashoffset: 200;
+        animation: draw 2s ease-out forwards;
+      }
+      @keyframes draw {
+        to { stroke-dashoffset: 0; }
+      }
+    </style>
+</defs>
+<rect fill="rgba(255, 255, 255, 0.1)" height="100" rx="24" stroke="rgba(255, 255, 255, 0.2)" stroke-width="1.5" style="backdrop-filter: blur(10px);" width="100" x="10" y="10"></rect>
+<g class="pulse-ring">
+<path class="fingerprint-path" d="M45 40 C45 35 55 30 60 30 C65 30 75 35 75 40 M35 50 C35 40 50 35 60 35 C70 35 85 40 85 50 M30 65 C30 50 50 45 60 45 C70 45 90 50 90 65 M35 80 C35 70 50 65 60 65 C70 65 85 70 85 80 M45 90 C45 85 55 80 60 80 C65 80 75 85 75 90" fill="none" filter="url(#glass-glow)" stroke="#3B82F6" stroke-linecap="round" stroke-width="3"></path>
+<circle cx="60" cy="60" fill="#3B82F6" filter="url(#glass-glow)" opacity="0.3" r="10"></circle>
+</g>
+</svg></div><!-- STITCH_SVG_END:ANIMATION_8 -->
+</div>
+<div class="text-center space-y-sm">
+<h2 class="font-title-md text-title-md text-on-surface">Identity Verified Required</h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Please authenticate to continue</p>
+</div>
+</main>
+<!-- Bottom Actions -->
+<footer class="w-full pb-8 z-10 flex justify-center">
+<button class="px-lg py-sm rounded-full border border-primary/30 text-primary font-label-caps text-label-caps hover:bg-primary/10 transition-colors duration-300 backdrop-blur-md">
+            Use Pin
+        </button>
+</footer>
+</body></html>

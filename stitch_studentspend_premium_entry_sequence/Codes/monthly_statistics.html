@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Statistics - StudentSpend</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "tertiary-fixed": "#ffdcc6",
+                        "on-primary-container": "#00285d",
+                        "primary-container": "#4d8eff",
+                        "primary-fixed-dim": "#adc6ff",
+                        "secondary-fixed": "#d4e4fa",
+                        "surface-bright": "#363941",
+                        "on-primary-fixed-variant": "#004395",
+                        "error-container": "#93000a",
+                        "on-secondary-container": "#a7b6cc",
+                        "on-error-container": "#ffdad6",
+                        "on-tertiary": "#502400",
+                        "on-tertiary-container": "#461f00",
+                        "on-surface": "#e1e2ec",
+                        "surface-container-highest": "#32353c",
+                        "on-secondary-fixed-variant": "#39485a",
+                        "background": "#10131a",
+                        "on-error": "#690005",
+                        "primary": "#adc6ff",
+                        "on-surface-variant": "#c2c6d6",
+                        "tertiary-container": "#df7412",
+                        "inverse-on-surface": "#2e3038",
+                        "error": "#ffb4ab",
+                        "surface-container-lowest": "#0b0e15",
+                        "surface-container": "#1d2027",
+                        "on-primary-fixed": "#001a42",
+                        "on-primary": "#002e6a",
+                        "surface-variant": "#32353c",
+                        "tertiary": "#ffb786",
+                        "on-tertiary-fixed-variant": "#723600",
+                        "surface": "#10131a",
+                        "primary-fixed": "#d8e2ff",
+                        "secondary-container": "#39485a",
+                        "on-background": "#e1e2ec",
+                        "outline-variant": "#424754",
+                        "surface-container-low": "#191b23",
+                        "surface-container-high": "#272a31",
+                        "secondary": "#b9c8de",
+                        "inverse-primary": "#005ac2",
+                        "inverse-surface": "#e1e2ec",
+                        "secondary-fixed-dim": "#b9c8de",
+                        "on-secondary-fixed": "#0d1c2d",
+                        "outline": "#8c909f",
+                        "surface-dim": "#10131a",
+                        "tertiary-fixed-dim": "#ffb786",
+                        "on-secondary": "#233143",
+                        "surface-tint": "#adc6ff",
+                        "on-tertiary-fixed": "#311400"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "xl": "32px",
+                        "md": "16px",
+                        "gutter": "12px",
+                        "unit": "4px",
+                        "lg": "24px",
+                        "container-padding": "20px",
+                        "xs": "4px",
+                        "sm": "8px"
+                    },
+                    "fontFamily": {
+                        "label-caps": ["Inter"],
+                        "display-lg": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "body-sm": ["Inter"],
+                        "title-md": ["Inter"],
+                        "headline-lg-mobile": ["Inter"],
+                        "body-lg": ["Inter"]
+                    },
+                    "fontSize": {
+                        "label-caps": ["12px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600" }],
+                        "display-lg": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700" }],
+                        "body-sm": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "title-md": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "headline-lg-mobile": ["28px", { "lineHeight": "34px", "fontWeight": "700" }],
+                        "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body {
+            background-color: #0F172A;
+            color: #e1e2ec;
+        }
+        
+        /* Glassmorphism Utilities */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .glass-panel-active {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(40px);
+            -webkit-backdrop-filter: blur(40px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.15);
+        }
+
+        .ambient-glow {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            z-index: -1;
+            opacity: 0.4;
+        }
+
+        /* Gradient Text */
+        .text-gradient {
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-image: linear-gradient(to right, #adc6ff, #d8e2ff);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="antialiased min-h-screen relative pb-[100px]">
+<!-- Ambient Background Glows -->
+<div class="ambient-glow bg-primary w-[300px] h-[300px] top-0 left-[-100px]"></div>
+<div class="ambient-glow bg-secondary w-[250px] h-[250px] bottom-[20%] right-[-50px]"></div>
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full bg-surface/10 dark:bg-surface/10 backdrop-blur-xl border-b border-white/10 shadow-[0_0_20px_rgba(59,130,246,0.1)] z-50">
+<div class="flex justify-between items-center px-container-padding h-16 w-full z-50">
+<button class="text-primary dark:text-primary hover:opacity-80 transition-opacity active:scale-95 transition-transform">
+<span class="material-symbols-outlined">menu</span>
+</button>
+<h1 class="font-label-caps text-label-caps tracking-widest text-primary dark:text-primary">FINANCE INTELLIGENCE</h1>
+<div class="w-8 h-8 rounded-full bg-surface-variant overflow-hidden flex items-center justify-center text-primary dark:text-primary hover:opacity-80 transition-opacity active:scale-95 transition-transform">
+<span class="material-symbols-outlined text-[20px]">person</span>
+</div>
+</div>
+</header>
+<main class="pt-24 px-container-padding max-w-4xl mx-auto flex flex-col gap-lg">
+<!-- Header & Month Toggle -->
+<div class="flex flex-col items-center gap-sm">
+<h2 class="font-headline-lg-mobile text-headline-lg-mobile md:font-headline-lg md:text-headline-lg text-on-surface">Statistics</h2>
+<div class="glass-panel rounded-full px-md py-sm flex items-center gap-md mt-sm">
+<button class="text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined">chevron_left</span>
+</button>
+<span class="font-title-md text-title-md text-on-surface">June 2026</span>
+<button class="text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined">chevron_right</span>
+</button>
+</div>
+</div>
+<!-- Spending Chart Card -->
+<div class="glass-panel rounded-2xl p-md mt-md relative overflow-hidden">
+<div class="flex justify-between items-end mb-lg">
+<div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mb-xs">Total Spent</p>
+<p class="font-display-lg text-display-lg text-on-surface text-gradient">$1,245.50</p>
+</div>
+<div class="flex items-center gap-xs text-tertiary">
+<span class="material-symbols-outlined text-[16px]">trending_up</span>
+<span class="font-label-caps text-label-caps">+12% vs last month</span>
+</div>
+</div>
+<!-- Simulated Chart Area -->
+<div class="h-[200px] w-full relative border-l border-b border-surface-variant/50">
+<!-- Grid Lines -->
+<div class="absolute inset-0 flex flex-col justify-between opacity-20">
+<div class="w-full h-px bg-on-surface-variant"></div>
+<div class="w-full h-px bg-on-surface-variant"></div>
+<div class="w-full h-px bg-on-surface-variant"></div>
+<div class="w-full h-px bg-on-surface-variant"></div>
+</div>
+<!-- SVG Neon Line -->
+<svg class="absolute inset-0 w-full h-full overflow-visible" preserveaspectratio="none" viewbox="0 0 100 100">
+<!-- Glow filter -->
+<defs>
+<filter height="140%" id="neon-glow" width="140%" x="-20%" y="-20%">
+<fegaussianblur result="blur" stddeviation="3"></fegaussianblur>
+<femerge>
+<femergenode in="blur"></femergenode>
+<femergenode in="blur"></femergenode>
+<femergenode in="SourceGraphic"></femergenode>
+</femerge>
+</filter>
+<lineargradient id="chart-fill" x1="0" x2="0" y1="0" y2="1">
+<stop offset="0%" stop-color="#adc6ff" stop-opacity="0.2"></stop>
+<stop offset="100%" stop-color="#adc6ff" stop-opacity="0"></stop>
+</lineargradient>
+</defs>
+<!-- Filled Area -->
+<path d="M0 80 Q 20 60, 40 70 T 80 40 T 100 20 L 100 100 L 0 100 Z" fill="url(#chart-fill)"></path>
+<!-- Line -->
+<path d="M0 80 Q 20 60, 40 70 T 80 40 T 100 20" fill="none" filter="url(#neon-glow)" stroke="#adc6ff" stroke-width="2"></path>
+</svg>
+<!-- Axis Labels -->
+<div class="absolute -bottom-6 left-0 w-full flex justify-between font-label-caps text-label-caps text-on-surface-variant">
+<span>1st</span>
+<span>15th</span>
+<span>30th</span>
+</div>
+</div>
+</div>
+<!-- Category Breakdown -->
+<div class="mt-xl flex flex-col gap-sm">
+<h3 class="font-title-md text-title-md text-on-surface mb-sm">Category Breakdown</h3>
+<!-- Category Item 1 -->
+<div class="glass-panel rounded-xl p-md flex items-center justify-between hover:glass-panel-active transition-all cursor-pointer">
+<div class="flex items-center gap-md">
+<div class="w-12 h-12 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">restaurant</span>
+</div>
+<div>
+<h4 class="font-title-md text-title-md text-on-surface">Food</h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant">42 Transactions</p>
+</div>
+</div>
+<div class="text-right">
+<p class="font-title-md text-title-md text-on-surface">$450.00</p>
+<p class="font-label-caps text-label-caps text-primary">36%</p>
+</div>
+</div>
+<!-- Category Item 2 -->
+<div class="glass-panel rounded-xl p-md flex items-center justify-between hover:glass-panel-active transition-all cursor-pointer">
+<div class="flex items-center gap-md">
+<div class="w-12 h-12 rounded-full bg-secondary/10 border border-secondary/20 flex items-center justify-center text-secondary">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">flight_takeoff</span>
+</div>
+<div>
+<h4 class="font-title-md text-title-md text-on-surface">Travel</h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant">12 Transactions</p>
+</div>
+</div>
+<div class="text-right">
+<p class="font-title-md text-title-md text-on-surface">$320.50</p>
+<p class="font-label-caps text-label-caps text-secondary">25%</p>
+</div>
+</div>
+<!-- Category Item 3 -->
+<div class="glass-panel rounded-xl p-md flex items-center justify-between hover:glass-panel-active transition-all cursor-pointer">
+<div class="flex items-center gap-md">
+<div class="w-12 h-12 rounded-full bg-tertiary/10 border border-tertiary/20 flex items-center justify-center text-tertiary">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">edit</span>
+</div>
+<div>
+<h4 class="font-title-md text-title-md text-on-surface">Stationery</h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant">8 Transactions</p>
+</div>
+</div>
+<div class="text-right">
+<p class="font-title-md text-title-md text-on-surface">$125.00</p>
+<p class="font-label-caps text-label-caps text-tertiary">10%</p>
+</div>
+</div>
+<!-- Category Item 4 -->
+<div class="glass-panel rounded-xl p-md flex items-center justify-between hover:glass-panel-active transition-all cursor-pointer">
+<div class="flex items-center gap-md">
+<div class="w-12 h-12 rounded-full bg-primary-container/10 border border-primary-container/20 flex items-center justify-center text-primary-fixed-dim">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">movie</span>
+</div>
+<div>
+<h4 class="font-title-md text-title-md text-on-surface">Entertainment</h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant">15 Transactions</p>
+</div>
+</div>
+<div class="text-right">
+<p class="font-title-md text-title-md text-on-surface">$350.00</p>
+<p class="font-label-caps text-label-caps text-primary-fixed-dim">28%</p>
+</div>
+</div>
+</div>
+</main>
+<!-- BottomNavBar -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 py-3 pb-safe bg-surface/20 dark:bg-surface/20 backdrop-blur-2xl border-t border-white/20 shadow-[0_-8px_32px_rgba(0,0,0,0.4)] rounded-t-xl">
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-on-surface-variant opacity-60 hover:text-primary transition-colors active:scale-90 duration-200" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="font-label-caps text-label-caps mt-1">Dashboard</span>
+</a>
+<a class="flex flex-col items-center justify-center text-primary dark:text-primary bg-primary/10 rounded-xl px-4 py-2 hover:text-primary transition-colors active:scale-90 duration-200" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">insights</span>
+<span class="font-label-caps text-label-caps mt-1">Stats</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-on-surface-variant opacity-60 hover:text-primary transition-colors active:scale-90 duration-200" href="#">
+<span class="material-symbols-outlined">smart_toy</span>
+<span class="font-label-caps text-label-caps mt-1">Assistant</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-on-surface-variant opacity-60 hover:text-primary transition-colors active:scale-90 duration-200" href="#">
+<span class="material-symbols-outlined">account_balance_wallet</span>
+<span class="font-label-caps text-label-caps mt-1">Wallet</span>
+</a>
+</nav>
+<!-- Interactive script for chart point highlighting (Vanilla JS) -->
+<script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const listItems = document.querySelectorAll('.glass-panel.cursor-pointer');
+            
+            listItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    // Remove active class from all
+                    listItems.forEach(i => i.classList.remove('glass-panel-active'));
+                    // Add active class to clicked
+                    this.classList.add('glass-panel-active');
+                    
+                    // Simple interaction feedback
+                    this.style.transform = 'scale(0.98)';
+                    setTimeout(() => {
+                        this.style.transform = 'scale(1)';
+                    }, 150);
+                });
+            });
+        });
+    </script>
+</body></html>

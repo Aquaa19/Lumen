@@ -1,10 +1,10 @@
 import React from 'react';
-import { Text, View } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 
 // Import screens
+import SplashScreen from '../screens/SplashScreen';
 import LoginScreen from '../screens/LoginScreen';
 import SetupWizardScreen from '../screens/SetupWizardScreen';
 import BiometricGateScreen from '../screens/BiometricGateScreen';
@@ -14,7 +14,6 @@ import AssistantScreen from '../screens/AssistantScreen';
 import SettingsScreen from '../screens/SettingsScreen';
 import TransactionDetailScreen from '../screens/TransactionDetailScreen';
 import SelfTransferScreen from '../screens/SelfTransferScreen';
-import MaterialIcon from '../components/MaterialIcon';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -23,11 +22,11 @@ const Tab = createBottomTabNavigator();
 const MainTabNavigator = () => {
   return (
     <Tab.Navigator
-      screenOptions={({ route }) => ({
+      tabBar={() => null}
+      screenOptions={{
         headerShown: false,
-        tabBar: () => null,
         tabBarStyle: { display: 'none' },
-      })}
+      }}
     >
       <Tab.Screen name="Dashboard" component={DashboardScreen} />
       <Tab.Screen name="Statistics" component={StatisticsScreen} />
@@ -41,12 +40,13 @@ export const AppNavigator: React.FC = () => {
   return (
     <NavigationContainer>
       <Stack.Navigator
-        initialRouteName="BiometricGate"
+        initialRouteName="Splash"
         screenOptions={{
           headerShown: false,
           contentStyle: { backgroundColor: '#10131a' } // base dark background
         }}
       >
+        <Stack.Screen name="Splash" component={SplashScreen} />
         <Stack.Screen name="Login" component={LoginScreen} />
         <Stack.Screen name="SetupWizard" component={SetupWizardScreen} />
         <Stack.Screen name="BiometricGate" component={BiometricGateScreen} />

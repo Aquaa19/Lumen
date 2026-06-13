@@ -1,10 +1,9 @@
 import React from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
+import { View, Text, TouchableOpacity, Image } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 import { GlassCard } from '../components/GlassCard';
 import BackgroundLayout from '../components/BackgroundLayout';
 import GlowOrb from '../components/GlowOrb';
-import MaterialIcon from '../components/MaterialIcon';
 
 export const LoginScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
   const handleGoogleSignIn = () => {
@@ -22,10 +21,17 @@ export const LoginScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
       <View className="w-full max-w-md">
         {/* Logo Header */}
         <View className="items-center mb-8">
-          <View className="w-16 h-16 rounded-full bg-primary/10 border border-primary/20 justify-center items-center mb-4">
-            <MaterialIcon name="credit_card" color="#3B82F6" size={32} />
+          <View className="w-20 h-20 rounded-2xl bg-white/[0.03] border border-white/10 justify-center items-center mb-4 shadow-[0_0_20px_rgba(255,255,255,0.05)]">
+            <Image 
+              source={require('../public/assets/logo/lumen_logo_icon_bgremoved.png')} 
+              className="w-14 h-14" 
+              resizeMode="contain" 
+            />
           </View>
-          <Text className="font-display-lg text-display-lg text-on-surface tracking-tighter">
+          <Text 
+            style={{ fontSize: 38, fontWeight: 'bold', fontFamily: 'Montserrat-Bold', color: '#FFFFFF', letterSpacing: 2 }}
+            className="text-on-surface text-center"
+          >
             LUMEN
           </Text>
         </View>

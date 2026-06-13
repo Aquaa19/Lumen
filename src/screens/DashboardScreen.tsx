@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, Animated } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Animated, Alert, StyleSheet } from 'react-native';
 import { useMockStore } from '../store/mockStore';
 import { GlassCard } from '../components/GlassCard';
 import LogPaymentModal from '../components/LogPaymentModal';
@@ -10,12 +10,56 @@ import MaterialIcon from '../components/MaterialIcon';
 const TABS = ['total', 'cash', 'upi'] as const;
 
 export const DashboardScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
-  const { cashBalance, upiBalance, userProfile, transactions } = useMockStore();
+  const { cashBalance, upiBalance, transactions, addFunds } = useMockStore();
   const [activeTab, setActiveTab] = useState<'total' | 'cash' | 'upi'>('total');
   const [isLogModalVisible, setIsLogModalVisible] = useState(false);
   const [containerWidth, setContainerWidth] = useState(0);
+  const [isFabExpanded, setIsFabExpanded] = useState(false);
 
   const tabIndexAnim = useRef(new Animated.Value(0)).current;
+  const fabAnim = useRef(new Animated.Value(0)).current;
+
+  const toggleFab = () => {
+    const toValue = isFabExpanded ? 0 : 1;
+    Animated.spring(fabAnim, {
+      toValue,
+      useNativeDriver: true,
+      bounciness: 6,
+    }).start();
+    setIsFabExpanded(!isFabExpanded);
+  };
+
+  const fabItems = [
+    {
+      label: 'Log Payment',
+      icon: 'credit_card',
+      color: '#3B82F6',
+      onPress: () => {
+        toggleFab();
+        setIsLogModalVisible(true);
+      },
+    },
+    {
+      label: 'Add Funds',
+      icon: 'trending_up',
+      color: '#4ade80',
+      onPress: () => {
+        toggleFab();
+        // Mock Add Funds: add 1000 to Cash balance
+        addFunds(1000, 'cash');
+        Alert.alert('Add Funds', 'Successfully added ₹1,000.00 mock funds to Cash Wallet.');
+      },
+    },
+    {
+      label: 'Self Transfer',
+      icon: 'swap_horiz',
+      color: '#fbbf24',
+      onPress: () => {
+        toggleFab();
+        navigation.navigate('SelfTransfer');
+      },
+    },
+  ];
 
   useEffect(() => {
     const index = TABS.indexOf(activeTab);
@@ -294,8 +338,13 @@ export const DashboardScreen: React.FC<{ navigation: any }> = ({ navigation }) =
                     </Text>
                   </View>
                 </View>
-                <Text className="text-base text-error font-bold">
-                  -₹{tx.amount.toFixed(2)}
+                 <Text 
+                  style={{ fontFamily: 'Montserrat-Bold' }} 
+                  className={`text-base font-bold ${
+                    tx.type === 'income' ? 'text-green-400' : tx.type === 'transfer' ? 'text-primary' : 'text-error'
+                  }`}
+                >
+                  {tx.type === 'income' ? '+' : tx.type === 'transfer' ? '' : '-'}₹{tx.amount.toFixed(2)}
                 </Text>
               </TouchableOpacity>
             ))}
@@ -303,17 +352,89 @@ export const DashboardScreen: React.FC<{ navigation: any }> = ({ navigation }) =
         </View>
       </ScrollView>
 
-      {/* Floating Action Button */}
-      <TouchableOpacity
-        onPress={() => setIsLogModalVisible(true)}
-        activeOpacity={0.8}
-        style={{ backgroundColor: '#adc6ff' }}
-        className="absolute bottom-24 right-6 w-14 h-14 rounded-full border border-white/20 items-center justify-center shadow-[0_0_20px_rgba(173,198,255,0.3)] z-50"
+      {/* Backdrop Dim overlay when FAB is expanded */}
+      {isFabExpanded && (
+        <TouchableOpacity
+          activeOpacity={1}
+          onPress={toggleFab}
+          style={[StyleSheet.absoluteFill, { zIndex: 40 }]}
+          className="bg-black/50"
+        />
+      )}
+
+      {/* Expandable FAB Options Container */}
+      <View 
+        pointerEvents="box-none"
+        className="absolute bottom-24 right-6 items-end z-50"
       >
-        <View className="items-center justify-center">
-          <MaterialIcon name="add" size={28} color="#10131A" />
-        </View>
-      </TouchableOpacity>
+        {fabItems.map((item, index) => {
+          const translateY = fabAnim.interpolate({
+            inputRange: [0, 1],
+            outputRange: [0, -64 * (index + 1)],
+          });
+          const scale = fabAnim.interpolate({
+            inputRange: [0, 1],
+            outputRange: [0, 1],
+          });
+          const opacity = fabAnim.interpolate({
+            inputRange: [0, 0.8, 1],
+            outputRange: [0, 0.8, 1],
+          });
+
+          return (
+            <Animated.View
+              key={item.label}
+              style={{
+                position: 'absolute',
+                right: 0,
+                transform: [{ translateY }, { scale }],
+                opacity,
+              }}
+              className="flex-row items-center gap-3 pr-1.5"
+            >
+              {/* Option Label */}
+              <View className="bg-surface-container-high/90 border border-white/10 px-3 py-1.5 rounded-xl shadow-md">
+                <Text style={{ fontFamily: 'Montserrat-Bold' }} className="text-white text-xs font-bold uppercase tracking-wider">
+                  {item.label}
+                </Text>
+              </View>
+
+              {/* Option Button */}
+              <TouchableOpacity
+                onPress={item.onPress}
+                activeOpacity={0.8}
+                style={{ backgroundColor: item.color }}
+                className="w-11 h-11 rounded-full items-center justify-center shadow-lg border border-white/10"
+              >
+                <MaterialIcon name={item.icon} size={20} color="#10131A" />
+              </TouchableOpacity>
+            </Animated.View>
+          );
+        })}
+
+        {/* Main Floating Action Button */}
+        <TouchableOpacity
+          onPress={toggleFab}
+          activeOpacity={0.85}
+          style={{ backgroundColor: '#adc6ff' }}
+          className="w-14 h-14 rounded-full border border-white/20 items-center justify-center shadow-[0_0_20px_rgba(173,198,255,0.3)]"
+        >
+          <Animated.View
+            style={{
+              transform: [
+                {
+                  rotate: fabAnim.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: ['0deg', '135deg'],
+                  }),
+                },
+              ],
+            }}
+          >
+            <MaterialIcon name="add" size={28} color="#10131A" />
+          </Animated.View>
+        </TouchableOpacity>
+      </View>
 
       {/* Log Payment Modal Sheet */}
       <LogPaymentModal 

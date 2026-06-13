@@ -20,6 +20,7 @@ interface MockStoreContextProps {
   refundTransaction: (id: string) => void;
   selfTransfer: (amount: number, from: 'cash' | 'upi', to: 'cash' | 'upi') => void;
   setBiometricLock: (enabled: boolean) => void;
+  addFunds: (amount: number, source: 'cash' | 'upi') => void;
 }
 
 const MockStoreContext = createContext<MockStoreContextProps | undefined>(undefined);
@@ -35,7 +36,7 @@ export const MockStoreProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     if (saved) {
       try {
         return JSON.parse(saved);
-      } catch (e) {}
+      } catch {}
     }
     return {
       name: 'Aqua',
@@ -50,7 +51,7 @@ export const MockStoreProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     if (saved) {
       try {
         return JSON.parse(saved);
-      } catch (e) {}
+      } catch {}
     }
     return INITIAL_TRANSACTIONS;
   });
@@ -164,6 +165,28 @@ export const MockStoreProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     setUserProfile(prev => ({ ...prev, biometricLock: enabled }));
   };
 
+  const addFunds = (amount: number, source: 'cash' | 'upi') => {
+    if (source === 'cash') {
+      setCashBalance((prev) => prev + amount);
+    } else {
+      setUpiBalance((prev) => prev + amount);
+    }
+
+    const now = new Date();
+    const addTx: Transaction = {
+      id: Math.random().toString(36).substring(2, 9),
+      title: 'Added Funds',
+      amount,
+      type: 'income',
+      source,
+      category: 'Others',
+      timestamp: formatTo24h(now),
+      date: formatDateToShort(now),
+      note: `Added funds to ${source.toUpperCase()} Wallet`
+    };
+    setTransactions((prev: Transaction[]) => [addTx, ...prev]);
+  };
+
   return (
     <MockStoreContext.Provider
       value={{
@@ -179,7 +202,8 @@ export const MockStoreProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         addTransaction,
         refundTransaction,
         selfTransfer,
-        setBiometricLock
+        setBiometricLock,
+        addFunds
       }}
     >
       {children}

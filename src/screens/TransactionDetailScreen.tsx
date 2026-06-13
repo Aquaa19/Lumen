@@ -57,7 +57,7 @@ export const TransactionDetailScreen: React.FC<{ route: any; navigation: any }> 
             </View>
             <Text 
               allowFontScaling={false}
-              style={{ fontSize: 28, lineHeight: 34, fontWeight: 'bold', fontFamily: 'sans-serif-medium', color: '#e1e2ec' }}
+              style={{ fontSize: 28, lineHeight: 34, fontWeight: 'bold', fontFamily: 'Montserrat-Bold', color: '#e1e2ec' }}
               className="mb-1"
             >
               {tx.title}
@@ -67,7 +67,7 @@ export const TransactionDetailScreen: React.FC<{ route: any; navigation: any }> 
             </Text>
             <Text 
               allowFontScaling={false}
-              style={{ fontSize: 48, lineHeight: 56, fontWeight: 'bold', fontFamily: 'sans-serif-medium', color: '#ffb4ab', letterSpacing: -1 }}
+              style={{ fontSize: 48, lineHeight: 56, fontWeight: 'bold', fontFamily: 'Montserrat-Bold', color: '#ffb4ab', letterSpacing: -1 }}
               className="mb-6"
             >
               -₹{tx.amount.toFixed(2)}
@@ -94,7 +94,7 @@ export const TransactionDetailScreen: React.FC<{ route: any; navigation: any }> 
           <GlassCard className="p-4">
             <Text 
               allowFontScaling={false}
-              style={{ fontSize: 20, lineHeight: 28, fontWeight: 'semibold', fontFamily: 'sans-serif-medium', color: 'white' }}
+              style={{ fontSize: 20, lineHeight: 28, fontWeight: 'semibold', fontFamily: 'Montserrat-Bold', color: 'white' }}
               className="mb-4"
             >
               Transaction Details

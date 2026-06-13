@@ -10,6 +10,7 @@ trigger: always_on
 - **Wait for Approval:** Continue step-by-step and ALWAYS wait for user approval before moving to the next step, installing libraries, modifying configs, or generating multiple files.
 - **Generate File-by-File:** Present code separately for each component, labeled with its exact file name and path. Never combine unrelated files.
 - **No Hallucination:** Use only latest stable React Native standards and official APIs. Never invent packages, hooks, methods, or native modules.
+- **Always run "npx tsc --noEmt" and make sure all errors are fixed**
 
 ## 2. UI Translation: Exact Pixel-Perfect Replications
 - **The Golden Rule:** The final native UI components must be exact 1:1 duplicates of the HTML layouts, aesthetics, and colors found in the `stitch` folder. Read the `design.md` carefully.

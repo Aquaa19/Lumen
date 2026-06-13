@@ -87,7 +87,6 @@ export const AssistantScreen: React.FC<{ navigation: any }> = ({ navigation }) =
       activeTab="assistant"
       navigation={navigation}
       title="FINANCE INTELLIGENCE"
-      rightAction="profile"
     >
 
       {/* Chat Space */}

@@ -3,7 +3,6 @@ import { View, Text, TouchableOpacity, Animated } from 'react-native';
 import Svg, { Defs, Filter, FeGaussianBlur, FeMerge, FeMergeNode, Rect, G, Path, Circle } from 'react-native-svg';
 import BackgroundLayout from '../components/BackgroundLayout';
 import GlowOrb from '../components/GlowOrb';
-import MaterialIcon from '../components/MaterialIcon';
 
 const AnimatedPath = Animated.createAnimatedComponent(Path);
 
@@ -48,18 +47,15 @@ export const BiometricGateScreen: React.FC<{ navigation: any }> = ({ navigation 
 
       <View className="flex-1 justify-between items-center py-12 px-6 z-10 w-full">
 
-      {/* Header */}
-      <View className="w-full flex-row items-center justify-between mt-4">
-        <Text className="font-display-lg text-display-lg tracking-tighter text-primary text-[28px]">
-          LUMEN
-        </Text>
-        <View className="w-10 h-10 rounded-full items-center justify-center bg-white/5 border border-white/10">
-          <MaterialIcon name="shield" size={20} color="#3B82F6" />
-        </View>
-      </View>
-
       {/* Sensor Area */}
       <View className="items-center justify-center flex-1 w-full gap-8">
+        <Text 
+          allowFontScaling={false}
+          style={{ fontSize: 32, fontWeight: 'bold', fontFamily: 'Montserrat-Bold', color: '#FFFFFF', letterSpacing: 2 }}
+          className="mb-2"
+        >
+          LUMEN
+        </Text>
         <TouchableOpacity
           onPress={handleAuthenticate}
           activeOpacity={0.8}

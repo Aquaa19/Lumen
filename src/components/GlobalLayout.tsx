@@ -11,7 +11,6 @@ interface GlobalLayoutProps {
   activeTab: 'dashboard' | 'statistics' | 'assistant' | 'settings' | 'none';
   title?: string;
   showBack?: boolean;
-  rightAction?: 'biometric' | 'logout' | 'profile' | 'none';
 }
 
 export const GlobalLayout: React.FC<GlobalLayoutProps> = ({
@@ -20,7 +19,6 @@ export const GlobalLayout: React.FC<GlobalLayoutProps> = ({
   activeTab,
   title,
   showBack = false,
-  rightAction = 'none',
 }) => {
   return (
     <BackgroundLayout>
@@ -38,7 +36,7 @@ export const GlobalLayout: React.FC<GlobalLayoutProps> = ({
             title={title}
             showBack={showBack}
             navigation={navigation}
-            rightAction={rightAction}
+            activeTab={activeTab}
           />
 
           {/* Screen Content */}

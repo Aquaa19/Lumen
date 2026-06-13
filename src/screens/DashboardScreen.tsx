@@ -1,17 +1,31 @@
-import React, { useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, Platform, StyleSheet } from 'react-native';
+import React, { useState, useRef, useEffect } from 'react';
+import { View, Text, ScrollView, TouchableOpacity, Animated } from 'react-native';
 import { useMockStore } from '../store/mockStore';
 import { GlassCard } from '../components/GlassCard';
 import LogPaymentModal from '../components/LogPaymentModal';
 import GlobalLayout from '../components/GlobalLayout';
 import GlowOrb from '../components/GlowOrb';
-import { BlurView } from '@react-native-community/blur';
 import MaterialIcon from '../components/MaterialIcon';
+
+const TABS = ['total', 'cash', 'upi'] as const;
 
 export const DashboardScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
   const { cashBalance, upiBalance, userProfile, transactions } = useMockStore();
   const [activeTab, setActiveTab] = useState<'total' | 'cash' | 'upi'>('total');
   const [isLogModalVisible, setIsLogModalVisible] = useState(false);
+  const [containerWidth, setContainerWidth] = useState(0);
+
+  const tabIndexAnim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    const index = TABS.indexOf(activeTab);
+    Animated.spring(tabIndexAnim, {
+      toValue: index,
+      useNativeDriver: true,
+      bounciness: 12,
+      speed: 12,
+    }).start();
+  }, [activeTab, tabIndexAnim]);
 
   // Compute balance safely
   const safeCashBalance = typeof cashBalance === 'number' && !isNaN(cashBalance) ? cashBalance : 0;
@@ -60,31 +74,55 @@ export const DashboardScreen: React.FC<{ navigation: any }> = ({ navigation }) =
     <GlobalLayout
       activeTab="dashboard"
       navigation={navigation}
-      rightAction="biometric"
     >
 
       <ScrollView contentContainerStyle={{ paddingBottom: 120 }} className="flex-1">
         {/* Wallet Segmented Toggle */}
         <View className="px-6 mt-4">
-          <View className="flex-row p-1 bg-surface-container/30 rounded-full border border-white/5">
-            {(['total', 'cash', 'upi'] as const).map(tab => {
+          <View 
+            onLayout={(e) => setContainerWidth(e.nativeEvent.layout.width)}
+            className="flex-row p-1 bg-surface-container/30 rounded-full border border-white/5 relative"
+          >
+            {containerWidth > 0 && (
+              <Animated.View
+                style={{
+                  position: 'absolute',
+                  top: 4,
+                  bottom: 4,
+                  left: 4,
+                  width: (containerWidth - 8) / 3,
+                  backgroundColor: 'rgba(59, 130, 246, 0.2)',
+                  borderRadius: 999,
+                  borderWidth: 1,
+                  borderColor: 'rgba(59, 130, 246, 0.3)',
+                  transform: [
+                    {
+                      translateX: tabIndexAnim.interpolate({
+                        inputRange: [0, 1, 2],
+                        outputRange: [0, (containerWidth - 8) / 3, ((containerWidth - 8) / 3) * 2],
+                      }),
+                    },
+                    {
+                      scaleX: tabIndexAnim.interpolate({
+                        inputRange: [0, 0.5, 1, 1.5, 2],
+                        outputRange: [1, 1.15, 1, 1.15, 1],
+                      }),
+                    },
+                  ],
+                }}
+              />
+            )}
+            {TABS.map(tab => {
               const isActive = activeTab === tab;
               return (
                 <TouchableOpacity
                   key={tab}
                   onPress={() => setActiveTab(tab)}
-                  style={isActive ? {
-                    backgroundColor: 'rgba(59, 130, 246, 0.2)',
-                    shadowColor: '#3B82F6',
-                    shadowOffset: { width: 0, height: 0 },
-                    shadowOpacity: 0.3,
-                    shadowRadius: 10,
-                    elevation: 3,
-                  } : undefined}
-                  className="flex-1 py-2 rounded-full items-center"
+                  activeOpacity={0.8}
+                  className="flex-1 py-2 rounded-full items-center justify-center z-10"
                 >
                   <Text 
-                    className={`font-label-caps text-label-caps uppercase ${
+                    className={`font-label-caps text-label-caps uppercase font-bold ${
                       isActive ? 'text-primary' : 'text-on-surface-variant/50'
                     }`}
                   >
@@ -115,14 +153,14 @@ export const DashboardScreen: React.FC<{ navigation: any }> = ({ navigation }) =
             <View className="items-start">
               <Text 
                 allowFontScaling={false}
-                style={{ fontSize: 12, lineHeight: 16, fontFamily: 'sans-serif-medium', color: 'rgba(194, 198, 214, 0.8)' }}
+                style={{ fontSize: 12, lineHeight: 16, fontFamily: 'Montserrat-Regular', color: 'rgba(194, 198, 214, 0.8)' }}
                 className="uppercase tracking-wider mb-2"
               >
                 {activeTab === 'total' ? 'Total Balance' : `${activeTab.charAt(0).toUpperCase() + activeTab.slice(1)} Balance`}
               </Text>
               <Text 
                 allowFontScaling={false}
-                style={{ fontSize: 48, lineHeight: 56, fontWeight: 'bold', fontFamily: 'sans-serif-medium', color: 'white', letterSpacing: -1 }}
+                style={{ fontSize: 48, lineHeight: 56, fontWeight: 'bold', fontFamily: 'Montserrat-Bold', color: 'white', letterSpacing: -1 }}
                 className="tracking-tight mb-4"
               >
                 ₹{currentBalance.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
@@ -144,7 +182,7 @@ export const DashboardScreen: React.FC<{ navigation: any }> = ({ navigation }) =
         <View className="px-6 mt-8">
           <Text 
             allowFontScaling={false}
-            style={{ fontSize: 20, lineHeight: 28, fontWeight: 'bold', fontFamily: 'sans-serif-medium', color: 'white' }}
+            style={{ fontSize: 20, lineHeight: 28, fontWeight: 'bold', fontFamily: 'Montserrat-Bold', color: 'white' }}
             className="mb-4"
           >
             Monthly Budget
@@ -155,9 +193,9 @@ export const DashboardScreen: React.FC<{ navigation: any }> = ({ navigation }) =
               <View className="flex-row justify-between items-center mb-1.5">
                 <View className="flex-row items-center gap-2">
                   <MaterialIcon name="restaurant" size={18} color="#adc6ff" />
-                  <Text style={{ fontSize: 16, lineHeight: 24, fontWeight: '500', fontFamily: 'sans-serif-medium', color: 'white' }}>Food</Text>
+                  <Text style={{ fontSize: 16, lineHeight: 24, fontWeight: '500', fontFamily: 'Montserrat-Regular', color: 'white' }}>Food</Text>
                 </View>
-                <Text style={{ fontSize: 14, lineHeight: 20, fontWeight: 'bold', fontFamily: 'sans-serif-medium', color: 'white' }}>
+                <Text style={{ fontSize: 14, lineHeight: 20, fontWeight: 'bold', fontFamily: 'Montserrat-Bold', color: 'white' }}>
                   ₹{foodSpent.toLocaleString('en-IN')} / ₹{budgetLimits.Food.toLocaleString('en-IN')} ({Math.round(getProgress(foodSpent, budgetLimits.Food))}%)
                 </Text>
               </View>
@@ -177,9 +215,9 @@ export const DashboardScreen: React.FC<{ navigation: any }> = ({ navigation }) =
               <View className="flex-row justify-between items-center mb-1.5">
                 <View className="flex-row items-center gap-2">
                   <MaterialIcon name="directions_car" size={18} color="#22d3ee" />
-                  <Text style={{ fontSize: 16, lineHeight: 24, fontWeight: '500', fontFamily: 'sans-serif-medium', color: 'white' }}>Travel</Text>
+                  <Text style={{ fontSize: 16, lineHeight: 24, fontWeight: '500', fontFamily: 'Montserrat-Regular', color: 'white' }}>Travel</Text>
                 </View>
-                <Text style={{ fontSize: 14, lineHeight: 20, fontWeight: 'bold', fontFamily: 'sans-serif-medium', color: 'white' }}>
+                <Text style={{ fontSize: 14, lineHeight: 20, fontWeight: 'bold', fontFamily: 'Montserrat-Bold', color: 'white' }}>
                   ₹{travelSpent.toLocaleString('en-IN')} / ₹{budgetLimits.Travel.toLocaleString('en-IN')} ({Math.round(getProgress(travelSpent, budgetLimits.Travel))}%)
                 </Text>
               </View>
@@ -199,9 +237,9 @@ export const DashboardScreen: React.FC<{ navigation: any }> = ({ navigation }) =
               <View className="flex-row justify-between items-center mb-1.5">
                 <View className="flex-row items-center gap-2">
                   <MaterialIcon name="menu_book" size={18} color="#fbbf24" />
-                  <Text style={{ fontSize: 16, lineHeight: 24, fontWeight: '500', fontFamily: 'sans-serif-medium', color: 'white' }}>Stationery</Text>
+                  <Text style={{ fontSize: 16, lineHeight: 24, fontWeight: '500', fontFamily: 'Montserrat-Regular', color: 'white' }}>Stationery</Text>
                 </View>
-                <Text style={{ fontSize: 14, lineHeight: 20, fontWeight: 'bold', fontFamily: 'sans-serif-medium', color: 'white' }}>
+                <Text style={{ fontSize: 14, lineHeight: 20, fontWeight: 'bold', fontFamily: 'Montserrat-Bold', color: 'white' }}>
                   ₹{stationerySpent.toLocaleString('en-IN')} / ₹{budgetLimits.Stationery.toLocaleString('en-IN')} ({Math.round(getProgress(stationerySpent, budgetLimits.Stationery))}%)
                 </Text>
               </View>
@@ -223,7 +261,7 @@ export const DashboardScreen: React.FC<{ navigation: any }> = ({ navigation }) =
           <View className="flex-row justify-between items-center mb-4">
             <Text 
               allowFontScaling={false}
-              style={{ fontSize: 20, lineHeight: 28, fontWeight: 'bold', fontFamily: 'sans-serif-medium', color: 'white' }}
+              style={{ fontSize: 20, lineHeight: 28, fontWeight: 'bold', fontFamily: 'Montserrat-Bold', color: 'white' }}
             >
               Recent Activity
             </Text>
@@ -269,33 +307,11 @@ export const DashboardScreen: React.FC<{ navigation: any }> = ({ navigation }) =
       <TouchableOpacity
         onPress={() => setIsLogModalVisible(true)}
         activeOpacity={0.8}
-        className="absolute bottom-24 right-6 w-14 h-14 rounded-full border border-white/20 items-center justify-center overflow-hidden shadow-[0_0_20px_rgba(59,130,246,0.25)] z-50"
+        style={{ backgroundColor: '#adc6ff' }}
+        className="absolute bottom-24 right-6 w-14 h-14 rounded-full border border-white/20 items-center justify-center shadow-[0_0_20px_rgba(173,198,255,0.3)] z-50"
       >
-        {Platform.OS === 'android' ? (
-          <BlurView
-            style={StyleSheet.absoluteFill}
-            blurRadius={10}
-            overlayColor="rgba(255, 255, 255, 0.15)"
-          />
-        ) : Platform.OS === 'ios' ? (
-          <BlurView
-            style={StyleSheet.absoluteFill}
-            blurType="light"
-            blurAmount={15}
-            reducedTransparencyFallbackColor="rgba(255, 255, 255, 0.2)"
-          />
-        ) : (
-          <View
-            style={[
-              StyleSheet.absoluteFill,
-              {
-                backgroundColor: 'rgba(255, 255, 255, 0.15)',
-              }
-            ]}
-          />
-        )}
-        <View className="z-10 items-center justify-center">
-          <MaterialIcon name="add" size={28} color="#FFFFFF" />
+        <View className="items-center justify-center">
+          <MaterialIcon name="add" size={28} color="#10131A" />
         </View>
       </TouchableOpacity>
 

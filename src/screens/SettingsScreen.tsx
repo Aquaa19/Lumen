@@ -31,7 +31,6 @@ export const SettingsScreen: React.FC<{ navigation: any }> = ({ navigation }) =>
       activeTab="settings"
       navigation={navigation}
       title="Lumen"
-      rightAction="logout"
     >
 
       <ScrollView 

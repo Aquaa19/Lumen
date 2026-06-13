@@ -1,6 +1,5 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Platform } from 'react-native';
-import { BlurView } from '@react-native-community/blur';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import MaterialIcon from './MaterialIcon';
 
 interface GlobalBottomNavbarProps {
@@ -25,29 +24,6 @@ export const GlobalBottomNavbar: React.FC<GlobalBottomNavbarProps> = ({
 
   return (
     <View style={styles.navbarContainer}>
-      {Platform.OS === 'android' ? (
-        <BlurView
-          style={StyleSheet.absoluteFill}
-          blurRadius={15}
-          overlayColor="rgba(25, 27, 35, 0.45)"
-        />
-      ) : Platform.OS === 'ios' ? (
-        <BlurView
-          style={StyleSheet.absoluteFill}
-          blurType="dark"
-          blurAmount={15}
-          reducedTransparencyFallbackColor="rgba(25, 27, 35, 0.9)"
-        />
-      ) : (
-        <View
-          style={[
-            StyleSheet.absoluteFill,
-            {
-              backgroundColor: 'rgba(25, 27, 35, 0.45)',
-            }
-          ]}
-        />
-      )}
       <View style={{ flex: 1, flexDirection: 'row', zIndex: 10 }}>
         {tabs.map(tab => {
           const isActive = activeTab === tab.key;
@@ -73,7 +49,7 @@ export const GlobalBottomNavbar: React.FC<GlobalBottomNavbarProps> = ({
                   fontWeight: '600',
                   letterSpacing: 0.5,
                   textTransform: 'uppercase',
-                  fontFamily: 'sans-serif',
+                  fontFamily: 'Montserrat-Regular',
                   color,
                   marginTop: 2,
                 }}
@@ -91,7 +67,7 @@ export const GlobalBottomNavbar: React.FC<GlobalBottomNavbarProps> = ({
 const styles = StyleSheet.create({
   navbarContainer: {
     flexDirection: 'row',
-    backgroundColor: 'transparent', // Make container transparent for blur transparency
+    backgroundColor: '#191b23', // Opaque surface background
     borderTopWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.1)',
     height: 70,
@@ -103,7 +79,7 @@ const styles = StyleSheet.create({
     right: 0,
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
-    overflow: 'hidden', // Contain the blur edges
+    overflow: 'hidden',
     elevation: 10,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: -4 },

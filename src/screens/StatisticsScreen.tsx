@@ -43,19 +43,11 @@ export const StatisticsScreen: React.FC<{ navigation: any }> = ({ navigation }) 
       activeTab="statistics"
       navigation={navigation}
       title="FINANCE INTELLIGENCE"
-      rightAction="profile"
     >
 
       <ScrollView contentContainerStyle={{ paddingBottom: 100 }} className="flex-1 px-6 pt-6">
         {/* Month Selector */}
         <View className="items-center mb-6">
-          <Text 
-            allowFontScaling={false}
-            style={{ fontSize: 28, lineHeight: 34, fontWeight: 'bold', fontFamily: 'sans-serif-medium', color: '#e1e2ec' }}
-            className="mb-3"
-          >
-            Statistics
-          </Text>
           <View className="glass-panel rounded-full px-4 py-2 flex-row items-center gap-4 border border-white/10">
             <TouchableOpacity><MaterialIcon name="chevron_left" color="#8c909f" size={20} /></TouchableOpacity>
             <Text className="font-title-md text-title-md text-on-surface">June 2026</Text>
@@ -69,14 +61,14 @@ export const StatisticsScreen: React.FC<{ navigation: any }> = ({ navigation }) 
             <View>
               <Text 
                 allowFontScaling={false}
-                style={{ fontSize: 12, lineHeight: 16, fontFamily: 'sans-serif-medium', color: '#c2c6d6' }}
+                style={{ fontSize: 12, lineHeight: 16, fontFamily: 'Montserrat-Regular', color: '#c2c6d6' }}
                 className="uppercase tracking-wider mb-1"
               >
                 Total Spent
               </Text>
               <Text 
                 allowFontScaling={false}
-                style={{ fontSize: 48, lineHeight: 56, fontWeight: 'bold', fontFamily: 'sans-serif-medium', color: '#adc6ff', letterSpacing: -1 }}
+                style={{ fontSize: 48, lineHeight: 56, fontWeight: 'bold', fontFamily: 'Montserrat-Bold', color: '#adc6ff', letterSpacing: -1 }}
               >
                 ₹{totalSpent.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
               </Text>
@@ -120,10 +112,9 @@ export const StatisticsScreen: React.FC<{ navigation: any }> = ({ navigation }) 
           </View>
         </GlassCard>
 
-        {/* Breakdown Title */}
         <Text 
           allowFontScaling={false}
-          style={{ fontSize: 20, lineHeight: 28, fontWeight: 'bold', fontFamily: 'sans-serif-medium', color: 'white' }}
+          style={{ fontSize: 20, lineHeight: 28, fontWeight: 'bold', fontFamily: 'Montserrat-Bold', color: 'white' }}
           className="mb-4"
         >
           Category Breakdown

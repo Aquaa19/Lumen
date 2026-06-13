@@ -39,7 +39,8 @@ module.exports = {
         'outline-variant': '#424754',
       },
       fontFamily: {
-        body: ["sans-serif", "System"],
+        sans: ["Montserrat-Regular", "sans-serif"],
+        body: ["Montserrat-Regular", "sans-serif"],
       },
     },
   },

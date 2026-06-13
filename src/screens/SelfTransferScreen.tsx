@@ -54,14 +54,14 @@ export const SelfTransferScreen: React.FC<{ navigation: any }> = ({ navigation }
               <View>
                 <Text 
                   allowFontScaling={false}
-                  style={{ fontSize: 12, lineHeight: 16, fontFamily: 'sans-serif-medium', color: '#c2c6d6' }}
+                  style={{ fontSize: 12, lineHeight: 16, fontFamily: 'Montserrat-Regular', color: '#c2c6d6' }}
                   className="uppercase tracking-wider mb-1"
                 >
                   FROM
                 </Text>
                 <Text 
                   allowFontScaling={false}
-                  style={{ fontSize: 20, lineHeight: 28, fontWeight: 'bold', fontFamily: 'sans-serif-medium', color: 'white' }}
+                  style={{ fontSize: 20, lineHeight: 28, fontWeight: 'bold', fontFamily: 'Montserrat-Bold', color: 'white' }}
                 >
                   {fromSource === 'cash' ? 'Cash Wallet' : 'UPI Account'}
                 </Text>
@@ -80,14 +80,14 @@ export const SelfTransferScreen: React.FC<{ navigation: any }> = ({ navigation }
               <View className="items-end">
                 <Text 
                   allowFontScaling={false}
-                  style={{ fontSize: 12, lineHeight: 16, fontFamily: 'sans-serif-medium', color: '#c2c6d6' }}
+                  style={{ fontSize: 12, lineHeight: 16, fontFamily: 'Montserrat-Regular', color: '#c2c6d6' }}
                   className="uppercase tracking-wider mb-1"
                 >
                   TO
                 </Text>
                 <Text 
                   allowFontScaling={false}
-                  style={{ fontSize: 20, lineHeight: 28, fontWeight: 'bold', fontFamily: 'sans-serif-medium', color: 'white' }}
+                  style={{ fontSize: 20, lineHeight: 28, fontWeight: 'bold', fontFamily: 'Montserrat-Bold', color: 'white' }}
                 >
                   {toSource === 'cash' ? 'Cash Wallet' : 'UPI Account'}
                 </Text>
@@ -102,7 +102,7 @@ export const SelfTransferScreen: React.FC<{ navigation: any }> = ({ navigation }
           <GlassCard className="p-6">
             <Text 
               allowFontScaling={false}
-              style={{ fontSize: 12, lineHeight: 16, fontFamily: 'sans-serif-medium', color: '#c2c6d6' }}
+              style={{ fontSize: 12, lineHeight: 16, fontFamily: 'Montserrat-Regular', color: '#c2c6d6' }}
               className="text-center uppercase tracking-wider mb-3"
             >
               TRANSFER AMOUNT
@@ -110,7 +110,7 @@ export const SelfTransferScreen: React.FC<{ navigation: any }> = ({ navigation }
             <View className="flex-row justify-center items-center h-20 border border-white/10 rounded-2xl bg-white/[0.03] px-4">
               <Text 
                 allowFontScaling={false}
-                style={{ fontSize: 48, lineHeight: 56, fontWeight: 'bold', fontFamily: 'sans-serif-medium', color: 'white' }}
+                style={{ fontSize: 48, lineHeight: 56, fontWeight: 'bold', fontFamily: 'Montserrat-Bold', color: 'white' }}
                 className="mr-1"
               >
                 ₹
@@ -122,7 +122,7 @@ export const SelfTransferScreen: React.FC<{ navigation: any }> = ({ navigation }
                 onChangeText={handleAmountChange}
                 placeholder="0.00"
                 placeholderTextColor="rgba(225, 226, 236, 0.2)"
-                style={{ fontSize: 48, lineHeight: 56, fontWeight: 'bold', fontFamily: 'sans-serif-medium', color: 'white', padding: 0 }}
+                style={{ fontSize: 48, lineHeight: 56, fontWeight: 'bold', fontFamily: 'Montserrat-Bold', color: 'white', padding: 0 }}
                 className="flex-1 h-full"
               />
             </View>

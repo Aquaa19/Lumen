@@ -39,7 +39,7 @@ export const MockStoreProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       } catch {}
     }
     return {
-      name: 'Aqua',
+      name: 'Aquaa',
       email: 'aqua@lumen.app',
       avatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuA-R0o7cKI1uoOIi1fiP2jA2MEeVeZWgGNf8YaOtMgTX9nCZgoVxoZiwctZRye-cWsn4BQDZxTycd5xfZID1So06n5o8El7-uNh_cKEIGWE-j3jDTPwz2pgtsPtRkfB3TMlBpBr5ODq8i8LzTxDfByd6OWew5K1me7a_3-fQOKZ8B6UVH6rLD3-hIK4h7qfXNvSTQfdnU5IFzjIW0ojnwHEHuP8taBkqDEWUsPcVTkQRxC3PxTVz9H2NI5PlYYc5LngxIr6T_RvW-ne',
       biometricLock: true

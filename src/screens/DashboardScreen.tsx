@@ -6,12 +6,16 @@ import LogPaymentModal from '../components/LogPaymentModal';
 import GlobalLayout from '../components/GlobalLayout';
 import GlowOrb from '../components/GlowOrb';
 import MaterialIcon from '../components/MaterialIcon';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const TABS = ['total', 'cash', 'upi'] as const;
 
 export const DashboardScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
   const { cashBalance, upiBalance, transactions, addFunds } = useMockStore();
   const [activeTab, setActiveTab] = useState<'total' | 'cash' | 'upi'>('total');
+  const insets = useSafeAreaInsets();
+  const bottomMargin = Math.max(insets.bottom, 12);
+  const fabBottom = bottomMargin + 70 + 16; // 70 navbar height + 16 spacing
   const [isLogModalVisible, setIsLogModalVisible] = useState(false);
   const [containerWidth, setContainerWidth] = useState(0);
   const [isFabExpanded, setIsFabExpanded] = useState(false);
@@ -365,76 +369,80 @@ export const DashboardScreen: React.FC<{ navigation: any }> = ({ navigation }) =
       {/* Expandable FAB Options Container */}
       <View 
         pointerEvents="box-none"
-        className="absolute bottom-24 right-6 items-end z-50"
+        className="absolute right-6 items-end justify-end z-50"
+        style={{ height: 300, width: 250, bottom: fabBottom }} // Height prevents Android tap clipping, Width gives labels room
       >
-        {fabItems.map((item, index) => {
-          const translateY = fabAnim.interpolate({
-            inputRange: [0, 1],
-            outputRange: [0, -64 * (index + 1)],
-          });
-          const scale = fabAnim.interpolate({
-            inputRange: [0, 1],
-            outputRange: [0, 1],
-          });
-          const opacity = fabAnim.interpolate({
-            inputRange: [0, 0.8, 1],
-            outputRange: [0, 0.8, 1],
-          });
+  {fabItems.map((item, index) => {
+    const translateY = fabAnim.interpolate({
+      inputRange: [0, 1],
+      outputRange: [0, -64 * (index + 1)],
+    });
+    const scale = fabAnim.interpolate({
+      inputRange: [0, 1],
+      outputRange: [0, 1],
+    });
+    const opacity = fabAnim.interpolate({
+      inputRange: [0, 0.8, 1],
+      outputRange: [0, 0.8, 1],
+    });
 
-          return (
-            <Animated.View
-              key={item.label}
-              style={{
-                position: 'absolute',
-                right: 0,
-                transform: [{ translateY }, { scale }],
-                opacity,
-              }}
-              className="flex-row items-center gap-3 pr-1.5"
-            >
-              {/* Option Label */}
-              <View className="bg-surface-container-high/90 border border-white/10 px-3 py-1.5 rounded-xl shadow-md">
-                <Text style={{ fontFamily: 'Montserrat-Bold' }} className="text-white text-xs font-bold uppercase tracking-wider">
-                  {item.label}
-                </Text>
-              </View>
+    return (
+      <Animated.View
+        key={item.label}
+        style={{
+          position: 'absolute',
+          right: 0,
+          bottom: 6, 
+          transform: [{ translateY }], // <-- ONLY Translate the row
+          opacity,                     // <-- Fade the whole row
+        }}
+        className="flex-row items-center justify-end pr-1.5 w-full"
+      >
+        {/* Option Label */}
+        <View className="bg-surface-container-high/90 border border-white/10 px-3 py-1.5 rounded-xl shadow-md mr-3">
+          <Text style={{ fontFamily: 'Montserrat-Bold' }} className="text-white text-xs font-bold uppercase tracking-wider">
+            {item.label}
+          </Text>
+        </View>
 
-              {/* Option Button */}
-              <TouchableOpacity
-                onPress={item.onPress}
-                activeOpacity={0.8}
-                style={{ backgroundColor: item.color }}
-                className="w-11 h-11 rounded-full items-center justify-center shadow-lg border border-white/10"
-              >
-                <MaterialIcon name={item.icon} size={20} color="#10131A" />
-              </TouchableOpacity>
-            </Animated.View>
-          );
-        })}
-
-        {/* Main Floating Action Button */}
-        <TouchableOpacity
-          onPress={toggleFab}
-          activeOpacity={0.85}
-          style={{ backgroundColor: '#adc6ff' }}
-          className="w-14 h-14 rounded-full border border-white/20 items-center justify-center shadow-[0_0_20px_rgba(173,198,255,0.3)]"
-        >
-          <Animated.View
-            style={{
-              transform: [
-                {
-                  rotate: fabAnim.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: ['0deg', '135deg'],
-                  }),
-                },
-              ],
-            }}
+        {/* Option Button - SCALE THIS INDEPENDENTLY */}
+        <Animated.View style={{ transform: [{ scale }] }}>
+          <TouchableOpacity
+            onPress={item.onPress}
+            activeOpacity={0.8}
+            style={{ backgroundColor: item.color }}
+            className="w-11 h-11 rounded-full items-center justify-center shadow-lg border border-white/10"
           >
-            <MaterialIcon name="add" size={28} color="#10131A" />
-          </Animated.View>
-        </TouchableOpacity>
-      </View>
+            <MaterialIcon name={item.icon} size={20} color="#10131A" />
+          </TouchableOpacity>
+        </Animated.View>
+      </Animated.View>
+    );
+  })}
+
+  {/* Main Floating Action Button */}
+  <TouchableOpacity
+    onPress={toggleFab}
+    activeOpacity={0.85}
+    style={{ backgroundColor: '#adc6ff' }}
+    className="w-14 h-14 rounded-full border border-white/20 items-center justify-center shadow-[0_0_20px_rgba(173,198,255,0.3)]"
+  >
+    <Animated.View
+      style={{
+        transform: [
+          {
+            rotate: fabAnim.interpolate({
+              inputRange: [0, 1],
+              outputRange: ['0deg', '135deg'],
+            }),
+          },
+        ],
+      }}
+    >
+      <MaterialIcon name="add" size={28} color="#10131A" />
+    </Animated.View>
+  </TouchableOpacity>
+</View>
 
       {/* Log Payment Modal Sheet */}
       <LogPaymentModal 

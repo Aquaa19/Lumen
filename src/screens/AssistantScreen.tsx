@@ -4,6 +4,7 @@ import { useMockStore } from '../store/mockStore';
 import { GlassCard } from '../components/GlassCard';
 import GlobalLayout from '../components/GlobalLayout';
 import MaterialIcon from '../components/MaterialIcon';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 interface Message {
   id: string;
@@ -14,6 +15,9 @@ interface Message {
 
 export const AssistantScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
   const { transactions } = useMockStore();
+  const insets = useSafeAreaInsets();
+  const bottomMargin = Math.max(insets.bottom, 12);
+  const inputPaddingBottom = bottomMargin + 70 + 12; // 70 navbar height + 12 spacing
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
@@ -173,7 +177,10 @@ export const AssistantScreen: React.FC<{ navigation: any }> = ({ navigation }) =
       </View>
 
       {/* Input bar */}
-      <View className="px-6 pt-4 pb-[84px] border-t border-white/5 bg-background">
+      <View 
+        style={{ paddingBottom: inputPaddingBottom }}
+        className="px-6 pt-4 border-t border-white/5 bg-background"
+      >
         <View className="flex-row items-center gap-2 h-14 bg-white/5 border border-white/10 rounded-2xl px-4">
           <TextInput
             placeholder="Ask assistant..."

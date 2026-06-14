@@ -1,5 +1,6 @@
 import React, { useRef, useEffect, useState } from 'react';
-import { View, KeyboardAvoidingView, Platform, Animated, Text, Keyboard } from 'react-native';
+import { View, KeyboardAvoidingView, Platform, Animated, Text, Keyboard, StyleSheet } from 'react-native';
+import { BlurView } from '@react-native-community/blur';
 import BackgroundLayout from './BackgroundLayout';
 import GlowOrb from './GlowOrb';
 import GlobalHeader from './GlobalHeader';
@@ -105,9 +106,26 @@ export const GlobalLayout: React.FC<GlobalLayoutProps> = ({
                 zIndex: 9999,
               }}
             >
-              <View className="flex-row items-center gap-3 bg-emerald-500/20 border border-emerald-500/30 rounded-2xl px-4 py-3.5 shadow-lg backdrop-blur-md">
+              <View 
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  gap: 12,
+                  backgroundColor: '#1d2027', // solid surface-container
+                  borderColor: '#059669', // solid emerald border
+                  borderWidth: 1.5,
+                  borderRadius: 12, // rounded rectangle
+                  paddingHorizontal: 16,
+                  paddingVertical: 14,
+                  shadowColor: '#000000',
+                  shadowOffset: { width: 0, height: 4 },
+                  shadowOpacity: 0.3,
+                  shadowRadius: 6,
+                  elevation: 5,
+                }}
+              >
                 <MaterialIcon name="check_circle" size={20} color="#34d399" />
-                <Text style={{ fontFamily: 'Montserrat-Bold' }} className="text-white text-sm font-bold flex-1">
+                <Text style={{ fontFamily: 'Montserrat-Bold', color: '#FFFFFF', fontSize: 14, flex: 1 }}>
                   {toastMessage}
                 </Text>
               </View>

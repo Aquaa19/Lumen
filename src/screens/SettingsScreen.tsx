@@ -1,14 +1,17 @@
-import React from 'react';
-import { View, Text, TouchableOpacity, Image, Alert, Switch, ScrollView } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, TouchableOpacity, Image, Alert, Switch, ScrollView, TextInput, Modal } from 'react-native';
 import { useMockStore } from '../store/mockStore';
 import { GlassCard } from '../components/GlassCard';
 import GlobalLayout from '../components/GlobalLayout';
 import LinearGradient from 'react-native-linear-gradient';
 import MaterialIcon from '../components/MaterialIcon';
 import FingerprintIcon from '../public/assets/icons/FingerprintIcon';
+import TrashIcon from '../public/assets/icons/TrashIcon';
 
 export const SettingsScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
-  const { userProfile, logout, setBiometricLock } = useMockStore();
+  const { userProfile, logout, setBiometricLock, purgeData } = useMockStore();
+  const [showPurgeModal, setShowPurgeModal] = useState(false);
+  const [purgeText, setPurgeText] = useState('');
 
   const handleExportCSV = () => {
     Alert.alert('Success', 'Transaction records exported as CSV successfully!');
@@ -25,6 +28,31 @@ export const SettingsScreen: React.FC<{ navigation: any }> = ({ navigation }) =>
   const handleSignOut = () => {
     logout();
     navigation.getParent()?.replace('Login');
+  };
+
+  const handlePurgeDataPress = () => {
+    Alert.alert(
+      'Purge Data',
+      'Are you sure you want to purge all data from local and firebase?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { 
+          text: 'Yes', 
+          onPress: () => {
+            setPurgeText('');
+            setShowPurgeModal(true);
+          } 
+        }
+      ]
+    );
+  };
+
+  const handleConfirmPurge = async () => {
+    if (purgeText === 'PURGE') {
+      setShowPurgeModal(false);
+      await purgeData();
+      navigation.getParent()?.replace('Login');
+    }
   };
 
   return (
@@ -156,8 +184,90 @@ export const SettingsScreen: React.FC<{ navigation: any }> = ({ navigation }) =>
               <Text style={{ fontFamily: 'Montserrat-Regular' }} className="font-body-sm text-body-sm text-on-surface-variant">Just now</Text>
             </GlassCard>
           </TouchableOpacity>
+
+          {/* Purge Data */}
+          <TouchableOpacity onPress={handlePurgeDataPress} activeOpacity={0.9}>
+            <GlassCard contentClassName="flex-row items-center justify-between p-4 border border-error/20 bg-error/5">
+              <View className="flex-row items-center gap-3">
+                <View className="w-12 h-12 rounded-2xl bg-error/10 items-center justify-center border border-error/20">
+                  <TrashIcon size={22} color="#EF4444" />
+                </View>
+                <Text style={{ fontFamily: 'Montserrat-Bold', fontSize: 20, color: '#EF4444', fontWeight: 'bold' }}>
+                  Purge Data
+                </Text>
+              </View>
+              <MaterialIcon name="chevron_right" color="#EF4444" size={24} />
+            </GlassCard>
+          </TouchableOpacity>
         </View>
       </ScrollView>
+
+      {/* Verification Modal for Purge Confirmation */}
+      <Modal
+        visible={showPurgeModal}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setShowPurgeModal(false)}
+      >
+        <View className="flex-1 justify-center items-center px-6" style={{ backgroundColor: 'rgba(0, 0, 0, 0.75)' }}>
+          <GlassCard className="w-full max-w-sm p-6 border border-error/20">
+            <Text 
+              style={{ fontFamily: 'Montserrat-Bold', fontSize: 22, color: '#EF4444', marginBottom: 12, textAlign: 'center', fontWeight: 'bold' }}
+            >
+              Verify Purge
+            </Text>
+            <Text 
+              style={{ fontFamily: 'Montserrat-Regular', fontSize: 14, color: '#c2c6d6', marginBottom: 20, textAlign: 'center', lineHeight: 20 }}
+            >
+              Please type the word <Text className="font-bold text-white">PURGE</Text> in all caps below to permanently delete your data.
+            </Text>
+            
+            <TextInput
+              value={purgeText}
+              onChangeText={setPurgeText}
+              placeholder="Type PURGE here"
+              placeholderTextColor="rgba(255, 255, 255, 0.3)"
+              autoCapitalize="characters"
+              autoCorrect={false}
+              style={{
+                backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                borderWidth: 1,
+                borderColor: purgeText === 'PURGE' ? '#4ade80' : 'rgba(255, 255, 255, 0.1)',
+                borderRadius: 12,
+                color: 'white',
+                fontFamily: 'Montserrat-Bold',
+                fontSize: 16,
+                paddingHorizontal: 16,
+                paddingVertical: 12,
+                textAlign: 'center',
+                marginBottom: 20,
+              }}
+            />
+
+            <View className="flex-row gap-3">
+              <TouchableOpacity
+                onPress={() => setShowPurgeModal(false)}
+                className="flex-1 py-3 rounded-xl bg-white/5 border border-white/10 items-center"
+              >
+                <Text style={{ fontFamily: 'Montserrat-Bold', color: '#c2c6d6', fontWeight: 'bold' }}>
+                  Cancel
+                </Text>
+              </TouchableOpacity>
+              
+              <TouchableOpacity
+                disabled={purgeText !== 'PURGE'}
+                onPress={handleConfirmPurge}
+                style={{ opacity: purgeText === 'PURGE' ? 1 : 0.5 }}
+                className="flex-1 py-3 rounded-xl bg-error items-center"
+              >
+                <Text style={{ fontFamily: 'Montserrat-Bold', color: 'white', fontWeight: 'bold' }}>
+                  Purge
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </GlassCard>
+        </View>
+      </Modal>
     </GlobalLayout>
   );
 };

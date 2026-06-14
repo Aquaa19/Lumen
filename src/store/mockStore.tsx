@@ -25,6 +25,7 @@ interface MockStoreContextProps {
   categories: Category[];
   login: () => void;
   logout: () => void;
+  purgeData: () => Promise<void>;
   completeSetup: (cashOnHand: number, upiOnHand: number, monthlyBudget: number, pin: string | null, biometricLock: boolean) => void;
   addTransaction: (title: string, amount: number, source: 'cash' | 'upi', category: string, note?: string) => void;
   refundTransaction: (id: string) => void;
@@ -324,6 +325,35 @@ export const MockStoreProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       await auth().signOut();
     } catch {}
     setIsLoggedIn(false);
+    storage.set('isLoggedIn', false);
+  };
+
+  const purgeData = async () => {
+    const user = auth().currentUser;
+    if (user) {
+      try {
+        const snapshot = await firestore()
+          .collection('users')
+          .doc(user.uid)
+          .collection('transactions')
+          .get();
+        const batch = firestore().batch();
+        snapshot.docs.forEach(doc => {
+          batch.delete(doc.ref);
+        });
+        await batch.commit();
+
+        await firestore().collection('users').doc(user.uid).delete();
+      } catch (err) {
+        console.log('Error purging Firestore data:', err);
+      }
+    }
+
+    try {
+      await auth().signOut();
+    } catch {}
+
+    setIsLoggedIn(false);
     setHasCompletedSetup(false);
     setCashBalance(0);
     setUpiBalance(0);
@@ -414,12 +444,18 @@ export const MockStoreProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
     const user = auth().currentUser;
     if (user) {
+      // Create a Firestore-safe copy of the transaction object (delete undefined fields)
+      const firestoreTx = { ...newTx };
+      if (firestoreTx.note === undefined) {
+        delete firestoreTx.note;
+      }
+
       firestore()
         .collection('users')
         .doc(user.uid)
         .collection('transactions')
         .doc(newTx.id)
-        .set(newTx)
+        .set(firestoreTx)
         .catch(err => console.log('Firestore write failed:', err));
 
       firestore()
@@ -661,6 +697,7 @@ export const MockStoreProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         transactions,
         login,
         logout,
+        purgeData,
         completeSetup,
         addTransaction,
         refundTransaction,

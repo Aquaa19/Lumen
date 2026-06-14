@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, Modal, TouchableOpacity, StyleSheet, Animated, Vibration } from 'react-native';
+import { View, Text, Modal, TouchableOpacity, StyleSheet, Animated, Vibration, ScrollView } from 'react-native';
 import { BlurView } from '@react-native-community/blur';
 import { useMockStore } from '../store/mockStore';
+import { formatIndianCurrency } from '../utils/currencyFormatter';
 import MaterialIcon from './MaterialIcon';
 
 interface AddFundsModalProps {
@@ -27,7 +28,9 @@ export const AddFundsModal: React.FC<AddFundsModalProps> = ({ visible, onClose }
   }, [source, toggleAnim]);
 
   const handleNumPress = (val: string) => {
-    Vibration.vibrate(15);
+    try {
+      Vibration.vibrate(15);
+    } catch (e) {}
     if (amount === '0') {
       if (val === '.') {
         setAmount('0.');
@@ -46,7 +49,9 @@ export const AddFundsModal: React.FC<AddFundsModalProps> = ({ visible, onClose }
   };
 
   const handleBackspace = () => {
-    Vibration.vibrate(15);
+    try {
+      Vibration.vibrate(15);
+    } catch (e) {}
     if (amount.length <= 1) {
       setAmount('0');
     } else {
@@ -91,9 +96,36 @@ export const AddFundsModal: React.FC<AddFundsModalProps> = ({ visible, onClose }
         />
 
         {/* Modal Sheet Container */}
-        <View className="w-full bg-surface-container/90 border-t border-white/10 rounded-t-[32px] p-6 pb-12 gap-6 relative z-10 shadow-[0_-8px_32px_rgba(0,0,0,0.5)]">
+        <View 
+          style={{
+            width: '100%',
+            backgroundColor: 'rgba(29, 32, 39, 0.9)', // bg-surface-container/90
+            borderTopWidth: 1,
+            borderTopColor: 'rgba(255, 255, 255, 0.1)', // border-white/10
+            borderTopLeftRadius: 32,
+            borderTopRightRadius: 32,
+            padding: 24,
+            paddingBottom: 48,
+            gap: 24,
+            position: 'relative',
+            zIndex: 10,
+            shadowColor: '#000000',
+            shadowOffset: { width: 0, height: -8 },
+            shadowOpacity: 0.5,
+            shadowRadius: 32,
+            elevation: 10,
+          }}
+        >
           {/* Drag Handle indicator */}
-          <View className="w-12 h-1.5 bg-outline-variant/50 rounded-full mx-auto" />
+          <View 
+            style={{
+              width: 48,
+              height: 6,
+              backgroundColor: 'rgba(66, 71, 84, 0.5)', // bg-outline-variant/50
+              borderRadius: 999,
+              alignSelf: 'center',
+            }}
+          />
 
           {/* Amount Display */}
           <TouchableOpacity 
@@ -102,14 +134,22 @@ export const AddFundsModal: React.FC<AddFundsModalProps> = ({ visible, onClose }
             className="items-center justify-center pt-4 w-full"
           >
             <Text 
-              style={{ fontFamily: 'Montserrat-Bold' }}
-              className="font-display-lg text-display-lg text-primary text-5xl font-bold tracking-tighter"
+              style={{ 
+                fontFamily: 'Montserrat-Bold',
+                color: '#adc6ff', // text-primary
+              }}
+              className="text-5xl font-bold tracking-tighter"
             >
-              ₹{parseFloat(amount).toLocaleString('en-IN', { minimumFractionDigits: 0 })}
+              ₹{formatIndianCurrency(amount)}
             </Text>
             <Text 
-              style={{ fontFamily: 'Montserrat-Regular' }}
-              className="font-label-caps text-label-caps text-on-surface-variant mt-1 text-[10px] opacity-60"
+              style={{ 
+                fontFamily: 'Montserrat-Regular',
+                color: 'rgba(194, 198, 214, 0.6)', // text-on-surface-variant (opacity 60%)
+                fontSize: 10,
+                marginTop: 4,
+                letterSpacing: 1,
+              }}
             >
               TAP TO CLEAR • ENTER AMOUNT TO ADD
             </Text>
@@ -118,7 +158,15 @@ export const AddFundsModal: React.FC<AddFundsModalProps> = ({ visible, onClose }
           {/* Source Toggle */}
           <View 
             onLayout={(e) => setContainerWidth(e.nativeEvent.layout.width)}
-            className="flex-row bg-white/5 rounded-full p-1 border border-white/5 relative"
+            style={{
+              flexDirection: 'row',
+              backgroundColor: 'rgba(255, 255, 255, 0.05)',
+              borderRadius: 9999,
+              padding: 4,
+              borderWidth: 1,
+              borderColor: 'rgba(255, 255, 255, 0.05)',
+              position: 'relative',
+            }}
           >
             {containerWidth > 0 && (
               <Animated.View
@@ -180,7 +228,7 @@ export const AddFundsModal: React.FC<AddFundsModalProps> = ({ visible, onClose }
           </View>
 
           {/* Custom Numpad */}
-          <View className="grid grid-cols-3 gap-y-2 gap-x-4">
+          <View style={{ gap: 8 }}>
             <View className="flex-row justify-between w-full">
               {['1', '2', '3'].map(num => (
                 <TouchableOpacity
@@ -241,11 +289,21 @@ export const AddFundsModal: React.FC<AddFundsModalProps> = ({ visible, onClose }
             onPress={handleSave}
             disabled={amount === '0'}
             activeOpacity={0.85}
-            className={`w-full py-4 rounded-xl items-center justify-center ${
-              amount === '0' 
-                ? 'bg-surface-container-high border border-white/5' 
-                : 'bg-primary-container shadow-[0_0_20px_rgba(77,142,255,0.4)]'
-            }`}
+            style={{
+              width: '100%',
+              paddingVertical: 16,
+              borderRadius: 12,
+              alignItems: 'center',
+              justifyContent: 'center',
+              backgroundColor: amount === '0' ? '#272a31' : '#4d8eff',
+              borderWidth: amount === '0' ? 1 : 0,
+              borderColor: 'rgba(255, 255, 255, 0.05)',
+              shadowColor: amount === '0' ? 'transparent' : '#4d8eff',
+              shadowOffset: { width: 0, height: 0 },
+              shadowOpacity: amount === '0' ? 0 : 0.4,
+              shadowRadius: 20,
+              elevation: amount === '0' ? 0 : 8,
+            }}
           >
             <Text 
               style={{ fontFamily: 'Montserrat-Bold' }} 

@@ -14,7 +14,9 @@ export const PinFallbackScreen: React.FC<{ navigation: any }> = ({ navigation })
   const shakeAnim = React.useRef(new Animated.Value(0)).current;
 
   const triggerShake = () => {
-    Vibration.vibrate(100);
+    try {
+      Vibration.vibrate(100);
+    } catch (e) {}
     Animated.sequence([
       Animated.timing(shakeAnim, { toValue: 10, duration: 50, useNativeDriver: true }),
       Animated.timing(shakeAnim, { toValue: -10, duration: 50, useNativeDriver: true }),
@@ -24,7 +26,9 @@ export const PinFallbackScreen: React.FC<{ navigation: any }> = ({ navigation })
   };
 
   const handleKeyPress = (num: string) => {
-    Vibration.vibrate(15);
+    try {
+      Vibration.vibrate(15);
+    } catch (e) {}
     setErrorMsg(null);
     if (enteredPin.length < pinLength) {
       const nextPin = enteredPin + num;
@@ -33,7 +37,9 @@ export const PinFallbackScreen: React.FC<{ navigation: any }> = ({ navigation })
   };
 
   const handleBackspace = () => {
-    Vibration.vibrate(15);
+    try {
+      Vibration.vibrate(15);
+    } catch (e) {}
     setEnteredPin(prev => prev.slice(0, -1));
   };
 

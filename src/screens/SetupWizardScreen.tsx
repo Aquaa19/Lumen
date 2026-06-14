@@ -3,6 +3,7 @@ import { View, Text, TouchableOpacity, TextInput, Vibration } from 'react-native
 import { useMockStore } from '../store/mockStore';
 import BackgroundLayout from '../components/BackgroundLayout';
 import GlowOrb from '../components/GlowOrb';
+import { formatIndianCurrency } from '../utils/currencyFormatter';
 import MaterialIcon from '../components/MaterialIcon';
 import BiometricService from '../services/BiometricService';
 import { GlassCard } from '../components/GlassCard';
@@ -34,7 +35,9 @@ export const SetupWizardScreen: React.FC<{ navigation: any }> = ({ navigation })
   ];
 
   const handlePinKeyPress = (num: string) => {
-    Vibration.vibrate(15);
+    try {
+      Vibration.vibrate(15);
+    } catch (e) {}
     setPinError(null);
     if (!isConfirming) {
       if (pinCode.length < pinLength) {
@@ -48,7 +51,9 @@ export const SetupWizardScreen: React.FC<{ navigation: any }> = ({ navigation })
   };
 
   const handlePinBackspace = () => {
-    Vibration.vibrate(15);
+    try {
+      Vibration.vibrate(15);
+    } catch (e) {}
     if (!isConfirming) {
       setPinCode(prev => prev.slice(0, -1));
     } else {
@@ -71,7 +76,9 @@ export const SetupWizardScreen: React.FC<{ navigation: any }> = ({ navigation })
         } else {
           setPinError('PINS DO NOT MATCH');
           setConfirmPin('');
-          Vibration.vibrate(100);
+          try {
+            Vibration.vibrate(100);
+          } catch (e) {}
         }
       } else {
         setPinError(`CONFIRM YOUR ${pinLength}-DIGIT PIN`);
@@ -121,7 +128,7 @@ export const SetupWizardScreen: React.FC<{ navigation: any }> = ({ navigation })
   const formatCurrencyInput = (text: string) => {
     const numeric = text.replace(/[^0-9]/g, '');
     if (!numeric) return '';
-    return `₹${parseInt(numeric, 10).toLocaleString('en-IN')}`;
+    return `₹${formatIndianCurrency(numeric)}`;
   };
 
   // Step 1: Security Setup Render

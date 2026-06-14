@@ -1,7 +1,7 @@
 import React from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
-import Svg, { Path, Defs, LinearGradient as SvgLinearGradient, Stop, Filter, FeGaussianBlur } from 'react-native-svg';
+import Svg, { Path, Defs, LinearGradient as SvgLinearGradient, Stop, Filter, FeGaussianBlur, Circle } from 'react-native-svg';
 import { useMockStore } from '../store/mockStore';
 import { GlassCard } from '../components/GlassCard';
 import { DEFAULT_CATEGORIES } from '../utils/constants';
@@ -62,7 +62,7 @@ export const StatisticsScreen: React.FC<{ navigation: any }> = ({ navigation }) 
 
     const getY = (val: number) => {
       const scale = (val / maxSpent);
-      return 90 - scale * 70; // 90 is bottom, 20 is top
+      return 90 - scale * 75; // Expanded height for a more natural look
     };
 
     const y0 = 90;
@@ -71,7 +71,8 @@ export const StatisticsScreen: React.FC<{ navigation: any }> = ({ navigation }) 
     const y3 = getY(cumulative[2]);
     const y4 = getY(cumulative[3]);
 
-    const linePath = `M0,${y0} Q25,${y1} 50,${y2} T75,${y3} T100,${y4}`;
+    // Smooth cubic bezier path where x is linear
+    const linePath = `M0,${y0} C8.33,${y0} 16.67,${y1} 25,${y1} C33.33,${y1} 41.67,${y2} 50,${y2} C58.33,${y2} 66.67,${y3} 75,${y3} C83.33,${y3} 91.67,${y4} 100,${y4}`;
     const fillPath = `${linePath} L100,100 L0,100 Z`;
 
     return {
@@ -81,6 +82,62 @@ export const StatisticsScreen: React.FC<{ navigation: any }> = ({ navigation }) 
   };
 
   const path = getDynamicPath();
+
+  // Helper to calculate exact Y on the cubic Bezier curve
+  const getCurveY = (x: number, xA: number, xB: number, yA: number, yB: number) => {
+    const t = (x - xA) / (xB - xA);
+    return yA * Math.pow(1 - t, 2) * (1 + 2 * t) + yB * Math.pow(t, 2) * (3 - 2 * t);
+  };
+
+  // Calculate coordinates for today's spending indicator
+  const today = new Date().getDate();
+  const currentX = ((today - 1) / 29) * 100;
+  let currentY = 90;
+
+  const expenses = transactions.filter(t => t.type === 'expense');
+  if (expenses.length > 0) {
+    const weeklyTotals = [0, 0, 0, 0];
+    expenses.forEach(t => {
+      try {
+        const parts = t.date.split(' ');
+        const day = parseInt(parts[0], 10);
+        if (day <= 7) weeklyTotals[0] += t.amount;
+        else if (day <= 14) weeklyTotals[1] += t.amount;
+        else if (day <= 21) weeklyTotals[2] += t.amount;
+        else weeklyTotals[3] += t.amount;
+      } catch {
+        weeklyTotals[0] += t.amount;
+      }
+    });
+
+    const cumulative = [0, 0, 0, 0];
+    cumulative[0] = weeklyTotals[0];
+    cumulative[1] = cumulative[0] + weeklyTotals[1];
+    cumulative[2] = cumulative[1] + weeklyTotals[2];
+    cumulative[3] = cumulative[2] + weeklyTotals[3];
+    const maxSpent = cumulative[3] || 1;
+
+    const getY = (val: number) => {
+      const scale = (val / maxSpent);
+      return 90 - scale * 75;
+    };
+
+    const y0 = 90;
+    const y1 = getY(cumulative[0]);
+    const y2 = getY(cumulative[1]);
+    const y3 = getY(cumulative[2]);
+    const y4 = getY(cumulative[3]);
+
+    if (today <= 7) {
+      currentY = getCurveY(currentX, 0, 25, y0, y1);
+    } else if (today <= 14) {
+      currentY = getCurveY(currentX, 25, 50, y1, y2);
+    } else if (today <= 21) {
+      currentY = getCurveY(currentX, 50, 75, y2, y3);
+    } else {
+      currentY = getCurveY(currentX, 75, 100, y3, y4);
+    }
+  }
 
   // Compute category breakdown metrics
   const categoryStats = categories.map(cat => {
@@ -186,8 +243,8 @@ export const StatisticsScreen: React.FC<{ navigation: any }> = ({ navigation }) 
             </View>
 
             {/* SVG Spending Curve */}
-            <View className="h-44 w-full relative justify-end">
-              <Svg height="100%" width="100%" viewBox="0 0 100 100" preserveAspectRatio="none">
+            <View className="h-44 w-full relative justify-end" style={{ overflow: 'visible' }}>
+              <Svg height="100%" width="100%" viewBox="0 0 100 100" preserveAspectRatio="none" style={{ overflow: 'visible' }}>
   <Defs>
     <SvgLinearGradient id="chartFill" x1="0" y1="0" x2="0" y2="1">
       <Stop offset="0%" stopColor="#adc6ff" stopOpacity="0.25" />
@@ -233,6 +290,25 @@ export const StatisticsScreen: React.FC<{ navigation: any }> = ({ navigation }) 
     strokeWidth="1.5"
     strokeLinecap="round"
     strokeLinejoin="round"
+  />
+
+  {/* Today Indicator Point */}
+  <Circle
+    cx={currentX}
+    cy={currentY}
+    r="3"
+    fill="#3B82F6"
+    stroke="#FFFFFF"
+    strokeWidth="1"
+  />
+  <Circle
+    cx={currentX}
+    cy={currentY}
+    r="6"
+    fill="none"
+    stroke="#3B82F6"
+    strokeWidth="1.5"
+    strokeOpacity="0.6"
   />
 </Svg>
               {/* Axis labels */}

@@ -15,23 +15,21 @@ interface Message {
 }
 
 export const AssistantScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
-  const { transactions } = useMockStore();
+  const { transactions, monthlyBudget, userProfile } = useMockStore();
   const insets = useSafeAreaInsets();
   const bottomMargin = Math.max(insets.bottom, 12);
   const inputPaddingBottom = bottomMargin + 70 + 12; // 70 navbar height + 12 spacing
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: '1',
-      sender: 'user',
-      text: 'Show me all my ₹15 payments.'
-    },
-    {
-      id: '2',
-      sender: 'ai',
-      text: 'I found 3 payments of ₹15 in June:',
-      transactions: transactions.filter(t => t.amount === 15)
-    }
-  ]);
+  const [messages, setMessages] = useState<Message[]>([]);
+
+  useEffect(() => {
+    setMessages([
+      {
+        id: '1',
+        sender: 'ai',
+        text: `Hi ${userProfile.name}, I am your Lumen Assistant. You can ask me to filter your ledger or analyze your spending (e.g., "What did I spend on Food?" or "Show payments under ₹100").`
+      }
+    ]);
+  }, [userProfile.name]);
   const [inputText, setInputText] = useState('');
   const scrollViewRef = useRef<ScrollView>(null);
   const [isKeyboardActive, setIsKeyboardActive] = useState(false);
@@ -100,15 +98,31 @@ export const AssistantScreen: React.FC<{ navigation: any }> = ({ navigation }) =
       let replyText = '';
       let filteredTxs: any[] | undefined = undefined;
 
-      if (query.includes('food')) {
-        filteredTxs = transactions.filter(t => t.category === 'Food');
-        const spent = filteredTxs.reduce((sum, t) => sum + t.amount, 0);
-        replyText = `You spent a total of ₹${spent.toFixed(2)} on Food across ${filteredTxs.length} payments:`;
-      } else if (query.includes('15')) {
-        filteredTxs = transactions.filter(t => t.amount === 15);
-        replyText = `I found ${filteredTxs.length} payments of ₹15 in June:`;
+      const matchedCategory = DEFAULT_CATEGORIES.find(c => query.includes(c.name.toLowerCase()));
+      if (matchedCategory) {
+        filteredTxs = transactions.filter(t => t.category === matchedCategory.name && t.type === 'expense');
+        const spent = filteredTxs.reduce((sum, t) => sum + (t.amount ?? 0), 0);
+        replyText = `You spent a total of ₹${spent.toFixed(2)} on ${matchedCategory.name} across ${filteredTxs.length} payments:`;
+      } else if (query.includes('under') || query.includes('<') || query.includes('less than')) {
+        const match = query.match(/\d+/);
+        if (match) {
+          const limitAmt = parseInt(match[0], 10);
+          filteredTxs = transactions.filter(t => (t.amount ?? 0) < limitAmt && t.type === 'expense');
+          replyText = `I found ${filteredTxs.length} payments under ₹${limitAmt}:`;
+        } else {
+          replyText = `I can help you filter transactions. Try asking me "What did I spend on Food?" or "Show payments under ₹100".`;
+        }
+      } else if (query.includes('over') || query.includes('>') || query.includes('more than')) {
+        const match = query.match(/\d+/);
+        if (match) {
+          const limitAmt = parseInt(match[0], 10);
+          filteredTxs = transactions.filter(t => (t.amount ?? 0) > limitAmt && t.type === 'expense');
+          replyText = `I found ${filteredTxs.length} payments over ₹${limitAmt}:`;
+        } else {
+          replyText = `I can help you filter transactions. Try asking me "What did I spend on Food?" or "Show payments over ₹100".`;
+        }
       } else {
-        replyText = `I can help you filter transactions. Try asking me "What did I spend on Food?" or "Show me my ₹15 payments."`;
+        replyText = `I can help you filter transactions. Try asking me "What did I spend on Food?" or "Show payments under ₹100".`;
       }
 
       const aiMessage: Message = {
@@ -132,31 +146,78 @@ export const AssistantScreen: React.FC<{ navigation: any }> = ({ navigation }) =
       {/* Chat Space */}
       <View className="flex-1 px-6 pt-6">
         {/* Proactive Insight banner */}
-        <View className="mb-6">
-          <GlassCard 
-            className="border border-emerald-500/20"
-            contentClassName="flex-row items-center gap-4 p-5"
-          >
-            <View className="w-12 h-12 rounded-full bg-emerald-500/10 items-center justify-center border border-emerald-500/30">
-              <MaterialIcon name="trending_down" color="#34d399" size={24} />
-            </View>
-            <View className="flex-1">
-              <Text 
-                style={{ fontFamily: 'Montserrat-Bold', letterSpacing: 0.8, color: "white" }} 
-                className="font-label-caps text-[11px] text-on-surface-variant/80 uppercase font-bold"
+        {/* Proactive Insight Card */}
+        {(() => {
+          const totalSpent = transactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0);
+
+          let insightText = '';
+          let highlightText = '';
+          let isPositive = true;
+          let iconName = 'trending_down';
+          let iconColor = '#34d399';
+          let iconBg = 'bg-emerald-500/10';
+          let iconBorder = 'border-emerald-500/30';
+          let cardBorder = 'border-emerald-500/20';
+
+          if (monthlyBudget === 0) {
+            highlightText = 'Set your monthly budget';
+            insightText = ' to get proactive insights!';
+            isPositive = false;
+            iconName = 'info';
+            iconColor = '#adc6ff';
+            iconBg = 'bg-primary/10';
+            iconBorder = 'border-primary/30';
+            cardBorder = 'border-primary/20';
+          } else if (totalSpent < monthlyBudget) {
+            const percentUnder = Math.round(((monthlyBudget - totalSpent) / monthlyBudget) * 100);
+            highlightText = `You are ${percentUnder}% under budget`;
+            insightText = ' this month!';
+            isPositive = true;
+            iconName = 'trending_down';
+            iconColor = '#34d399';
+            iconBg = 'bg-emerald-500/10';
+            iconBorder = 'border-emerald-500/30';
+            cardBorder = 'border-emerald-500/20';
+          } else {
+            const percentOver = Math.round(((totalSpent - monthlyBudget) / monthlyBudget) * 100);
+            highlightText = `You are ${percentOver}% over budget`;
+            insightText = ' this month!';
+            isPositive = false;
+            iconName = 'trending_up';
+            iconColor = '#ef4444';
+            iconBg = 'bg-red-500/10';
+            iconBorder = 'border-red-500/30';
+            cardBorder = 'border-red-500/20';
+          }
+
+          return (
+            <View className="mb-6">
+              <GlassCard 
+                className={`border ${cardBorder}`}
+                contentClassName="flex-row items-center gap-4 p-5"
               >
-                Proactive Insight
-              </Text>
-              <Text 
-                style={{ fontFamily: 'Montserrat-Bold', fontSize: 21, lineHeight: 26 }}
-                className="font-bold mt-1.5"
-              >
-                <Text className="text-emerald-400">You are 15% under budget{"\n"}</Text>
-                <Text className="text-white">this week!</Text>
-              </Text>
+                <View className={`w-12 h-12 rounded-full ${iconBg} items-center justify-center border ${iconBorder}`}>
+                  <MaterialIcon name={iconName} color={iconColor} size={24} />
+                </View>
+                <View className="flex-1">
+                  <Text 
+                    style={{ fontFamily: 'Montserrat-Bold', letterSpacing: 0.8, color: "white" }} 
+                    className="font-label-caps text-[11px] text-on-surface-variant/80 uppercase font-bold"
+                  >
+                    Proactive Insight
+                  </Text>
+                  <Text 
+                    style={{ fontFamily: 'Montserrat-Bold', fontSize: 21, lineHeight: 26 }}
+                    className="font-bold mt-1.5"
+                  >
+                    <Text className={isPositive ? "text-emerald-400" : "text-red-400"}>{highlightText}{"\n"}</Text>
+                    <Text className="text-white">{insightText}</Text>
+                  </Text>
+                </View>
+              </GlassCard>
             </View>
-          </GlassCard>
-        </View>
+          );
+        })()}
 
         {/* Scrollable messages list */}
         <ScrollView 

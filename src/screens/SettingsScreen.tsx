@@ -15,7 +15,7 @@ export const SettingsScreen: React.FC<{ navigation: any }> = ({ navigation }) =>
   };
 
   const handleCustomCategories = () => {
-    Alert.alert('Info', 'Custom Categories feature coming soon in Phase 2.');
+    navigation.navigate('CustomCategories');
   };
 
   const handleFirebaseSync = () => {

@@ -15,7 +15,7 @@ import { DEFAULT_CATEGORIES } from '../utils/constants';
 const TABS = ['total', 'cash', 'upi'] as const;
 
 export const DashboardScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
-  const { cashBalance, upiBalance, transactions } = useMockStore();
+  const { cashBalance, upiBalance, transactions, categoryLimits, pinnedCategories } = useMockStore();
   const [activeTab, setActiveTab] = useState<'total' | 'cash' | 'upi'>('total');
   const insets = useSafeAreaInsets();
   const bottomMargin = Math.max(insets.bottom, 12);
@@ -96,17 +96,43 @@ export const DashboardScreen: React.FC<{ navigation: any }> = ({ navigation }) =
     return t.source === activeTab;
   });
 
-  // Compute category budgets dynamically
-  const foodSpent = filteredTransactions.filter(t => t.category === 'Food').reduce((sum, t) => sum + (t.amount ?? 0), 0);
-  const travelSpent = filteredTransactions.filter(t => t.category === 'Travel').reduce((sum, t) => sum + (t.amount ?? 0), 0);
-  const stationerySpent = filteredTransactions.filter(t => t.category === 'Stationery').reduce((sum, t) => sum + (t.amount ?? 0), 0);
-
-  const budgetLimits = {
-    Food: 3000,
-    Travel: 1500,
-    Stationery: 500,
+  // Helper to parse dates
+  const parseTxDate = (dateStr: string) => {
+    const parts = dateStr.split(' ');
+    const day = parseInt(parts[0], 10);
+    const monthStr = parts[1];
+    const months: { [key: string]: number } = {
+      JAN: 0, FEB: 1, MAR: 2, APR: 3, MAY: 4, JUN: 5,
+      JUL: 6, AUG: 7, SEP: 8, OCT: 9, NOV: 10, DEC: 11
+    };
+    const month = months[monthStr] ?? 0;
+    const year = 2026;
+    return new Date(year, month, day);
   };
 
+  // Calculate weekly spent and net change dynamically
+  const now = new Date();
+  const sevenDaysAgo = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 7);
+  const thisWeeksTransactions = safeTransactions.filter(t => {
+    if (!t) return false;
+    try {
+      return parseTxDate(t.date) >= sevenDaysAgo;
+    } catch {
+      return false;
+    }
+  });
+
+  const totalSpentThisWeek = thisWeeksTransactions
+    .filter(t => t.type === 'expense')
+    .reduce((sum, t) => sum + (t.amount ?? 0), 0);
+
+  const totalIncomeThisWeek = thisWeeksTransactions
+    .filter(t => t.type === 'income')
+    .reduce((sum, t) => sum + (t.amount ?? 0), 0);
+
+  const netWeeklyChange = totalIncomeThisWeek - totalSpentThisWeek;
+
+  // Compute category budgets dynamically
   const getProgress = (spent: number, limit: number) => {
     if (!limit || isNaN(spent)) return 0;
     return Math.min(100, Math.max(0, (spent / limit) * 100));
@@ -219,12 +245,16 @@ export const DashboardScreen: React.FC<{ navigation: any }> = ({ navigation }) =
                 ₹{currentBalance.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
               </Text>
               <View className="flex-row items-center gap-1.5">
-                <MaterialIcon name="trending_up" size={16} color="#4ade80" />
+                <MaterialIcon 
+                  name={netWeeklyChange >= 0 ? "trending_up" : "trending_down"} 
+                  size={16} 
+                  color={netWeeklyChange >= 0 ? "#4ade80" : "#f87171"} 
+                />
                 <Text 
                   allowFontScaling={false}
-                  className="text-green-400 text-sm font-medium"
+                  className={netWeeklyChange >= 0 ? "text-green-400 text-sm font-medium" : "text-red-400 text-sm font-medium"}
                 >
-                  +₹450 this week
+                  {netWeeklyChange >= 0 ? `+₹${netWeeklyChange.toLocaleString('en-IN')}` : `-₹${Math.abs(netWeeklyChange).toLocaleString('en-IN')}`} this week
                 </Text>
               </View>
             </View>
@@ -241,71 +271,46 @@ export const DashboardScreen: React.FC<{ navigation: any }> = ({ navigation }) =
             Monthly Budget
           </Text>
           <GlassCard contentClassName="p-4">
-            {/* Food */}
-            <View className="mb-5">
-              <View className="flex-row justify-between items-center mb-1.5">
-                <View className="flex-row items-center gap-2">
-                  <MaterialIcon name="restaurant" size={18} color="#adc6ff" />
-                  <Text style={{ fontSize: 16, lineHeight: 24, fontWeight: '500', fontFamily: 'Montserrat-Regular', color: 'white' }}>Food</Text>
-                </View>
-                <Text style={{ fontSize: 14, lineHeight: 20, fontWeight: 'bold', fontFamily: 'Montserrat-Bold', color: 'white' }}>
-                  ₹{foodSpent.toLocaleString('en-IN')} / ₹{budgetLimits.Food.toLocaleString('en-IN')} ({Math.round(getProgress(foodSpent, budgetLimits.Food))}%)
-                </Text>
-              </View>
-              <View 
-                style={{ height: 5 }} 
-                className="w-full bg-[#13161d] rounded-full overflow-hidden"
-              >
-                <View 
-                  className="h-full bg-primary rounded-full" 
-                  style={{ width: `${getProgress(foodSpent, budgetLimits.Food)}%` }} 
-                />
-              </View>
-            </View>
+            {pinnedCategories.length === 0 ? (
+              <Text style={{ fontFamily: 'Montserrat-Regular' }} className="text-on-surface-variant text-center py-4">
+                No pinned categories. Configure them in Settings under Custom Categories.
+              </Text>
+            ) : (
+              pinnedCategories.map((catName, idx) => {
+                const spent = filteredTransactions.filter(t => t.category === catName).reduce((sum, t) => sum + (t.amount ?? 0), 0);
+                const limit = categoryLimits[catName] ?? 0;
+                const progress = getProgress(spent, limit);
+                
+                // Get matching category properties (color, icon)
+                const catInfo = DEFAULT_CATEGORIES.find(c => c.name === catName) ?? {
+                  icon: 'category',
+                  color: '#94a3b8'
+                };
 
-            {/* Travel */}
-            <View className="mb-5">
-              <View className="flex-row justify-between items-center mb-1.5">
-                <View className="flex-row items-center gap-2">
-                  <MaterialIcon name="directions_car" size={18} color="#22d3ee" />
-                  <Text style={{ fontSize: 16, lineHeight: 24, fontWeight: '500', fontFamily: 'Montserrat-Regular', color: 'white' }}>Travel</Text>
-                </View>
-                <Text style={{ fontSize: 14, lineHeight: 20, fontWeight: 'bold', fontFamily: 'Montserrat-Bold', color: 'white' }}>
-                  ₹{travelSpent.toLocaleString('en-IN')} / ₹{budgetLimits.Travel.toLocaleString('en-IN')} ({Math.round(getProgress(travelSpent, budgetLimits.Travel))}%)
-                </Text>
-              </View>
-              <View 
-                style={{ height: 5 }} 
-                className="w-full bg-[#13161d] rounded-full overflow-hidden"
-              >
-                <View 
-                  className="h-full bg-cyan-400 rounded-full" 
-                  style={{ width: `${getProgress(travelSpent, budgetLimits.Travel)}%` }} 
-                />
-              </View>
-            </View>
-
-            {/* Stationery */}
-            <View>
-              <View className="flex-row justify-between items-center mb-1.5">
-                <View className="flex-row items-center gap-2">
-                  <MaterialIcon name="menu_book" size={18} color="#fbbf24" />
-                  <Text style={{ fontSize: 16, lineHeight: 24, fontWeight: '500', fontFamily: 'Montserrat-Regular', color: 'white' }}>Stationery</Text>
-                </View>
-                <Text style={{ fontSize: 14, lineHeight: 20, fontWeight: 'bold', fontFamily: 'Montserrat-Bold', color: 'white' }}>
-                  ₹{stationerySpent.toLocaleString('en-IN')} / ₹{budgetLimits.Stationery.toLocaleString('en-IN')} ({Math.round(getProgress(stationerySpent, budgetLimits.Stationery))}%)
-                </Text>
-              </View>
-              <View 
-                style={{ height: 5 }} 
-                className="w-full bg-[#13161d] rounded-full overflow-hidden"
-              >
-                <View 
-                  className="h-full bg-amber-400 rounded-full" 
-                  style={{ width: `${getProgress(stationerySpent, budgetLimits.Stationery)}%` }} 
-                />
-              </View>
-            </View>
+                return (
+                  <View key={catName} className={idx < pinnedCategories.length - 1 ? "mb-5" : ""}>
+                    <View className="flex-row justify-between items-center mb-1.5">
+                      <View className="flex-row items-center gap-2">
+                        <MaterialIcon name={catInfo.icon} size={18} color={catInfo.color} />
+                        <Text style={{ fontSize: 16, lineHeight: 24, fontWeight: '500', fontFamily: 'Montserrat-Regular', color: 'white' }}>{catName}</Text>
+                      </View>
+                      <Text style={{ fontSize: 14, lineHeight: 20, fontWeight: 'bold', fontFamily: 'Montserrat-Bold', color: 'white' }}>
+                        ₹{spent.toLocaleString('en-IN')} / ₹{limit.toLocaleString('en-IN')} ({Math.round(progress)}%)
+                      </Text>
+                    </View>
+                    <View 
+                      style={{ height: 5 }} 
+                      className="w-full bg-[#13161d] rounded-full overflow-hidden"
+                    >
+                      <View 
+                        className="h-full rounded-full" 
+                        style={{ width: `${progress}%`, backgroundColor: catInfo.color }} 
+                      />
+                    </View>
+                  </View>
+                );
+              })
+            )}
           </GlassCard>
         </View>
 

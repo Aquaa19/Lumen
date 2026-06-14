@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "42123286632",
+    "project_id": "lumen-9cc61",
+    "storage_bucket": "lumen-9cc61.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:42123286632:android:64f5564e116c64c64283dd",
+        "android_client_info": {
+          "package_name": "com.lumen"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "42123286632-r0nik8lb5hpij36rrjs919rbp22l62p5.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.lumen",
+            "certificate_hash": "1744f8a796010eb76e77893fe8b15f280b5f372a"
+          }
+        },
+        {
+          "client_id": "42123286632-60rnun1q7trf18n4nhoo31u9qbne9301.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCEi0uOGPUrTcEHqv_bclsuXumejAmNCL4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "42123286632-60rnun1q7trf18n4nhoo31u9qbne9301.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

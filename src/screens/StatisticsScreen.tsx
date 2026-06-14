@@ -11,14 +11,76 @@ import GlowOrb from '../components/GlowOrb';
 import LinearGradient from 'react-native-linear-gradient';
 
 export const StatisticsScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
-  const { transactions } = useMockStore();
-const insets = useSafeAreaInsets();
-// Matches the exact bottom placement of your GlobalBottomNavbar
-const navbarBottomMargin = Math.max(insets.bottom, 12); 
-// 70 (Navbar Height) + exact bottom margin + 4px (to protect the drop shadow)
-const bottomPadding = 70 + navbarBottomMargin + 4;
-  // Compute total spent dynamically
-  const totalSpent = transactions.reduce((sum, t) => sum + t.amount, 0);
+  const { transactions, monthlyBudget } = useMockStore();
+  const insets = useSafeAreaInsets();
+  // Matches the exact bottom placement of your GlobalBottomNavbar
+  const navbarBottomMargin = Math.max(insets.bottom, 12); 
+  // 70 (Navbar Height) + exact bottom margin + 4px (to protect the drop shadow)
+  const bottomPadding = 70 + navbarBottomMargin + 4;
+  
+  // Compute total spent dynamically (only expenses)
+  const totalSpent = transactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0);
+
+  // Dynamic path builder
+  const getDynamicPath = () => {
+    const expenses = transactions.filter(t => t.type === 'expense');
+    if (expenses.length === 0) {
+      // Flat line at the bottom (90 spent)
+      return {
+        fill: "M0,90 L100,90 L100,100 L0,100 Z",
+        line: "M0,90 L100,90"
+      };
+    }
+
+    const weeklyTotals = [0, 0, 0, 0];
+    expenses.forEach(t => {
+      try {
+        const parts = t.date.split(' ');
+        const day = parseInt(parts[0], 10);
+        if (day <= 7) weeklyTotals[0] += t.amount;
+        else if (day <= 14) weeklyTotals[1] += t.amount;
+        else if (day <= 21) weeklyTotals[2] += t.amount;
+        else weeklyTotals[3] += t.amount;
+      } catch {
+        weeklyTotals[0] += t.amount;
+      }
+    });
+
+    const cumulative = [0, 0, 0, 0];
+    cumulative[0] = weeklyTotals[0];
+    cumulative[1] = cumulative[0] + weeklyTotals[1];
+    cumulative[2] = cumulative[1] + weeklyTotals[2];
+    cumulative[3] = cumulative[2] + weeklyTotals[3];
+
+    const maxSpent = cumulative[3];
+    if (maxSpent === 0) {
+      return {
+        fill: "M0,90 L100,90 L100,100 L0,100 Z",
+        line: "M0,90 L100,90"
+      };
+    }
+
+    const getY = (val: number) => {
+      const scale = (val / maxSpent);
+      return 90 - scale * 70; // 90 is bottom, 20 is top
+    };
+
+    const y0 = 90;
+    const y1 = getY(cumulative[0]);
+    const y2 = getY(cumulative[1]);
+    const y3 = getY(cumulative[2]);
+    const y4 = getY(cumulative[3]);
+
+    const linePath = `M0,${y0} Q25,${y1} 50,${y2} T75,${y3} T100,${y4}`;
+    const fillPath = `${linePath} L100,100 L0,100 Z`;
+
+    return {
+      fill: fillPath,
+      line: linePath
+    };
+  };
+
+  const path = getDynamicPath();
 
   // Compute category breakdown metrics
   const categoryStats = DEFAULT_CATEGORIES.map(cat => {
@@ -110,9 +172,16 @@ const bottomPadding = 70 + navbarBottomMargin + 4;
                   Total Spent
                 </Text>
                 <View className="flex-row items-center gap-1">
-                  <MaterialIcon name="trending_up" color="#4ade80" size={14} />
-                  <Text style={{ fontFamily: 'Montserrat-Bold' }} className="font-label-caps text-label-caps text-tertiary">
-                    +12% vs last month
+                  <MaterialIcon 
+                    name={monthlyBudget === 0 || totalSpent <= monthlyBudget ? "check_circle" : "warning"} 
+                    color={monthlyBudget === 0 || totalSpent <= monthlyBudget ? "#4ade80" : "#ef4444"} 
+                    size={14} 
+                  />
+                  <Text 
+                    style={{ fontFamily: 'Montserrat-Bold' }} 
+                    className={`font-label-caps text-label-caps ${monthlyBudget === 0 || totalSpent <= monthlyBudget ? "text-emerald-400" : "text-error"}`}
+                  >
+                    {monthlyBudget === 0 ? "Under budget" : totalSpent <= monthlyBudget ? `${Math.round((totalSpent / monthlyBudget) * 100)}% of budget` : "Over budget!"}
                   </Text>
                 </View>
               </View>
@@ -148,14 +217,14 @@ const bottomPadding = 70 + navbarBottomMargin + 4;
 
   {/* Fill Path (Underneath everything) */}
   <Path
-    d="M0,80 Q20,60 40,70 T80,40 T100,20 L100,100 L0,100 Z"
+    d={path.fill}
     fill="url(#chartFill)"
   />
 
   {/* --- The Blurred Glow Layer --- */}
   {/* Replaces the multi-layer stack with one perfectly smooth neon glow */}
   <Path
-    d="M0,80 Q20,60 40,70 T80,40 T100,20"
+    d={path.line}
     fill="none"
     stroke="#adc6ff"
     strokeWidth="5"
@@ -167,7 +236,7 @@ const bottomPadding = 70 + navbarBottomMargin + 4;
   
   {/* Main Solid Line Path (On top) */}
   <Path
-    d="M0,80 Q20,60 40,70 T80,40 T100,20"
+    d={path.line}
     fill="none"
     stroke="#adc6ff"
     strokeWidth="1.5"

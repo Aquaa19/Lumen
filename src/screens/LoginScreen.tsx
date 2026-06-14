@@ -1,13 +1,26 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { View, Text, TouchableOpacity, Image } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 import { GlassCard } from '../components/GlassCard';
 import BackgroundLayout from '../components/BackgroundLayout';
 import GlowOrb from '../components/GlowOrb';
+import { useMockStore } from '../store/mockStore';
 
 export const LoginScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
-  const handleGoogleSignIn = () => {
-    navigation.navigate('SetupWizard');
+  const { login, isLoggedIn, hasCompletedSetup } = useMockStore();
+
+  useEffect(() => {
+    if (isLoggedIn) {
+      if (hasCompletedSetup) {
+        navigation.replace('MainApp');
+      } else {
+        navigation.replace('SetupWizard');
+      }
+    }
+  }, [isLoggedIn, hasCompletedSetup, navigation]);
+
+  const handleGoogleSignIn = async () => {
+    await login();
   };
 
   return (
@@ -24,7 +37,7 @@ export const LoginScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
           <View className="w-20 h-20 rounded-2xl bg-white/[0.03] border border-white/10 justify-center items-center mb-4 shadow-[0_0_20px_rgba(255,255,255,0.05)]">
             <Image 
               source={require('../public/assets/logo/lumen_logo_icon_bgremoved.png')} 
-              className="w-14 h-14" 
+              className="w-full h-full" 
               resizeMode="contain" 
             />
           </View>

@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { View, Text, Animated } from 'react-native';
+import { createMMKV } from 'react-native-mmkv';
 import Svg, { Rect, Path, Defs, LinearGradient, Stop, Filter, FeGaussianBlur, FeMerge, FeMergeNode, G } from 'react-native-svg';
 import { useMockStore } from '../store/mockStore';
 import BackgroundLayout from '../components/BackgroundLayout';
@@ -7,7 +8,7 @@ import GlowOrb from '../components/GlowOrb';
 import MaterialIcon from '../components/MaterialIcon';
 
 export const SplashScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
-  const { isLoggedIn } = useMockStore();
+  const { isLoggedIn, hasCompletedSetup } = useMockStore();
 
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const scaleAnim = useRef(new Animated.Value(0.7)).current;
@@ -44,15 +45,22 @@ export const SplashScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
     }).start();
 
     const timer = setTimeout(() => {
-      if (!isLoggedIn) {
+      const storage = createMMKV();
+      const hasLaunched = storage.getBoolean('hasLaunchedBefore') || false;
+      if (!hasLaunched) {
+        storage.set('hasLaunchedBefore', true);
+        navigation.replace('Onboarding');
+      } else if (!isLoggedIn) {
         navigation.replace('Login');
+      } else if (!hasCompletedSetup) {
+        navigation.replace('SetupWizard');
       } else {
         navigation.replace('BiometricGate');
       }
     }, 2500);
 
     return () => clearTimeout(timer);
-  }, [isLoggedIn, navigation, fadeAnim, scaleAnim, rotateAnim, textOpacity]);
+  }, [isLoggedIn, hasCompletedSetup, navigation, fadeAnim, scaleAnim, rotateAnim, textOpacity]);
 
   const spin = rotateAnim.interpolate({
     inputRange: [0, 1],

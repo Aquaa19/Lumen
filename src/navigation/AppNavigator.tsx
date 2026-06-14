@@ -12,8 +12,11 @@ import DashboardScreen from '../screens/DashboardScreen';
 import StatisticsScreen from '../screens/StatisticsScreen';
 import AssistantScreen from '../screens/AssistantScreen';
 import SettingsScreen from '../screens/SettingsScreen';
+import CustomCategoriesScreen from '../screens/CustomCategoriesScreen';
 import TransactionDetailScreen from '../screens/TransactionDetailScreen';
 import SelfTransferScreen from '../screens/SelfTransferScreen';
+import OnboardingScreen from '../screens/OnboardingScreen';
+import PinFallbackScreen from '../screens/PinFallbackScreen';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -47,9 +50,11 @@ export const AppNavigator: React.FC = () => {
         }}
       >
         <Stack.Screen name="Splash" component={SplashScreen} />
+        <Stack.Screen name="Onboarding" component={OnboardingScreen} />
         <Stack.Screen name="Login" component={LoginScreen} />
         <Stack.Screen name="SetupWizard" component={SetupWizardScreen} />
         <Stack.Screen name="BiometricGate" component={BiometricGateScreen} />
+        <Stack.Screen name="PinFallback" component={PinFallbackScreen} />
         
         {/* Main Tab stack */}
         <Stack.Screen name="MainApp" component={MainTabNavigator} />
@@ -57,6 +62,7 @@ export const AppNavigator: React.FC = () => {
         {/* Global Modal / Push screens */}
         <Stack.Screen name="TransactionDetail" component={TransactionDetailScreen} />
         <Stack.Screen name="SelfTransfer" component={SelfTransferScreen} />
+        <Stack.Screen name="CustomCategories" component={CustomCategoriesScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

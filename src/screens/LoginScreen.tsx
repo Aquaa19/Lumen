@@ -39,10 +39,11 @@ export const LoginScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
               source={require('../public/assets/logo/lumen_logo_icon_bgremoved.png')} 
               className="w-full h-full" 
               resizeMode="contain" 
+              fadeDuration={0}
             />
           </View>
           <Text 
-            style={{ fontSize: 38, fontWeight: 'bold', fontFamily: 'Montserrat-Bold', color: '#FFFFFF', letterSpacing: 2 }}
+            style={{ fontSize: 44, fontWeight: '900', fontFamily: 'Montserrat-Bold', color: '#FFFFFF', letterSpacing: 2 }}
             className="text-on-surface text-center"
           >
             LUMEN
@@ -52,10 +53,10 @@ export const LoginScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
         {/* Card */}
         <GlassCard active={true} className="p-6">
           <View className="items-center mb-8">
-            <Text className="font-headline-lg-mobile text-headline-lg-mobile text-on-surface mb-2 text-center">
+            <Text style={{ fontFamily: 'Montserrat-Bold', fontSize: 34, fontWeight: 'bold', color: 'white' }} className="mb-2 text-center">
               Welcome back
             </Text>
-            <Text className="font-body-lg text-body-lg text-on-surface-variant text-center">
+            <Text style={{ fontFamily: 'Montserrat-SemiBold', fontSize: 17, color: 'rgba(255,255,255,0.7)' }} className="text-center">
               Manage Cash & UPI independently
             </Text>
           </View>
@@ -85,14 +86,14 @@ export const LoginScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
                 fill="#EA4335"
               />
             </Svg>
-            <Text className="font-title-md text-title-md text-on-surface font-semibold">
+            <Text style={{ fontFamily: 'Montserrat-Bold', fontSize: 17, color: 'white', fontWeight: 'bold' }}>
               Continue with Google
             </Text>
           </TouchableOpacity>
 
           {/* Terms Footer */}
           <View className="mt-8 text-center">
-            <Text className="font-body-sm text-body-sm text-on-surface-variant/70 text-center">
+            <Text style={{ fontFamily: 'Montserrat-Medium', fontSize: 13, color: 'rgba(255,255,255,0.5)', lineHeight: 18 }} className="text-center">
               By continuing, you agree to our{' '}
               <Text className="text-primary underline">Terms of Service</Text> and{' '}
               <Text className="text-primary underline">Privacy Policy</Text>.
@@ -103,7 +104,7 @@ export const LoginScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
 
       {/* Footer Label */}
       <View className="absolute bottom-6 w-full items-center">
-        <Text className="font-label-caps text-label-caps text-on-surface-variant/50">
+        <Text style={{ fontFamily: 'Montserrat-Bold', fontSize: 12, color: 'rgba(255,255,255,0.4)', letterSpacing: 1 }}>
           SECURE LOGIN INITIATIVE
         </Text>
       </View>

@@ -46,7 +46,7 @@ export const SelfTransferScreen: React.FC<{ navigation: any }> = ({ navigation }
       showBack={true}
     >
 
-      <View className="flex-1 px-6 pt-6 justify-between pb-12 max-w-md mx-auto">
+      <View className="flex-1 w-full px-6 pt-6 justify-between pb-12 max-w-md mx-auto self-center">
         <View className="gap-6">
           {/* Toggle From/To Source */}
           <GlassCard className="p-4 gap-4">
@@ -133,9 +133,10 @@ export const SelfTransferScreen: React.FC<{ navigation: any }> = ({ navigation }
         <TouchableOpacity
           onPress={handleTransfer}
           activeOpacity={0.85}
-          className="w-full py-4 rounded-xl bg-primary-container items-center justify-center shadow-[0_0_20px_rgba(59,130,246,0.4)]"
+          style={{ height: 56 }}
+          className="w-full self-stretch rounded-2xl bg-primary-container items-center justify-center shadow-[0_0_25px_rgba(77,142,255,0.4)]"
         >
-          <Text className="text-on-primary-container font-title-md text-title-md font-bold">
+          <Text style={{ fontFamily: 'Montserrat-Bold', fontSize: 16, color: '#00285d', fontWeight: 'bold' }}>
             Confirm Transfer
           </Text>
         </TouchableOpacity>

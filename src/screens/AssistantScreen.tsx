@@ -4,6 +4,7 @@ import { useMockStore } from '../store/mockStore';
 import { GlassCard } from '../components/GlassCard';
 import GlobalLayout from '../components/GlobalLayout';
 import MaterialIcon from '../components/MaterialIcon';
+import AIIcon from '../public/assets/icons/AIIcon';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { DEFAULT_CATEGORIES } from '../utils/constants';
 
@@ -14,8 +15,19 @@ interface Message {
   transactions?: any[];
 }
 
+const GEMINI_API_KEY = "AQ.Ab8RN6JkQx9XVyMHchnXakVrVUzS3PI9AxcfHYyomhlNkJ_ptg";
+const GEMINI_MODELS = ['gemini-2.5-flash', 'gemini-2.5-pro', 'gemini-1.5-flash', 'gemini-1.5-pro'];
+
+const PRESETS = [
+  { label: 'Analyze budget', prompt: 'Analyze my budget and suggest savings.' },
+  { label: 'Top categories', prompt: 'Which categories did I spend the most on?' },
+  { label: 'Cash payments', prompt: 'Show me my recent Cash payments.' },
+  { label: 'UPI transactions', prompt: 'List my recent UPI transactions.' },
+  { label: 'Warning check', prompt: 'Am I close to exceeding any category budget?' }
+];
+
 export const AssistantScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
-  const { transactions, monthlyBudget, userProfile, categories } = useMockStore();
+  const { transactions, monthlyBudget, userProfile, categories, categoryLimits, addGoal } = useMockStore();
   const insets = useSafeAreaInsets();
   const bottomMargin = Math.max(insets.bottom, 12);
   const inputPaddingBottom = bottomMargin + 70 + 12; // 70 navbar height + 12 spacing
@@ -26,16 +38,14 @@ export const AssistantScreen: React.FC<{ navigation: any }> = ({ navigation }) =
       {
         id: '1',
         sender: 'ai',
-        text: `Hi ${userProfile.name}, I am your Lumen Assistant. You can ask me to filter your ledger or analyze your spending (e.g., "What did I spend on Food?" or "Show payments under ₹100").`
+        text: `Hi ${userProfile.name}, I am your Lumen Assistant. You can ask me to analyze your spending, check budgets, or filter your ledger.`
       }
     ]);
   }, [userProfile.name]);
+
   const [inputText, setInputText] = useState('');
   const scrollViewRef = useRef<ScrollView>(null);
   const [isKeyboardActive, setIsKeyboardActive] = useState(false);
-  const keyboardOffsetAnim = useRef(new Animated.Value(0)).current;
-
-  // Start the animation at the default resting padding
   const paddingAnim = useRef(new Animated.Value(inputPaddingBottom)).current;
 
   useEffect(() => {
@@ -46,7 +56,7 @@ export const AssistantScreen: React.FC<{ navigation: any }> = ({ navigation }) =
         Animated.timing(paddingAnim, {
           toValue: Platform.OS === 'android' ? e.endCoordinates.height + 30 : 30,
           duration: 250,
-          easing: Easing.out(Easing.ease), // Native deceleration feel
+          easing: Easing.out(Easing.ease),
           useNativeDriver: false,
         }).start();
       }
@@ -56,7 +66,7 @@ export const AssistantScreen: React.FC<{ navigation: any }> = ({ navigation }) =
       () => {
         setIsKeyboardActive(false);
         Animated.timing(paddingAnim, {
-          toValue: inputPaddingBottom, // Smoothly animate back to the large navbar padding
+          toValue: inputPaddingBottom,
           duration: 200,
           easing: Easing.out(Easing.ease),
           useNativeDriver: false,
@@ -67,65 +77,128 @@ export const AssistantScreen: React.FC<{ navigation: any }> = ({ navigation }) =
     return () => { showListener.remove(); hideListener.remove(); };
   }, [inputPaddingBottom]);
 
+  const fetchGeminiResponse = async (userMessage: string, chatHistory: { role: string; text: string }[]) => {
+    const systemInstruction = `You are Lumen Assistant, a premium AI personal finance advisor.
+Today's date is 2026-06-14.
+The user's name is ${userProfile.name}.
+Monthly Budget: ₹${monthlyBudget}.
+Categories available: ${categories.map(c => `${c.name} (Budget: ₹${categoryLimits[c.name] || 0})`).join(', ')}.
 
+Here are the user's recent transactions:
+${JSON.stringify(transactions, null, 2)}
 
+If the user wants to set or add a financial goal (e.g. "Save ₹5000 for a trip next month"), provide a friendly confirmation response and ALWAYS append a single line at the very end of your response with this format:
+ACTION: ADD_GOAL {"title": "<goal name>", "targetAmount": <number>, "deadline": "<deadline string>"}
+Example: ACTION: ADD_GOAL {"title": "Trip to Goa", "targetAmount": 5000, "deadline": "Next Month"}
+Keep the title concise. Do not add any extra characters to this ACTION line.
 
+Provide clear, helpful, and concise insights. Format currency in ₹ (INR). Use a 24-hour time format when referencing transaction timestamps. Keep replies direct and under 4-5 sentences unless detail is needed. Do not use markdown bold symbols (** or *) excessively, keep text clean and readable.`;
 
-  const handleSend = () => {
-    if (!inputText.trim()) return;
+    const contents = [
+      ...chatHistory.map(m => ({
+        role: m.role === 'user' ? 'user' : 'model',
+        parts: [{ text: m.text }]
+      })),
+      {
+        role: 'user',
+        parts: [{ text: userMessage }]
+      }
+    ];
+
+    for (const model of GEMINI_MODELS) {
+      try {
+        const response = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GEMINI_API_KEY}`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              contents,
+              systemInstruction: {
+                parts: [{ text: systemInstruction }]
+              }
+            })
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error(`Model ${model} returned status ${response.status}`);
+        }
+
+        const data = await response.json();
+        const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+        if (text) {
+          return text;
+        }
+        throw new Error(`Empty response from model ${model}`);
+      } catch (error) {
+        console.warn(`Failed with model ${model}:`, error);
+      }
+    }
+    throw new Error("All models failed to generate content.");
+  };
+
+  const executeSend = async (textToSend: string) => {
+    if (!textToSend.trim()) return;
 
     const userMessage: Message = {
       id: Math.random().toString(),
       sender: 'user',
-      text: inputText
+      text: textToSend
     };
 
     setMessages(prev => [...prev, userMessage]);
-    const query = inputText.toLowerCase();
-    setInputText('');
+    
+    const tempAiId = Math.random().toString();
+    const tempAiMessage: Message = {
+      id: tempAiId,
+      sender: 'ai',
+      text: 'Analyzing...'
+    };
+    setMessages(prev => [...prev, tempAiMessage]);
+    scrollViewRef.current?.scrollToEnd({ animated: true });
 
-    // Process reply
-    setTimeout(() => {
-      let replyText = '';
-      let filteredTxs: any[] | undefined = undefined;
+    try {
+      const chatHistory = messages
+        .filter(m => m.text !== 'Analyzing...')
+        .map(m => ({
+          role: m.sender,
+          text: m.text
+        }));
 
-      const matchedCategory = categories.find(c => query.includes(c.name.toLowerCase()));
-      if (matchedCategory) {
-        filteredTxs = transactions.filter(t => t.category === matchedCategory.name && t.type === 'expense');
-        const spent = filteredTxs.reduce((sum, t) => sum + (t.amount ?? 0), 0);
-        replyText = `You spent a total of ₹${spent.toFixed(2)} on ${matchedCategory.name} across ${filteredTxs.length} payments:`;
-      } else if (query.includes('under') || query.includes('<') || query.includes('less than')) {
-        const match = query.match(/\d+/);
-        if (match) {
-          const limitAmt = parseInt(match[0], 10);
-          filteredTxs = transactions.filter(t => (t.amount ?? 0) < limitAmt && t.type === 'expense');
-          replyText = `I found ${filteredTxs.length} payments under ₹${limitAmt}:`;
-        } else {
-          replyText = `I can help you filter transactions. Try asking me "What did I spend on Food?" or "Show payments under ₹100".`;
+      const replyText = await fetchGeminiResponse(textToSend, chatHistory);
+
+      let cleanReply = replyText;
+      const actionMatch = replyText.match(/ACTION:\s*ADD_GOAL\s*({.*})/);
+      if (actionMatch) {
+        try {
+          const goalData = JSON.parse(actionMatch[1]);
+          if (goalData && goalData.title && goalData.targetAmount) {
+            addGoal(goalData.title, goalData.targetAmount, goalData.deadline || 'Next Month');
+          }
+          cleanReply = replyText.replace(/ACTION:\s*ADD_GOAL\s*({.*})/, '').trim();
+        } catch (e) {
+          console.warn("Failed to parse goal from AI response:", e);
         }
-      } else if (query.includes('over') || query.includes('>') || query.includes('more than')) {
-        const match = query.match(/\d+/);
-        if (match) {
-          const limitAmt = parseInt(match[0], 10);
-          filteredTxs = transactions.filter(t => (t.amount ?? 0) > limitAmt && t.type === 'expense');
-          replyText = `I found ${filteredTxs.length} payments over ₹${limitAmt}:`;
-        } else {
-          replyText = `I can help you filter transactions. Try asking me "What did I spend on Food?" or "Show payments over ₹100".`;
-        }
-      } else {
-        replyText = `I can help you filter transactions. Try asking me "What did I spend on Food?" or "Show payments under ₹100".`;
       }
 
-      const aiMessage: Message = {
-        id: Math.random().toString(),
-        sender: 'ai',
-        text: replyText,
-        transactions: filteredTxs
-      };
+      setMessages(prev => 
+        prev.map(m => m.id === tempAiId ? { ...m, text: cleanReply } : m)
+      );
+    } catch (err) {
+      setMessages(prev => 
+        prev.map(m => m.id === tempAiId ? { ...m, text: "Sorry, I encountered an error while trying to connect to my brain. Please try again." } : m)
+      );
+    }
+    scrollViewRef.current?.scrollToEnd({ animated: true });
+  };
 
-      setMessages(prev => [...prev, aiMessage]);
-      scrollViewRef.current?.scrollToEnd({ animated: true });
-    }, 800);
+  const handleSend = () => {
+    if (!inputText.trim()) return;
+    executeSend(inputText);
+    setInputText('');
   };
 
   return (
@@ -200,7 +273,7 @@ export const AssistantScreen: React.FC<{ navigation: any }> = ({ navigation }) =
                     Proactive Insight
                   </Text>
                   <Text 
-                    style={{ fontFamily: 'Montserrat-Bold', fontSize: 21, lineHeight: 26 }}
+                    style={{ fontFamily: 'Montserrat-Bold', fontSize: 16, lineHeight: 22 }}
                     className="font-bold mt-1.5"
                   >
                     <Text className={isPositive ? "text-emerald-400" : "text-red-400"}>{highlightText}{"\n"}</Text>
@@ -228,7 +301,7 @@ export const AssistantScreen: React.FC<{ navigation: any }> = ({ navigation }) =
             >
               {msg.sender === 'ai' && (
                 <View className="w-9 h-9 rounded-full bg-surface-variant items-center justify-center border border-white/10 mr-2 self-end mb-2">
-                  <MaterialIcon name="smart_toy" color="#3B82F6" size={18} />
+                  <AIIcon size={18} />
                 </View>
               )}
               
@@ -293,6 +366,28 @@ export const AssistantScreen: React.FC<{ navigation: any }> = ({ navigation }) =
         style={{ paddingBottom: paddingAnim }}
         className="px-6 pt-4 border-t border-white/5 bg-background"
       >
+        {/* Preset Prompt Buttons */}
+        <View className="mb-3">
+          <ScrollView 
+            horizontal 
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={{ gap: 8 }}
+          >
+            {PRESETS.map((preset, index) => (
+              <TouchableOpacity
+                key={index}
+                onPress={() => executeSend(preset.prompt)}
+                className="px-4 py-2.5 rounded-full bg-white/5 border border-white/10"
+                activeOpacity={0.8}
+              >
+                <Text style={{ fontFamily: 'Montserrat-Bold', color: '#FFFFFF' }} className="text-xs font-bold">
+                  {preset.label}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        </View>
+
         <View className="flex-row items-center gap-2 h-14 bg-white/5 border border-white/10 rounded-2xl px-4">
           <TextInput
             placeholder="Ask assistant..."

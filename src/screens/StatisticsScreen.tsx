@@ -1,7 +1,7 @@
 import React from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
-import Svg, { Path, Defs, LinearGradient as SvgLinearGradient, Stop, Filter, FeGaussianBlur, Circle } from 'react-native-svg';
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
+import Svg, { Path, Defs, LinearGradient as SvgLinearGradient, Stop, Filter, FeGaussianBlur, Circle, G } from 'react-native-svg';
 import { useMockStore } from '../store/mockStore';
 import { GlassCard } from '../components/GlassCard';
 import { DEFAULT_CATEGORIES } from '../utils/constants';
@@ -21,127 +21,9 @@ export const StatisticsScreen: React.FC<{ navigation: any }> = ({ navigation }) 
   // Compute total spent dynamically (only expenses)
   const totalSpent = transactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0);
 
-  // Dynamic path builder
-  const getDynamicPath = () => {
-    const expenses = transactions.filter(t => t.type === 'expense');
-    if (expenses.length === 0) {
-      // Flat line at the bottom (90 spent)
-      return {
-        fill: "M0,90 L100,90 L100,100 L0,100 Z",
-        line: "M0,90 L100,90"
-      };
-    }
-
-    const weeklyTotals = [0, 0, 0, 0];
-    expenses.forEach(t => {
-      try {
-        const parts = t.date.split(' ');
-        const day = parseInt(parts[0], 10);
-        if (day <= 7) weeklyTotals[0] += t.amount;
-        else if (day <= 14) weeklyTotals[1] += t.amount;
-        else if (day <= 21) weeklyTotals[2] += t.amount;
-        else weeklyTotals[3] += t.amount;
-      } catch {
-        weeklyTotals[0] += t.amount;
-      }
-    });
-
-    const cumulative = [0, 0, 0, 0];
-    cumulative[0] = weeklyTotals[0];
-    cumulative[1] = cumulative[0] + weeklyTotals[1];
-    cumulative[2] = cumulative[1] + weeklyTotals[2];
-    cumulative[3] = cumulative[2] + weeklyTotals[3];
-
-    const maxSpent = cumulative[3];
-    if (maxSpent === 0) {
-      return {
-        fill: "M0,90 L100,90 L100,100 L0,100 Z",
-        line: "M0,90 L100,90"
-      };
-    }
-
-    const getY = (val: number) => {
-      const scale = (val / maxSpent);
-      return 90 - scale * 75; // Expanded height for a more natural look
-    };
-
-    const y0 = 90;
-    const y1 = getY(cumulative[0]);
-    const y2 = getY(cumulative[1]);
-    const y3 = getY(cumulative[2]);
-    const y4 = getY(cumulative[3]);
-
-    // Smooth cubic bezier path where x is linear
-    const linePath = `M0,${y0} C8.33,${y0} 16.67,${y1} 25,${y1} C33.33,${y1} 41.67,${y2} 50,${y2} C58.33,${y2} 66.67,${y3} 75,${y3} C83.33,${y3} 91.67,${y4} 100,${y4}`;
-    const fillPath = `${linePath} L100,100 L0,100 Z`;
-
-    return {
-      fill: fillPath,
-      line: linePath
-    };
-  };
-
-  const path = getDynamicPath();
-
-  // Helper to calculate exact Y on the cubic Bezier curve
-  const getCurveY = (x: number, xA: number, xB: number, yA: number, yB: number) => {
-    const t = (x - xA) / (xB - xA);
-    return yA * Math.pow(1 - t, 2) * (1 + 2 * t) + yB * Math.pow(t, 2) * (3 - 2 * t);
-  };
-
-  // Calculate coordinates for today's spending indicator
-  const today = new Date().getDate();
-  const currentX = ((today - 1) / 29) * 100;
-  let currentY = 90;
-
-  const expenses = transactions.filter(t => t.type === 'expense');
-  if (expenses.length > 0) {
-    const weeklyTotals = [0, 0, 0, 0];
-    expenses.forEach(t => {
-      try {
-        const parts = t.date.split(' ');
-        const day = parseInt(parts[0], 10);
-        if (day <= 7) weeklyTotals[0] += t.amount;
-        else if (day <= 14) weeklyTotals[1] += t.amount;
-        else if (day <= 21) weeklyTotals[2] += t.amount;
-        else weeklyTotals[3] += t.amount;
-      } catch {
-        weeklyTotals[0] += t.amount;
-      }
-    });
-
-    const cumulative = [0, 0, 0, 0];
-    cumulative[0] = weeklyTotals[0];
-    cumulative[1] = cumulative[0] + weeklyTotals[1];
-    cumulative[2] = cumulative[1] + weeklyTotals[2];
-    cumulative[3] = cumulative[2] + weeklyTotals[3];
-    const maxSpent = cumulative[3] || 1;
-
-    const getY = (val: number) => {
-      const scale = (val / maxSpent);
-      return 90 - scale * 75;
-    };
-
-    const y0 = 90;
-    const y1 = getY(cumulative[0]);
-    const y2 = getY(cumulative[1]);
-    const y3 = getY(cumulative[2]);
-    const y4 = getY(cumulative[3]);
-
-    if (today <= 7) {
-      currentY = getCurveY(currentX, 0, 25, y0, y1);
-    } else if (today <= 14) {
-      currentY = getCurveY(currentX, 25, 50, y1, y2);
-    } else if (today <= 21) {
-      currentY = getCurveY(currentX, 50, 75, y2, y3);
-    } else {
-      currentY = getCurveY(currentX, 75, 100, y3, y4);
-    }
-  }
-
   // Compute category breakdown metrics
   const categoryStats = categories.map(cat => {
-    const catTxs = transactions.filter(t => t.category === cat.name);
+    const catTxs = transactions.filter(t => t.category === cat.name && t.type === 'expense');
     const amount = catTxs.reduce((sum, t) => sum + t.amount, 0);
     const count = catTxs.length;
     const percentage = totalSpent > 0 ? Math.round((amount / totalSpent) * 100) : 0;
@@ -153,13 +35,32 @@ export const StatisticsScreen: React.FC<{ navigation: any }> = ({ navigation }) 
     };
   });
 
+  // Prepare active stats for the donut chart
+  const activeStats = categoryStats.filter(s => s.amount > 0);
+  const totalPercentage = activeStats.reduce((sum, s) => sum + s.percentage, 0);
 
+  // Normalize percentages so they sum to exactly 100 if totalSpent > 0
+  let adjustedStats = [...activeStats];
+  if (totalSpent > 0 && adjustedStats.length > 0) {
+    const sumAdjusted = adjustedStats.reduce((sum, s) => sum + s.percentage, 0);
+    if (sumAdjusted !== 100) {
+      // Add or subtract difference from the largest segment
+      const maxIndex = adjustedStats.findIndex(s => s.percentage === Math.max(...adjustedStats.map(x => x.percentage)));
+      if (maxIndex !== -1) {
+        adjustedStats[maxIndex].percentage += (100 - sumAdjusted);
+      }
+    }
+  }
+
+  const radius = 34;
+  const circumference = 2 * Math.PI * radius; // ~213.63
+  let accumulatedPercent = 0;
 
   return (
     <GlobalLayout
       activeTab="statistics"
       navigation={navigation}
-      title="FINANCE INTELLIGENCE"
+      title="Lumen Growth"
     >
       <View className="flex-1 relative">
         {/* Glow Orb 1: Top-Left */}
@@ -182,142 +83,132 @@ export const StatisticsScreen: React.FC<{ navigation: any }> = ({ navigation }) 
 
         <ScrollView contentContainerStyle={{ paddingBottom: 130 }} className="flex-1 px-6 pt-6" showsVerticalScrollIndicator={false}>
           {/* Month Selector */}
-<View className="items-center mb-6">
-  <View className="glass-panel rounded-full px-5 py-2.5 flex-row items-center gap-5 border border-white/10">
-    <TouchableOpacity>
-      <MaterialIcon name="chevron_left" color="#c2c6d6" size={26} />
-    </TouchableOpacity>
-    
-    <Text 
-      allowFontScaling={false}
-      style={{ 
-        fontFamily: 'Montserrat-Bold', 
-        fontWeight: '900', // Forces maximum thickness
-        fontSize: 16,      // Explicitly sets a strong size
-        letterSpacing: 0.5 
-      }} 
-      className="text-white"
-    >
-      June 2026
-    </Text>
-    
-    <TouchableOpacity>
-      <MaterialIcon name="chevron_right" color="#c2c6d6" size={26} />
-    </TouchableOpacity>
-  </View>
-</View>
+          <View className="items-center mb-6">
+            <View className="glass-panel rounded-full px-5 py-2.5 flex-row items-center gap-5 border border-white/10">
+              <TouchableOpacity>
+                <MaterialIcon name="chevron_left" color="#c2c6d6" size={26} />
+              </TouchableOpacity>
+              
+              <Text 
+                allowFontScaling={false}
+                style={{ 
+                  fontFamily: 'Montserrat-Bold', 
+                  fontWeight: '900', // Forces maximum thickness
+                  fontSize: 16,      // Explicitly sets a strong size
+                  letterSpacing: 0.5 
+                }} 
+                className="text-white"
+              >
+                June 2026
+              </Text>
+              
+              <TouchableOpacity>
+                <MaterialIcon name="chevron_right" color="#c2c6d6" size={26} />
+              </TouchableOpacity>
+            </View>
+          </View>
 
-          {/* Spent Chart Card */}
-          <GlassCard className="p-4 mb-6">
-            <View className="mb-6">
-              {/* Top Row: Label & Trend Metric */}
-              <View className="flex-row justify-between items-center mb-1">
+          {/* Spent Donut Chart Card */}
+          <GlassCard className="p-5 mb-6">
+            {/* Top Row: Title & Budget Warning status */}
+            <View className="flex-row justify-between items-center mb-5">
+              <Text 
+                allowFontScaling={false}
+                style={{ fontSize: 12, lineHeight: 16, fontFamily: 'Montserrat-Bold', fontWeight: 'bold', color: '#c2c6d6' }}
+                className="uppercase tracking-wider"
+              >
+                Category Spending
+              </Text>
+              <View className="flex-row items-center gap-1">
+                <MaterialIcon 
+                  name={monthlyBudget === 0 || totalSpent <= monthlyBudget ? "check_circle" : "warning"} 
+                  color={monthlyBudget === 0 || totalSpent <= monthlyBudget ? "#4ade80" : "#ef4444"} 
+                  size={14} 
+                />
+                <Text 
+                  style={{ fontFamily: 'Montserrat-Bold' }} 
+                  className={`font-label-caps text-label-caps ${monthlyBudget === 0 || totalSpent <= monthlyBudget ? "text-emerald-400" : "text-error"}`}
+                >
+                  {monthlyBudget === 0 ? "Under budget" : totalSpent <= monthlyBudget ? `${Math.round((totalSpent / monthlyBudget) * 100)}% of budget` : "Over budget!"}
+                </Text>
+              </View>
+            </View>
+
+            {/* Donut Chart Container */}
+            <View className="align-center items-center justify-center relative my-4" style={{ height: 200 }}>
+              <Svg height="100%" width="100%" viewBox="0 0 100 100" style={{ overflow: 'visible' }}>
+                <Defs>
+                  <Filter id="donutGlow" x="-20%" y="-20%" width="140%" height="140%">
+                    <FeGaussianBlur stdDeviation="2" result="blur" />
+                  </Filter>
+                </Defs>
+                <G transform="rotate(-90 50 50)">
+                  {totalSpent === 0 || adjustedStats.length === 0 ? (
+                    // Empty placeholder state circle
+                    <Circle
+                      cx="50"
+                      cy="50"
+                      r={radius}
+                      fill="transparent"
+                      stroke="rgba(255,255,255,0.08)"
+                      strokeWidth="6"
+                    />
+                  ) : (
+                    adjustedStats.map((stat) => {
+                      const strokeDash = (stat.percentage * circumference) / 100;
+                      const strokeOffset = - (accumulatedPercent * circumference) / 100;
+                      accumulatedPercent += stat.percentage;
+
+                      return (
+                        <Circle
+                          key={stat.name}
+                          cx="50"
+                          cy="50"
+                          r={radius}
+                          fill="transparent"
+                          stroke={stat.color || '#adc6ff'}
+                          strokeWidth="7"
+                          strokeDasharray={`${strokeDash} ${circumference}`}
+                          strokeDashoffset={strokeOffset}
+                          strokeLinecap="round"
+                        />
+                      );
+                    })
+                  )}
+                </G>
+              </Svg>
+
+              {/* Absolute Center Labels */}
+              <View style={StyleSheet.absoluteFill} className="justify-center items-center pointer-events-none">
                 <Text 
                   allowFontScaling={false}
-                  style={{ fontSize: 12, lineHeight: 16, fontFamily: 'Montserrat-Bold', fontWeight: 'bold', color: '#c2c6d6' }}
-                  className="uppercase tracking-wider"
+                  style={{ fontFamily: 'Montserrat-Regular', fontSize: 11, color: '#c2c6d6', letterSpacing: 1 }} 
+                  className="uppercase"
                 >
                   Total Spent
                 </Text>
-                <View className="flex-row items-center gap-1">
-                  <MaterialIcon 
-                    name={monthlyBudget === 0 || totalSpent <= monthlyBudget ? "check_circle" : "warning"} 
-                    color={monthlyBudget === 0 || totalSpent <= monthlyBudget ? "#4ade80" : "#ef4444"} 
-                    size={14} 
-                  />
-                  <Text 
-                    style={{ fontFamily: 'Montserrat-Bold' }} 
-                    className={`font-label-caps text-label-caps ${monthlyBudget === 0 || totalSpent <= monthlyBudget ? "text-emerald-400" : "text-error"}`}
-                  >
-                    {monthlyBudget === 0 ? "Under budget" : totalSpent <= monthlyBudget ? `${Math.round((totalSpent / monthlyBudget) * 100)}% of budget` : "Over budget!"}
-                  </Text>
-                </View>
-              </View>
-              {/* Bottom Row: Amount */}
-              <Text 
-                allowFontScaling={false}
-                style={{ fontSize: 48, lineHeight: 56, fontWeight: 'bold', fontFamily: 'Montserrat-Bold', color: '#adc6ff', letterSpacing: -1 }}
-              >
-                ₹{totalSpent.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
-              </Text>
-            </View>
-
-            {/* SVG Spending Curve */}
-            <View className="h-44 w-full relative justify-end" style={{ overflow: 'visible' }}>
-              <Svg height="100%" width="100%" viewBox="0 0 100 100" preserveAspectRatio="none" style={{ overflow: 'visible' }}>
-  <Defs>
-    <SvgLinearGradient id="chartFill" x1="0" y1="0" x2="0" y2="1">
-      <Stop offset="0%" stopColor="#adc6ff" stopOpacity="0.25" />
-      <Stop offset="100%" stopColor="#adc6ff" stopOpacity="0" />
-    </SvgLinearGradient>
-    
-    {/* --- The True Blur Filter --- */}
-    {/* The x/y/width/height expansion prevents the blur from getting clipped at the edges */}
-    <Filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
-      <FeGaussianBlur stdDeviation="3" result="blur" />
-    </Filter>
-  </Defs>
-
-  {/* Background Grid Lines */}
-  <Path d="M0,25 L100,25" stroke="rgba(255,255,255,0.06)" strokeWidth="0.5" />
-  <Path d="M0,50 L100,50" stroke="rgba(255,255,255,0.06)" strokeWidth="0.5" />
-  <Path d="M0,75 L100,75" stroke="rgba(255,255,255,0.06)" strokeWidth="0.5" />
-
-  {/* Fill Path (Underneath everything) */}
-  <Path
-    d={path.fill}
-    fill="url(#chartFill)"
-  />
-
-  {/* --- The Blurred Glow Layer --- */}
-  {/* Replaces the multi-layer stack with one perfectly smooth neon glow */}
-  <Path
-    d={path.line}
-    fill="none"
-    stroke="#adc6ff"
-    strokeWidth="5"
-    strokeOpacity="0.6"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    filter="url(#glow)"
-  />
-  
-  {/* Main Solid Line Path (On top) */}
-  <Path
-    d={path.line}
-    fill="none"
-    stroke="#adc6ff"
-    strokeWidth="1.5"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  />
-
-  {/* Today Indicator Point */}
-  <Circle
-    cx={currentX}
-    cy={currentY}
-    r="3"
-    fill="#3B82F6"
-    stroke="#FFFFFF"
-    strokeWidth="1"
-  />
-  <Circle
-    cx={currentX}
-    cy={currentY}
-    r="6"
-    fill="none"
-    stroke="#3B82F6"
-    strokeWidth="1.5"
-    strokeOpacity="0.6"
-  />
-</Svg>
-              {/* Axis labels */}
-              <View className="flex-row justify-between mt-2">
-                <Text style={{ fontFamily: 'Montserrat-Bold', fontWeight: '700', color: 'rgba(255, 255, 255, 0.92)', fontSize: 15 }} className="font-label-caps">1st</Text>
-                <Text style={{ fontFamily: 'Montserrat-Bold', fontWeight: '700', color: 'rgba(255, 255, 255, 0.92)', fontSize: 15 }} className="font-label-caps">15th</Text>
-                <Text style={{ fontFamily: 'Montserrat-Bold', fontWeight: '700', color: 'rgba(255, 255, 255, 0.92)', fontSize: 15 }} className="font-label-caps">30th</Text>
+                <Text 
+                  allowFontScaling={false}
+                  style={{ fontFamily: 'Montserrat-Bold', fontSize: 24, fontWeight: 'bold', color: 'white', marginTop: 4 }}
+                >
+                  ₹{totalSpent.toLocaleString('en-IN')}
+                </Text>
               </View>
             </View>
+
+            {/* Custom Clear Legend Row/Grid */}
+            {adjustedStats.length > 0 && (
+              <View className="flex-row flex-wrap justify-center gap-x-4 gap-y-2 mt-4 pt-3 border-t border-white/5">
+                {adjustedStats.map(stat => (
+                  <View key={stat.name} className="flex-row items-center gap-1.5">
+                    <View style={{ backgroundColor: stat.color }} className="w-2.5 h-2.5 rounded-full" />
+                    <Text style={{ fontFamily: 'Montserrat-Bold', fontSize: 12, color: 'rgba(255,255,255,0.85)' }}>
+                      {stat.name} <Text style={{ color: '#adc6ff' }}>{stat.percentage}%</Text>
+                    </Text>
+                  </View>
+                ))}
+              </View>
+            )}
           </GlassCard>
 
           <Text 

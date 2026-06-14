@@ -56,7 +56,7 @@ export const PaymentsScreen: React.FC<{ navigation: any }> = ({ navigation }) =>
     <GlobalLayout
       activeTab="payments"
       navigation={navigation}
-      title="Payments"
+      title="Lumen Logs"
     >
       <View className="flex-1 relative">
         <GlowOrb 

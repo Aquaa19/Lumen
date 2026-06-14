@@ -4,7 +4,7 @@ import { createMMKV } from 'react-native-mmkv';
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
-import { Transaction, UserProfile, Category } from '../types';
+import { Transaction, UserProfile, Category, Goal } from '../types';
 import { INITIAL_TRANSACTIONS, DEFAULT_CATEGORIES } from '../utils/constants';
 import { formatTo24h, formatDateToShort } from '../utils/timeFormatter';
 import googleServices from '../../android/app/google-services.json';
@@ -23,6 +23,7 @@ interface MockStoreContextProps {
   categoryLimits: Record<string, number>;
   pinnedCategories: string[];
   categories: Category[];
+  goals: Goal[];
   login: () => void;
   logout: () => void;
   purgeData: () => Promise<void>;
@@ -39,8 +40,14 @@ interface MockStoreContextProps {
   addCustomCategory: (name: string, icon: string, color: string) => void;
   editCategory: (oldName: string, newName: string, icon: string, color: string) => void;
   deleteCategory: (name: string) => void;
+  addGoal: (title: string, targetAmount: number, deadline: string) => void;
+  deleteGoal: (id: string) => void;
   toastMessage: string | null;
   showToast: (msg: string) => void;
+  syncFrequency: 'realtime' | 'daily' | 'weekly' | 'never' | 'manual';
+  setSyncFrequency: (freq: 'realtime' | 'daily' | 'weekly' | 'never' | 'manual') => void;
+  lastSyncTimestamp: number;
+  triggerManualSync: () => Promise<boolean>;
 }
 
 const MockStoreContext = createContext<MockStoreContextProps | undefined>(undefined);
@@ -52,6 +59,18 @@ export const MockStoreProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   const [upiBalance, setUpiBalance] = useState(() => storage.getNumber('upiBalance') ?? 0);
   const [monthlyBudget, setMonthlyBudget] = useState(() => storage.getNumber('monthlyBudget') ?? 0);
   const [pinCode, setPinCode] = useState<string | null>(() => storage.getString('pinCode') ?? null);
+
+  const [syncFrequency, setSyncFrequencyState] = useState<'realtime' | 'daily' | 'weekly' | 'never' | 'manual'>(() => {
+    return (storage.getString('syncFrequency') as any) || 'realtime';
+  });
+  const [lastSyncTimestamp, setLastSyncTimestamp] = useState(() => {
+    return storage.getNumber('lastSyncTimestamp') || 0;
+  });
+
+  const setSyncFrequency = (freq: 'realtime' | 'daily' | 'weekly' | 'never' | 'manual') => {
+    setSyncFrequencyState(freq);
+    storage.set('syncFrequency', freq);
+  };
   
   const [userProfile, setUserProfile] = useState<UserProfile>(() => {
     const saved = storage.getString('userProfile');
@@ -115,6 +134,16 @@ export const MockStoreProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     return DEFAULT_CATEGORIES;
   });
 
+  const [goals, setGoals] = useState<Goal[]>(() => {
+    const saved = storage.getString('goals');
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch {}
+    }
+    return [];
+  });
+
   // Configure Google Sign-In
   useEffect(() => {
     try {
@@ -155,6 +184,7 @@ export const MockStoreProvider: React.FC<{ children: React.ReactNode }> = ({ chi
               if (data.categoryLimits !== undefined) setCategoryLimits(data.categoryLimits);
               if (data.pinnedCategories !== undefined) setPinnedCategories(data.pinnedCategories);
               if (data.categories !== undefined) setCategories(data.categories);
+              if (data.goals !== undefined) setGoals(data.goals);
             }
           }
         } catch (err) {
@@ -190,6 +220,7 @@ export const MockStoreProvider: React.FC<{ children: React.ReactNode }> = ({ chi
             if (data.categoryLimits !== undefined) setCategoryLimits(data.categoryLimits);
             if (data.pinnedCategories !== undefined) setPinnedCategories(data.pinnedCategories);
             if (data.categories !== undefined) setCategories(data.categories);
+            if (data.goals !== undefined) setGoals(data.goals);
           }
         }
       }, err => console.log('Firestore user snapshot error:', err));
@@ -267,41 +298,65 @@ export const MockStoreProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     storage.set('categories', JSON.stringify(categories));
   }, [categories]);
 
-  // Sync category limits, pins & categories up to Firestore
+  useEffect(() => {
+    storage.set('goals', JSON.stringify(goals));
+  }, [goals]);
+
+  // Sync category limits, pins, categories & goals up to Firestore
   useEffect(() => {
     const user = auth().currentUser;
-    if (user && hasCompletedSetup) {
+    if (user && hasCompletedSetup && syncFrequency === 'realtime') {
       firestore()
         .collection('users')
         .doc(user.uid)
-        .update({ categoryLimits, pinnedCategories, categories })
+        .update({ categoryLimits, pinnedCategories, categories, goals })
         .catch(err => console.log('Firestore category settings sync failed:', err));
     }
-  }, [categoryLimits, pinnedCategories, categories, hasCompletedSetup]);
+  }, [categoryLimits, pinnedCategories, categories, goals, hasCompletedSetup, syncFrequency]);
 
   // Sync monthly budget changes up to Firestore
   useEffect(() => {
     const user = auth().currentUser;
-    if (user && hasCompletedSetup) {
+    if (user && hasCompletedSetup && syncFrequency === 'realtime') {
       firestore()
         .collection('users')
         .doc(user.uid)
         .update({ monthlyBudget })
         .catch(err => console.log('Firestore budget sync failed:', err));
     }
-  }, [monthlyBudget, hasCompletedSetup]);
+  }, [monthlyBudget, hasCompletedSetup, syncFrequency]);
 
   // Sync PIN changes up to Firestore
   useEffect(() => {
     const user = auth().currentUser;
-    if (user && hasCompletedSetup) {
+    if (user && hasCompletedSetup && syncFrequency === 'realtime') {
       firestore()
         .collection('users')
         .doc(user.uid)
         .update({ pinCode })
         .catch(err => console.log('Firestore PIN sync failed:', err));
     }
-  }, [pinCode, hasCompletedSetup]);
+  }, [pinCode, hasCompletedSetup, syncFrequency]);
+
+  // Periodic Daily / Weekly sync runner
+  useEffect(() => {
+    const checkPeriodicSync = async () => {
+      const user = auth().currentUser;
+      if (!user || !hasCompletedSetup) return;
+      const now = Date.now();
+      const last = storage.getNumber('lastSyncTimestamp') || 0;
+      const interval = syncFrequency === 'daily' ? 24 * 3600 * 1000 : 7 * 24 * 3600 * 1000;
+      if (now - last > interval) {
+        try {
+          await triggerManualSync();
+        } catch {}
+      }
+    };
+
+    if (syncFrequency === 'daily' || syncFrequency === 'weekly') {
+      checkPeriodicSync();
+    }
+  }, [transactions, categoryLimits, monthlyBudget, pinCode, syncFrequency, hasCompletedSetup]);
 
   const login = async () => {
     try {
@@ -361,6 +416,7 @@ export const MockStoreProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     setPinCode(null);
     setUserProfile(prev => ({ ...prev, biometricLock: false }));
     setTransactions(INITIAL_TRANSACTIONS);
+    setGoals([]);
     setCategoryLimits({
       Food: 0,
       Travel: 0,
@@ -396,7 +452,8 @@ export const MockStoreProvider: React.FC<{ children: React.ReactNode }> = ({ chi
           hasCompletedSetup: true,
           categoryLimits,
           pinnedCategories,
-          categories
+          categories,
+          goals
         });
       } catch (err) {
         console.log('Error writing setup to Firestore:', err);
@@ -675,6 +732,21 @@ export const MockStoreProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     }));
   };
 
+  const addGoal = (title: string, targetAmount: number, deadline: string) => {
+    const newGoal: Goal = {
+      id: Math.random().toString(36).substring(2, 9),
+      title,
+      targetAmount,
+      currentSaved: 0,
+      deadline,
+    };
+    setGoals(prev => [...prev, newGoal]);
+  };
+
+  const deleteGoal = (id: string) => {
+    setGoals(prev => prev.filter(g => g.id !== id));
+  };
+
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const showToast = (msg: string) => {
@@ -682,6 +754,53 @@ export const MockStoreProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     setTimeout(() => {
       setToastMessage(null);
     }, 3000);
+  };
+
+  const triggerManualSync = async (): Promise<boolean> => {
+    const user = auth().currentUser;
+    if (!user) return false;
+    try {
+      await firestore()
+        .collection('users')
+        .doc(user.uid)
+        .set({
+          hasCompletedSetup,
+          cashBalance,
+          upiBalance,
+          monthlyBudget,
+          pinCode,
+          userProfile,
+          categoryLimits,
+          pinnedCategories,
+          categories,
+          goals,
+          lastSynced: Date.now()
+        }, { merge: true });
+
+      const batch = firestore().batch();
+      transactions.forEach((tx) => {
+        const docRef = firestore()
+          .collection('users')
+          .doc(user.uid)
+          .collection('transactions')
+          .doc(tx.id);
+        
+        const firestoreTx = { ...tx };
+        if (firestoreTx.note === undefined) {
+          delete firestoreTx.note;
+        }
+        batch.set(docRef, firestoreTx);
+      });
+      await batch.commit();
+
+      const now = Date.now();
+      setLastSyncTimestamp(now);
+      storage.set('lastSyncTimestamp', now);
+      return true;
+    } catch (err) {
+      console.log('Manual sync failed:', err);
+      return false;
+    }
   };
 
   return (
@@ -709,13 +828,20 @@ export const MockStoreProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         categoryLimits,
         pinnedCategories,
         categories,
+        goals,
         updateCategoryLimit,
         togglePinCategory,
         addCustomCategory,
         editCategory,
         deleteCategory,
+        addGoal,
+        deleteGoal,
         toastMessage,
-        showToast
+        showToast,
+        syncFrequency,
+        setSyncFrequency,
+        lastSyncTimestamp,
+        triggerManualSync
       }}
     >
       {children}

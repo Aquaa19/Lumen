@@ -4,6 +4,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useMockStore } from '../store/mockStore';
 import { BlurView } from '@react-native-community/blur';
 import MaterialIcon from './MaterialIcon';
+import AIIcon from '../public/assets/icons/AIIcon';
 
 interface GlobalHeaderProps {
   title?: string;
@@ -28,14 +29,12 @@ export const GlobalHeader: React.FC<GlobalHeaderProps> = ({
       const hour = new Date().getHours();
       const greeting = hour < 12 ? 'Morning' : hour < 17 ? 'Afternoon' : 'Evening';
       const name = (userProfile.name || 'Aqua').trim().split(/\s+/)[0];
-      return Math.random() < 0.5 ? `Welcome, ${name}` : `Good ${greeting}, ${name}`;
+      return `${greeting}, ${name}`;
     }
-    if (activeTab === 'statistics') return 'Lumen Growth';
-    if (activeTab === 'payments') return 'Payments';
-    if (activeTab === 'wallet') return 'Wallet';
-    if (activeTab === 'settings') return 'Settings';
-    return title;
+    return title || 'LUMEN';
   }, [activeTab, title, userProfile.name]);
+
+  const showHeader = activeTab !== 'none';
 
   return (
     <View
@@ -68,9 +67,10 @@ export const GlobalHeader: React.FC<GlobalHeaderProps> = ({
           {showBack && (
             <TouchableOpacity
               onPress={() => navigation.goBack()}
-              className="w-10 h-10 items-center justify-center rounded-full bg-white/5 border border-white/10 mr-3"
+              activeOpacity={0.8}
+              className="w-10 h-10 rounded-full bg-white/5 border border-white/10 items-center justify-center shadow-lg mr-3"
             >
-              <MaterialIcon name="arrow_back" color="#e1e2ec" size={24} />
+              <MaterialIcon name="arrow_back" size={22} color="#adc6ff" />
             </TouchableOpacity>
           )}
           <Text
@@ -96,7 +96,7 @@ export const GlobalHeader: React.FC<GlobalHeaderProps> = ({
               activeOpacity={0.8}
               className="w-10 h-10 rounded-full bg-white/5 border border-white/10 items-center justify-center shadow-lg"
             >
-              <MaterialIcon name="smart_toy" size={22} color="#adc6ff" />
+              <AIIcon size={22} />
             </TouchableOpacity>
           )}
 

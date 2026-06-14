@@ -19,7 +19,7 @@ export const WalletScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
     <GlobalLayout
       activeTab="wallet"
       navigation={navigation}
-      title="Wallet"
+      title="Lumen Wallet"
     >
       <View className="flex-1 relative">
         {/* Decorative Glow Orbs */}

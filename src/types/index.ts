@@ -25,6 +25,14 @@ export interface Category {
   isCustom?: boolean;
 }
 
+export interface Goal {
+  id: string;
+  title: string;
+  targetAmount: number;
+  currentSaved: number;
+  deadline: string;
+}
+
 export interface MockStoreState {
   isLoggedIn: boolean;
   hasCompletedSetup: boolean;
@@ -32,4 +40,6 @@ export interface MockStoreState {
   upiBalance: number;
   userProfile: UserProfile;
   transactions: Transaction[];
+  goals: Goal[];
 }
+

@@ -12,7 +12,7 @@ interface LogPaymentModalProps {
 }
 
 export const LogPaymentModal: React.FC<LogPaymentModalProps> = ({ visible, onClose }) => {
-  const { addTransaction, cashBalance, upiBalance, showToast, categories } = useMockStore();
+  const { addTransaction, cashBalance, upiBalance, showToast, categories, categoryLimits, transactions } = useMockStore();
   const [amount, setAmount] = useState('0');
   const [source, setSource] = useState<'cash' | 'upi'>('cash');
   const [selectedCategory, setSelectedCategory] = useState('Others');
@@ -82,10 +82,35 @@ export const LogPaymentModal: React.FC<LogPaymentModalProps> = ({ visible, onClo
     if (isNaN(numericAmount) || numericAmount <= 0) return;
 
     const availableBalance = source === 'cash' ? cashBalance : upiBalance;
-    if (numericAmount > availableBalance) {
+    const categoryLimit = categoryLimits[selectedCategory] || 0;
+
+    // Calculate how much has already been spent in this category this month (based on dates containing 'Jun' or mock transaction mapping)
+    // For simplicity, we sum all transactions matching this category
+    const categorySpent = transactions
+      .filter(t => t.category === selectedCategory && t.type === 'expense')
+      .reduce((sum, t) => sum + (t.amount ?? 0), 0);
+
+    const isOverCategoryBudget = categoryLimit > 0 && (categorySpent + numericAmount > categoryLimit);
+    const isOverAvailableBalance = numericAmount > availableBalance;
+
+    let titleText = 'Confirm Transaction';
+    let warningMsg = '';
+
+    if (isOverAvailableBalance && isOverCategoryBudget) {
+      titleText = 'Budget & Balance Warning';
+      warningMsg = `You are exceeding both:\n1. Your available ${source.toUpperCase()} balance.\n2. Your ₹${categoryLimit} budget limit for ${selectedCategory} (already spent: ₹${categorySpent.toFixed(2)}).`;
+    } else if (isOverAvailableBalance) {
+      titleText = 'Insufficient Balance';
+      warningMsg = `The amount ₹${numericAmount.toFixed(2)} exceeds your available ${source.toUpperCase()} balance (₹${availableBalance.toFixed(2)}).`;
+    } else if (isOverCategoryBudget) {
+      titleText = 'Budget Limit Exceeded';
+      warningMsg = `This expense of ₹${numericAmount.toFixed(2)} will exceed your ₹${categoryLimit} monthly budget limit for ${selectedCategory} (already spent: ₹${categorySpent.toFixed(2)}).`;
+    }
+
+    if (isOverAvailableBalance || isOverCategoryBudget) {
       Alert.alert(
-        'Insufficient Balance',
-        `The amount ₹${numericAmount.toFixed(2)} exceeds your available ${source.toUpperCase()} balance (₹${availableBalance.toFixed(2)}). Do you want to proceed?`,
+        titleText,
+        `${warningMsg}\n\nDo you want to proceed anyway?`,
         [
           { text: 'Cancel', style: 'cancel' },
           {

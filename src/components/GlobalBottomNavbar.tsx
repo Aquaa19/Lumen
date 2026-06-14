@@ -17,8 +17,60 @@ const TABS = [
   { key: 'settings', label: 'Settings', icon: 'settings', route: 'Settings' },
 ] as const;
 
-// Global memory outside the component to remember the last tab position across all screens
 let previousTabIndex = 0;
+
+const TabLabel: React.FC<{ label: string; isActive: boolean; color: string; navigation: any }> = ({ label, isActive, color, navigation }) => {
+  const scaleAnim = useRef(new Animated.Value(0.3)).current;
+  const opacityAnim = useRef(new Animated.Value(0)).current;
+
+  const triggerAnimation = () => {
+    scaleAnim.setValue(0.3);
+    opacityAnim.setValue(0);
+    Animated.parallel([
+      Animated.spring(scaleAnim, {
+        toValue: 1,
+        friction: 5,
+        tension: 100,
+        useNativeDriver: true,
+      }),
+      Animated.timing(opacityAnim, {
+        toValue: 1,
+        duration: 200,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  };
+
+  useEffect(() => {
+    if (isActive) {
+      triggerAnimation();
+
+      const unsubscribe = navigation.addListener('focus', () => {
+        triggerAnimation();
+      });
+      return unsubscribe;
+    }
+  }, [isActive, navigation]);
+
+  return (
+    <Animated.Text
+      allowFontScaling={false}
+      style={{
+        fontSize: 10,
+        fontWeight: 'bold',
+        letterSpacing: 0.5,
+        textTransform: 'uppercase',
+        fontFamily: 'Montserrat-Bold',
+        color,
+        marginTop: 4,
+        opacity: opacityAnim,
+        transform: [{ scale: scaleAnim }],
+      }}
+    >
+      {label}
+    </Animated.Text>
+  );
+};
 
 export const GlobalBottomNavbar: React.FC<GlobalBottomNavbarProps> = ({
   activeTab,
@@ -124,20 +176,7 @@ export const GlobalBottomNavbar: React.FC<GlobalBottomNavbarProps> = ({
               </View>
               
               {isActive && (
-                <Text
-                  allowFontScaling={false}
-                  style={{
-                    fontSize: 10,
-                    fontWeight: 'bold',
-                    letterSpacing: 0.5,
-                    textTransform: 'uppercase',
-                    fontFamily: 'Montserrat-Bold',
-                    color,
-                    marginTop: 4,
-                  }}
-                >
-                  {tab.label}
-                </Text>
+                <TabLabel label={tab.label} isActive={isActive} color={color} navigation={navigation} />
               )}
             </TouchableOpacity>
           );
@@ -156,6 +195,7 @@ const styles = StyleSheet.create({
     height: 70,
     paddingBottom: 0,
     paddingTop: 6,
+    paddingHorizontal: 8,
     position: 'absolute',
     left: 16,
     right: 16,

@@ -11,9 +11,10 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BlurView } from '@react-native-community/blur';
 import LinearGradient from 'react-native-linear-gradient';
 import { DEFAULT_CATEGORIES } from '../utils/constants';
+import SpeedIcon from '../public/assets/icons/SpeedIcon';
 
 export const DashboardScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
-  const { cashBalance, upiBalance, transactions, categoryLimits, pinnedCategories, categories } = useMockStore();
+  const { cashBalance, upiBalance, transactions, categoryLimits, pinnedCategories, categories, goals, deleteGoal, monthlyBudget } = useMockStore();
   const activeTab = 'total';
   const insets = useSafeAreaInsets();
   const bottomMargin = Math.max(insets.bottom, 12);
@@ -126,7 +127,11 @@ export const DashboardScreen: React.FC<{ navigation: any }> = ({ navigation }) =
     return Math.min(100, Math.max(0, (spent / limit) * 100));
   };
 
-
+  // Goals & Spending limits calculations
+  const totalGoalTargetAmount = goals ? goals.reduce((sum, g) => sum + g.targetAmount, 0) : 0;
+  // Calculate remaining monthly budget available for weekly spending after taking goals out
+  const remainingBudgetForSpend = Math.max(0, monthlyBudget - totalGoalTargetAmount);
+  const weeklySpendingLimit = remainingBudgetForSpend / 4.33;
 
   return (
     <GlobalLayout
@@ -182,6 +187,83 @@ export const DashboardScreen: React.FC<{ navigation: any }> = ({ navigation }) =
             </View>
           </GlassCard>
         </View>
+
+        {/* Weekly Spending Limit Card (only when monthly budget is configured) */}
+        {monthlyBudget > 0 && (
+          <View className="px-6 mt-6">
+            <GlassCard className="px-5 py-4 border-l-4 border-l-blue-400">
+              <View className="flex-row justify-between items-center">
+                <View>
+                  <Text style={{ fontFamily: 'Montserrat-Regular', fontSize: 11, color: 'rgba(255,255,255,0.6)' }} className="uppercase tracking-wider mb-1">
+                    Safe Weekly Spending Limit
+                  </Text>
+                  <Text style={{ fontFamily: 'Montserrat-Bold', fontSize: 20, color: 'white' }}>
+                    ₹{weeklySpendingLimit.toLocaleString('en-IN', { maximumFractionDigits: 2 })} / week
+                  </Text>
+                </View>
+                <View style={{ backgroundColor: 'rgba(59, 130, 246, 0.15)' }} className="w-10 h-10 rounded-full items-center justify-center">
+                  <SpeedIcon size={20} color="#adc6ff" />
+                </View>
+              </View>
+              {totalGoalTargetAmount > 0 && (
+                <Text style={{ fontFamily: 'Montserrat-Regular', fontSize: 11, color: '#4ade80', marginTop: 6 }}>
+                  Adjusted for savings goal allocations: -₹{totalGoalTargetAmount.toLocaleString('en-IN')}
+                </Text>
+              )}
+            </GlassCard>
+          </View>
+        )}
+
+        {/* Financial Goals Tracker */}
+        {goals && goals.length > 0 && (
+          <View className="px-6 mt-8">
+            <Text 
+              allowFontScaling={false}
+              style={{ fontSize: 20, lineHeight: 28, fontWeight: 'bold', fontFamily: 'Montserrat-Bold', color: 'white' }}
+              className="mb-4"
+            >
+              Financial Goals
+            </Text>
+            <View className="gap-3">
+              {goals.map((goal) => {
+                // Determine how much is saved based on income vs expenses or mock it
+                // We'll set a basic progress calculation. E.g. 0% to start or based on user setup
+                const completionPercentage = Math.round((goal.currentSaved / goal.targetAmount) * 100);
+                return (
+                  <GlassCard key={goal.id} contentClassName="p-4">
+                    <View className="flex-row justify-between items-start mb-2">
+                      <View>
+                        <Text style={{ fontFamily: 'Montserrat-Bold', fontSize: 16, color: 'white' }}>
+                          {goal.title}
+                        </Text>
+                        <Text style={{ fontFamily: 'Montserrat-Regular', fontSize: 12, color: 'rgba(255,255,255,0.5)', marginTop: 2 }}>
+                          Target: {goal.deadline}
+                        </Text>
+                      </View>
+                      <TouchableOpacity onPress={() => deleteGoal(goal.id)}>
+                        <MaterialIcon name="delete" size={18} color="#f87171" />
+                      </TouchableOpacity>
+                    </View>
+                    <View className="flex-row justify-between items-center mb-1.5">
+                      <Text style={{ fontFamily: 'Montserrat-Regular', fontSize: 12, color: 'rgba(255,255,255,0.7)' }}>
+                        ₹{goal.currentSaved.toLocaleString('en-IN')} saved of ₹{goal.targetAmount.toLocaleString('en-IN')}
+                      </Text>
+                      <Text style={{ fontFamily: 'Montserrat-Bold', fontSize: 12, color: '#4ade80' }}>
+                        {completionPercentage}%
+                      </Text>
+                    </View>
+                    <View style={{ height: 6 }} className="w-full bg-black/40 rounded-full overflow-hidden">
+                      <View 
+                        className="h-full bg-emerald-400 rounded-full" 
+                        style={{ width: `${Math.max(5, Math.min(100, completionPercentage))}%` }} 
+                      />
+                    </View>
+                  </GlassCard>
+                );
+              })}
+            </View>
+          </View>
+        )}
 
         {/* Budget Progress Bars */}
         <View className="px-6 mt-8">

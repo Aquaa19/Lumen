@@ -1,5 +1,5 @@
-import React, { useRef, useEffect } from 'react';
-import { View, KeyboardAvoidingView, Platform, Animated, Text } from 'react-native';
+import React, { useRef, useEffect, useState } from 'react';
+import { View, KeyboardAvoidingView, Platform, Animated, Text, Keyboard } from 'react-native';
 import BackgroundLayout from './BackgroundLayout';
 import GlowOrb from './GlowOrb';
 import GlobalHeader from './GlobalHeader';
@@ -25,6 +25,23 @@ export const GlobalLayout: React.FC<GlobalLayoutProps> = ({
   const { toastMessage } = useMockStore();
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(-30)).current;
+  const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
+
+  useEffect(() => {
+    const showListener = Keyboard.addListener(
+      Platform.OS === 'android' ? 'keyboardDidShow' : 'keyboardWillShow',
+      () => setIsKeyboardVisible(true)
+    );
+    const hideListener = Keyboard.addListener(
+      Platform.OS === 'android' ? 'keyboardDidHide' : 'keyboardWillHide',
+      () => setIsKeyboardVisible(false)
+    );
+
+    return () => {
+      showListener.remove();
+      hideListener.remove();
+    };
+  }, []);
 
   useEffect(() => {
     if (toastMessage) {
@@ -101,7 +118,7 @@ export const GlobalLayout: React.FC<GlobalLayoutProps> = ({
           <View className="flex-1 w-full">
             {children}
           </View>
-          {activeTab !== 'none' && (
+          {activeTab !== 'none' && !isKeyboardVisible && (
           <GlobalBottomNavbar navigation={navigation} activeTab={activeTab} />
         )}
         </View>

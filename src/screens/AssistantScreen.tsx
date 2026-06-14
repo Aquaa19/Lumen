@@ -1,5 +1,5 @@
-import React, { useState, useRef } from 'react';
-import { View, Text, ScrollView, TextInput, TouchableOpacity } from 'react-native';
+import React, { useState, useRef, useEffect } from 'react';
+import { View, Text, ScrollView, TextInput, TouchableOpacity, Keyboard, Platform, Animated, Easing } from 'react-native';
 import { useMockStore } from '../store/mockStore';
 import { GlassCard } from '../components/GlassCard';
 import GlobalLayout from '../components/GlobalLayout';
@@ -34,6 +34,42 @@ export const AssistantScreen: React.FC<{ navigation: any }> = ({ navigation }) =
   ]);
   const [inputText, setInputText] = useState('');
   const scrollViewRef = useRef<ScrollView>(null);
+  const [isKeyboardActive, setIsKeyboardActive] = useState(false);
+  const keyboardOffsetAnim = useRef(new Animated.Value(0)).current;
+
+  // Start the animation at the default resting padding
+  const paddingAnim = useRef(new Animated.Value(inputPaddingBottom)).current;
+
+  useEffect(() => {
+    const showListener = Keyboard.addListener(
+      Platform.OS === 'android' ? 'keyboardDidShow' : 'keyboardWillShow',
+      (e) => {
+        setIsKeyboardActive(true);
+        Animated.timing(paddingAnim, {
+          toValue: Platform.OS === 'android' ? e.endCoordinates.height + 30 : 30,
+          duration: 250,
+          easing: Easing.out(Easing.ease), // Native deceleration feel
+          useNativeDriver: false,
+        }).start();
+      }
+    );
+    const hideListener = Keyboard.addListener(
+      Platform.OS === 'android' ? 'keyboardDidHide' : 'keyboardWillHide',
+      () => {
+        setIsKeyboardActive(false);
+        Animated.timing(paddingAnim, {
+          toValue: inputPaddingBottom, // Smoothly animate back to the large navbar padding
+          duration: 200,
+          easing: Easing.out(Easing.ease),
+          useNativeDriver: false,
+        }).start();
+      }
+    );
+
+    return () => { showListener.remove(); hideListener.remove(); };
+  }, [inputPaddingBottom]);
+
+
 
   const getCategoryIcon = (category: string): 'restaurant' | 'directions_car' | 'menu_book' | 'local_mall' | 'movie' | 'category' => {
     switch (category) {
@@ -93,21 +129,30 @@ export const AssistantScreen: React.FC<{ navigation: any }> = ({ navigation }) =
       navigation={navigation}
       title="FINANCE INTELLIGENCE"
     >
-
       {/* Chat Space */}
       <View className="flex-1 px-6 pt-6">
         {/* Proactive Insight banner */}
         <View className="mb-6">
-          <GlassCard className="flex-row items-center gap-4 bg-white/5 border border-emerald-500/20">
-            <View className="w-10 h-10 rounded-full bg-emerald-500/10 items-center justify-center border border-emerald-500/20">
-              <MaterialIcon name="trending_up" color="#34d399" size={18} />
+          <GlassCard 
+            className="border border-emerald-500/20"
+            contentClassName="flex-row items-center gap-4 p-5"
+          >
+            <View className="w-12 h-12 rounded-full bg-emerald-500/10 items-center justify-center border border-emerald-500/30">
+              <MaterialIcon name="trending_down" color="#34d399" size={24} />
             </View>
-            <View>
-              <Text className="font-label-caps text-label-caps text-on-surface-variant uppercase">
+            <View className="flex-1">
+              <Text 
+                style={{ fontFamily: 'Montserrat-Bold', letterSpacing: 0.8, color: "white" }} 
+                className="font-label-caps text-[11px] text-on-surface-variant/80 uppercase font-bold"
+              >
                 Proactive Insight
               </Text>
-              <Text className="font-title-md text-body-sm text-emerald-400 font-semibold mt-0.5">
-                You are 15% under budget this week!
+              <Text 
+                style={{ fontFamily: 'Montserrat-Bold', fontSize: 21, lineHeight: 26 }}
+                className="font-bold mt-1.5"
+              >
+                <Text className="text-emerald-400">You are 15% under budget{"\n"}</Text>
+                <Text className="text-white">this week!</Text>
               </Text>
             </View>
           </GlassCard>
@@ -120,6 +165,7 @@ export const AssistantScreen: React.FC<{ navigation: any }> = ({ navigation }) =
           showsVerticalScrollIndicator={false}
           className="flex-1"
           contentContainerStyle={{ paddingBottom: 24 }}
+          keyboardShouldPersistTaps="handled"
         >
           {messages.map(msg => (
             <View 
@@ -127,19 +173,22 @@ export const AssistantScreen: React.FC<{ navigation: any }> = ({ navigation }) =
               className={`flex-row mb-6 ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}
             >
               {msg.sender === 'ai' && (
-                <View className="w-8 h-8 rounded-full bg-surface-variant items-center justify-center border border-white/10 mr-2 self-end mb-2">
-                  <MaterialIcon name="smart_toy" color="#3B82F6" size={16} />
+                <View className="w-9 h-9 rounded-full bg-surface-variant items-center justify-center border border-white/10 mr-2 self-end mb-2">
+                  <MaterialIcon name="smart_toy" color="#3B82F6" size={18} />
                 </View>
               )}
               
               <View 
-                className={`max-w-[80%] rounded-2xl p-4 border ${
+                className={`max-w-[88%] rounded-2xl p-5 border ${
                   msg.sender === 'user'
                     ? 'bg-primary/10 border-primary/20 rounded-tr-none'
                     : 'bg-white/5 border-white/10 rounded-tl-none'
                 }`}
               >
-                <Text className="font-body-lg text-body-lg text-white">
+                <Text 
+                  style={{ fontFamily: 'Montserrat-Bold', fontSize: 17, lineHeight: 24 }}
+                  className="text-white font-bold"
+                >
                   {msg.text}
                 </Text>
 
@@ -149,11 +198,11 @@ export const AssistantScreen: React.FC<{ navigation: any }> = ({ navigation }) =
                     {msg.transactions.map((tx, idx) => (
                       <View 
                         key={tx.id} 
-                        className={`flex-row items-center justify-between py-2 ${
+                        className={`flex-row items-center justify-between py-2.5 ${
                           idx !== msg.transactions!.length - 1 ? 'border-b border-white/5' : ''
                         }`}
                       >
-                        <View className="flex-row items-center gap-2">
+                        <View className="flex-row items-center gap-3">
                           {(() => {
                             const catConfig = DEFAULT_CATEGORIES.find(c => c.name === tx.category) || { color: '#94a3b8', bgColor: 'rgba(148, 163, 184, 0.1)' };
                             return (
@@ -166,13 +215,13 @@ export const AssistantScreen: React.FC<{ navigation: any }> = ({ navigation }) =
                             );
                           })()}
                           <View>
-                            <Text className="font-body-sm text-[12px] text-white font-medium">{tx.title}</Text>
-                            <Text className="font-label-caps text-[9px] text-on-surface-variant uppercase">
+                            <Text style={{ fontFamily: 'Montserrat-Bold' }} className="font-body-sm text-[15px] text-white font-bold">{tx.title}</Text>
+                            <Text style={{ fontFamily: 'Montserrat-Regular' }} className="font-label-caps text-[12px] text-on-surface-variant uppercase">
                               {tx.date}, {tx.timestamp}
                             </Text>
                           </View>
                         </View>
-                        <Text className="font-body-sm text-[12px] text-white font-bold">
+                        <Text style={{ fontFamily: 'Montserrat-Bold' }} className="font-body-sm text-[15px] text-white font-bold">
                           ₹{tx.amount.toFixed(2)}
                         </Text>
                       </View>
@@ -186,8 +235,8 @@ export const AssistantScreen: React.FC<{ navigation: any }> = ({ navigation }) =
       </View>
 
       {/* Input bar */}
-      <View 
-        style={{ paddingBottom: inputPaddingBottom }}
+      <Animated.View 
+        style={{ paddingBottom: paddingAnim }}
         className="px-6 pt-4 border-t border-white/5 bg-background"
       >
         <View className="flex-row items-center gap-2 h-14 bg-white/5 border border-white/10 rounded-2xl px-4">
@@ -202,8 +251,8 @@ export const AssistantScreen: React.FC<{ navigation: any }> = ({ navigation }) =
           <TouchableOpacity onPress={handleSend} className="w-10 h-10 items-center justify-center">
             <MaterialIcon name="send" color="#3B82F6" size={20} />
           </TouchableOpacity>
-      </View>
-      </View>
+        </View>
+      </Animated.View>
     </GlobalLayout>
   );
 };

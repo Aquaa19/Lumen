@@ -27,7 +27,7 @@ const PRESETS = [
 ];
 
 export const AssistantScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
-  const { transactions, monthlyBudget, userProfile, categories, categoryLimits, addGoal } = useMockStore();
+  const { transactions, monthlyBudget, userProfile, categories, categoryLimits, addGoal, goals } = useMockStore();
   const insets = useSafeAreaInsets();
   const bottomMargin = Math.max(insets.bottom, 12);
   const inputPaddingBottom = bottomMargin + 70 + 12; // 70 navbar height + 12 spacing
@@ -78,11 +78,16 @@ export const AssistantScreen: React.FC<{ navigation: any }> = ({ navigation }) =
   }, [inputPaddingBottom]);
 
   const fetchGeminiResponse = async (userMessage: string, chatHistory: { role: string; text: string }[]) => {
+    if (!GEMINI_API_KEY) {
+      throw new Error("Gemini API key is not configured. Please check your .env file and restart Metro with 'npm start -- --clear-cache'.");
+    }
+
     const systemInstruction = `You are Lumen Assistant, a premium AI personal finance advisor.
 Today's date is 2026-06-14.
 The user's name is ${userProfile.name}.
 Monthly Budget: ₹${monthlyBudget}.
 Categories available: ${categories.map(c => `${c.name} (Budget: ₹${categoryLimits[c.name] || 0})`).join(', ')}.
+Current Active Savings Goals: ${goals && goals.length > 0 ? JSON.stringify(goals, null, 2) : "None"}.
 
 Here are the user's recent transactions:
 ${JSON.stringify(transactions, null, 2)}
@@ -187,9 +192,10 @@ Provide clear, helpful, and concise insights. Format currency in ₹ (INR). Use 
       setMessages(prev => 
         prev.map(m => m.id === tempAiId ? { ...m, text: cleanReply } : m)
       );
-    } catch (err) {
+    } catch (err: any) {
+      const isConfigError = err?.message?.includes("Gemini API key");
       setMessages(prev => 
-        prev.map(m => m.id === tempAiId ? { ...m, text: "Sorry, I encountered an error while trying to connect to my brain. Please try again." } : m)
+        prev.map(m => m.id === tempAiId ? { ...m, text: isConfigError ? err.message : "Sorry, I encountered an error while trying to connect to my brain. Please try again." } : m)
       );
     }
     scrollViewRef.current?.scrollToEnd({ animated: true });

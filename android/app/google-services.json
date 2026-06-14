@@ -22,6 +22,14 @@
           }
         },
         {
+          "client_id": "42123286632-tcr1mrii3ouehauf3j9okuth9ucoq5rd.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.lumen",
+            "certificate_hash": "ee4e30a886cd95318266f0523a03ce6bc50a4792"
+          }
+        },
+        {
           "client_id": "42123286632-60rnun1q7trf18n4nhoo31u9qbne9301.apps.googleusercontent.com",
           "client_type": 3
         }

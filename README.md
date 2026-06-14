@@ -1,97 +1,110 @@
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+# Lumen 💎
 
-# Getting Started
+Lumen is a premium, state-of-the-art personal finance manager built with **React Native** (using Expo-free bare workflow). It features a modern glassmorphism design system, secure multi-user data isolation, and smart AI-assisted budget coaching.
 
-> **Note**: Make sure you have completed the [Set Up Your Environment](https://reactnative.dev/docs/set-up-your-environment) guide before proceeding.
+Lumen separates your finances into **Cash** and **UPI** wallets independently, allowing you to track exactly where your money goes.
 
-## Step 1: Start Metro
+---
 
-First, you will need to run **Metro**, the JavaScript build tool for React Native.
+## Key Features 🚀
 
-To start the Metro dev server, run the following command from the root of your React Native project:
+- **Premium Glassmorphic UI**: Vibrant gradient background orbs, smooth transitions, and frosted-glass card containers (`@react-native-community/blur`).
+- **Independent Wallet Tracking**: Split your balances and ledger views between physical Cash and UPI wallets.
+- **Smart AI Budget Assistant**: Chat with your financial assistant powered by Google Gemini to analyze spending, filter transaction logs, and automatically register savings goals.
+- **Goal Allocations & Spending Limits**: Set saving targets via the AI chat to automatically compute your safe weekly spending limits on the Dashboard.
+- **Custom Categories & Limits**: Dynamically create new expense categories, color-code them, configure monthly caps, and track budget utilization in real-time.
+- **Over-Limit Warnings**: Receive instant warnings if logging a payment will push you past your available wallet balance or monthly category budget.
+- **Unified Firebase Settings**: Fully customizable data synchronization intervals (Real-time, Daily, Weekly, or Manual) with direct manual sync triggers and live status feedback.
+- **Staggered Entrance Splash Screen**: Fluid and modern animations where wallet cards spin clockwise/anticlockwise into position and the Rupee symbol performs a physics-based spring bounce.
 
-```sh
-# Using npm
+---
+
+## Technical Stack 🛠️
+
+- **Core**: React Native (v0.86.0), React (v19.2.3), TypeScript (v5.8.3)
+- **Local Storage**: `react-native-mmkv` for high-performance offline caching
+- **Database & Sync**: `@react-native-firebase/firestore` (Google Cloud)
+- **Authentication**: `@react-native-firebase/auth` with Google Sign-In
+- **AI Brain**: Google Gemini API via Generative Language SDK
+- **Styling**: NativeWind (Tailwind CSS for React Native) & `react-native-linear-gradient`
+
+---
+
+## Firestore Database Security & Isolation 🔒
+
+Lumen enforces strict privacy rules. User accounts and ledger records are fully isolated under:
+`/users/{userId}` and `/users/{userId}/transactions/{transactionId}`
+
+Ensure your Firestore Rules are set as follows to prevent unauthorized cross-user access:
+
+```javascript
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+      match /{allChildren=**} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+    }
+  }
+}
+```
+
+---
+
+## Getting Started ⚙️
+
+### Prerequisites
+- Node.js >= 22.11.0
+- Java Development Kit (JDK) 17 (for Android)
+- Android Studio & Android SDK (configured on system path)
+- Xcode & CocoaPods (for iOS)
+
+### Step 1: Clone and Install Dependencies
+```bash
+npm install
+```
+
+### Step 2: Environment Variables
+Create a `.env` file at the root of the project to securely load the Gemini API key:
+```env
+GEMINI_API_KEY=your_gemini_api_key_here
+```
+
+### Step 3: Run Development Server
+```bash
+# Start Metro bundler
 npm start
 
-# OR using Yarn
-yarn start
-```
-
-## Step 2: Build and run your app
-
-With Metro running, open a new terminal window/pane from the root of your React Native project, and use one of the following commands to build and run your Android or iOS app:
-
-### Android
-
-```sh
-# Using npm
+# Run on Android
 npm run android
 
-# OR using Yarn
-yarn android
-```
-
-### iOS
-
-For iOS, remember to install CocoaPods dependencies (this only needs to be run on first clone or after updating native deps).
-
-The first time you create a new project, run the Ruby bundler to install CocoaPods itself:
-
-```sh
-bundle install
-```
-
-Then, and every time you update your native dependencies, run:
-
-```sh
-bundle exec pod install
-```
-
-For more information, please visit [CocoaPods Getting Started guide](https://guides.cocoapods.org/using/getting-started.html).
-
-```sh
-# Using npm
+# Run on iOS
 npm run ios
-
-# OR using Yarn
-yarn ios
 ```
 
-If everything is set up correctly, you should see your new app running in the Android Emulator, iOS Simulator, or your connected device.
+---
 
-This is one way to run your app — you can also build it directly from Android Studio or Xcode.
+## Creating a Release APK (Android) 📦
 
-## Step 3: Modify your app
+To build a standalone APK that can run independently on other devices (without a running Metro server):
 
-Now that you have successfully run the app, let's make changes!
-
-Open `App.tsx` in your text editor of choice and make some changes. When you save, your app will automatically update and reflect these changes — this is powered by [Fast Refresh](https://reactnative.dev/docs/fast-refresh).
-
-When you want to forcefully reload, for example to reset the state of your app, you can perform a full reload:
-
-- **Android**: Press the <kbd>R</kbd> key twice or select **"Reload"** from the **Dev Menu**, accessed via <kbd>Ctrl</kbd> + <kbd>M</kbd> (Windows/Linux) or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> (macOS).
-- **iOS**: Press <kbd>R</kbd> in iOS Simulator.
-
-## Congratulations! :tada:
-
-You've successfully run and modified your React Native App. :partying_face:
-
-### Now what?
-
-- If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
-- If you're curious to learn more about React Native, check out the [docs](https://reactnative.dev/docs/getting-started).
-
-# Troubleshooting
-
-If you're having issues getting the above steps to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
-
-# Learn More
-
-To learn more about React Native, take a look at the following resources:
-
-- [React Native Website](https://reactnative.dev) - learn more about React Native.
-- [Getting Started](https://reactnative.dev/docs/environment-setup) - an **overview** of React Native and how setup your environment.
-- [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
-- [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
-- [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
+1. **Generate a Signing Keystore**:
+   ```bash
+   keytool -genkey -v -keystore my-release-key.keystore -alias my-key-alias -keyalg RSA -keysize 2048 -validity 10000
+   ```
+2. **Move keystore file**: Move `my-release-key.keystore` inside `android/app/` folder.
+3. **Configure Gradle properties**: Open `android/gradle.properties` and replace variables:
+   ```properties
+   MYAPP_UPLOAD_STORE_FILE=my-release-key.keystore
+   MYAPP_UPLOAD_KEY_ALIAS=my-key-alias
+   MYAPP_UPLOAD_STORE_PASSWORD=your_keystore_password
+   MYAPP_UPLOAD_KEY_PASSWORD=your_key_password
+   ```
+4. **Build APK**:
+   ```bash
+   cd android
+   ./gradlew assembleRelease
+   ```
+   *The built APK will be saved at `android/app/build/outputs/apk/release/app-release.apk`.*

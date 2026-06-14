@@ -149,10 +149,10 @@ export const SplashScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
           
           <Animated.View style={{ opacity: textOpacity }}>
             <Text 
-              style={{ fontFamily: 'Montserrat-Bold' }} 
+              style={{ fontFamily: 'Montserrat-Bold' , fontSize:23}} 
               className="mt-8 font-display-lg text-display-lg text-primary tracking-tight text-center"
             >
-              STUDENTSPEND
+              Lumen
             </Text>
           </Animated.View>
         </View>

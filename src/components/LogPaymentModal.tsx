@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, Modal, TouchableOpacity, StyleSheet, Animated, TextInput, Alert, Vibration } from 'react-native';
+import { View, Text, Modal, TouchableOpacity, StyleSheet, Animated, TextInput, Alert, Vibration, ScrollView } from 'react-native';
 import { BlurView } from '@react-native-community/blur';
 import { useMockStore } from '../store/mockStore';
 import { DEFAULT_CATEGORIES } from '../utils/constants';
@@ -11,7 +11,7 @@ interface LogPaymentModalProps {
 }
 
 export const LogPaymentModal: React.FC<LogPaymentModalProps> = ({ visible, onClose }) => {
-  const { addTransaction, cashBalance, upiBalance, showToast } = useMockStore();
+  const { addTransaction, cashBalance, upiBalance, showToast, categories } = useMockStore();
   const [amount, setAmount] = useState('0');
   const [source, setSource] = useState<'cash' | 'upi'>('cash');
   const [selectedCategory, setSelectedCategory] = useState('Others');
@@ -209,44 +209,41 @@ export const LogPaymentModal: React.FC<LogPaymentModalProps> = ({ visible, onClo
           </View>
 
           {/* Category Grid */}
-          <View className="flex-row flex-wrap justify-between gap-y-4">
-            {DEFAULT_CATEGORIES.map(cat => (
-              <TouchableOpacity
-                key={cat.name}
-                onPress={() => setSelectedCategory(cat.name)}
-                className="w-[30%] items-center gap-1"
-              >
-                <View 
-                  style={{ 
-                    backgroundColor: selectedCategory === cat.name ? cat.bgColor : 'rgba(255,255,255,0.03)',
-                    borderColor: selectedCategory === cat.name ? cat.color : 'rgba(255,255,255,0.1)'
-                  }}
-                  className="w-14 h-14 rounded-full border items-center justify-center"
-                >
-                  <MaterialIcon 
-                    name={
-                      cat.name === 'Food' ? 'restaurant' :
-                      cat.name === 'Travel' ? 'directions_car' :
-                      cat.name === 'Stationery' ? 'menu_book' :
-                      cat.name === 'Shopping' ? 'local_mall' :
-                      cat.name === 'Entertainment' ? 'movie' :
-                      'category'
-                    }
-                    size={24}
-                    color={selectedCategory === cat.name ? cat.color : cat.color + '80'}
-                  />
-                </View>
-                <Text 
-                  style={{ 
-                    fontFamily: 'Montserrat-Bold',
-                    color: selectedCategory === cat.name ? cat.color : '#c2c6d6'
-                  }}
-                  className="font-label-caps text-[10px]"
-                >
-                  {cat.name}
-                </Text>
-              </TouchableOpacity>
-            ))}
+          <View style={{ maxHeight: 135 }}>
+            <ScrollView nestedScrollEnabled={true} showsVerticalScrollIndicator={false}>
+              <View className="flex-row flex-wrap justify-between gap-y-4 pb-1 pr-1">
+                {categories.map(cat => (
+                  <TouchableOpacity
+                    key={cat.name}
+                    onPress={() => setSelectedCategory(cat.name)}
+                    className="w-[30%] items-center gap-1"
+                  >
+                    <View 
+                      style={{ 
+                        backgroundColor: selectedCategory === cat.name ? cat.bgColor : 'rgba(255,255,255,0.03)',
+                        borderColor: selectedCategory === cat.name ? cat.color : 'rgba(255,255,255,0.1)'
+                      }}
+                      className="w-14 h-14 rounded-full border items-center justify-center"
+                    >
+                      <MaterialIcon 
+                        name={cat.icon as any}
+                        size={24}
+                        color={selectedCategory === cat.name ? cat.color : cat.color + '80'}
+                      />
+                    </View>
+                    <Text 
+                      style={{ 
+                        fontFamily: 'Montserrat-Bold',
+                        color: selectedCategory === cat.name ? cat.color : '#c2c6d6'
+                      }}
+                      className="font-label-caps text-[10px]"
+                    >
+                      {cat.name}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </ScrollView>
           </View>
 
           {/* Inputs Section */}

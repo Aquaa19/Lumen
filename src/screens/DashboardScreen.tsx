@@ -15,7 +15,7 @@ import { DEFAULT_CATEGORIES } from '../utils/constants';
 const TABS = ['total', 'cash', 'upi'] as const;
 
 export const DashboardScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
-  const { cashBalance, upiBalance, transactions, categoryLimits, pinnedCategories } = useMockStore();
+  const { cashBalance, upiBalance, transactions, categoryLimits, pinnedCategories, categories } = useMockStore();
   const [activeTab, setActiveTab] = useState<'total' | 'cash' | 'upi'>('total');
   const insets = useSafeAreaInsets();
   const bottomMargin = Math.max(insets.bottom, 12);
@@ -138,16 +138,7 @@ export const DashboardScreen: React.FC<{ navigation: any }> = ({ navigation }) =
     return Math.min(100, Math.max(0, (spent / limit) * 100));
   };
 
-  const getCategoryIcon = (category: string): 'restaurant' | 'directions_car' | 'menu_book' | 'local_mall' | 'movie' | 'category' => {
-    switch (category) {
-      case 'Food': return 'restaurant';
-      case 'Travel': return 'directions_car';
-      case 'Stationery': return 'menu_book';
-      case 'Shopping': return 'local_mall';
-      case 'Entertainment': return 'movie';
-      default: return 'category';
-    }
-  };
+
 
   return (
     <GlobalLayout
@@ -282,7 +273,7 @@ export const DashboardScreen: React.FC<{ navigation: any }> = ({ navigation }) =
                 const progress = getProgress(spent, limit);
                 
                 // Get matching category properties (color, icon)
-                const catInfo = DEFAULT_CATEGORIES.find(c => c.name === catName) ?? {
+                const catInfo = categories.find(c => c.name === catName) ?? {
                   icon: 'category',
                   color: '#94a3b8'
                 };
@@ -344,13 +335,13 @@ export const DashboardScreen: React.FC<{ navigation: any }> = ({ navigation }) =
               >
                 <View className="flex-row items-center gap-3.5">
                   {(() => {
-                    const catConfig = DEFAULT_CATEGORIES.find(c => c.name === tx.category) || { color: '#94a3b8', bgColor: 'rgba(148, 163, 184, 0.1)' };
+                    const catConfig = categories.find(c => c.name === tx.category) || { color: '#94a3b8', bgColor: 'rgba(148, 163, 184, 0.1)', icon: 'category' };
                     return (
                       <View 
                         style={{ backgroundColor: catConfig.bgColor, borderColor: catConfig.color + '33' }}
                         className="w-11 h-11 rounded-full border items-center justify-center shadow-md"
                       >
-                        <MaterialIcon name={getCategoryIcon(tx.category)} size={20} color={catConfig.color} />
+                        <MaterialIcon name={catConfig.icon as any} size={20} color={catConfig.color} />
                       </View>
                     );
                   })()}

@@ -17,6 +17,14 @@ export interface UserProfile {
   biometricLock: boolean;
 }
 
+export interface Category {
+  name: string;
+  icon: string;
+  color: string;
+  bgColor: string;
+  isCustom?: boolean;
+}
+
 export interface MockStoreState {
   isLoggedIn: boolean;
   hasCompletedSetup: boolean;

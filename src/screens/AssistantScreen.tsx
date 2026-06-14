@@ -15,7 +15,7 @@ interface Message {
 }
 
 export const AssistantScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
-  const { transactions, monthlyBudget, userProfile } = useMockStore();
+  const { transactions, monthlyBudget, userProfile, categories } = useMockStore();
   const insets = useSafeAreaInsets();
   const bottomMargin = Math.max(insets.bottom, 12);
   const inputPaddingBottom = bottomMargin + 70 + 12; // 70 navbar height + 12 spacing
@@ -69,16 +69,7 @@ export const AssistantScreen: React.FC<{ navigation: any }> = ({ navigation }) =
 
 
 
-  const getCategoryIcon = (category: string): 'restaurant' | 'directions_car' | 'menu_book' | 'local_mall' | 'movie' | 'category' => {
-    switch (category) {
-      case 'Food': return 'restaurant';
-      case 'Travel': return 'directions_car';
-      case 'Stationery': return 'menu_book';
-      case 'Shopping': return 'local_mall';
-      case 'Entertainment': return 'movie';
-      default: return 'category';
-    }
-  };
+
 
   const handleSend = () => {
     if (!inputText.trim()) return;
@@ -98,7 +89,7 @@ export const AssistantScreen: React.FC<{ navigation: any }> = ({ navigation }) =
       let replyText = '';
       let filteredTxs: any[] | undefined = undefined;
 
-      const matchedCategory = DEFAULT_CATEGORIES.find(c => query.includes(c.name.toLowerCase()));
+      const matchedCategory = categories.find(c => query.includes(c.name.toLowerCase()));
       if (matchedCategory) {
         filteredTxs = transactions.filter(t => t.category === matchedCategory.name && t.type === 'expense');
         const spent = filteredTxs.reduce((sum, t) => sum + (t.amount ?? 0), 0);
@@ -265,13 +256,13 @@ export const AssistantScreen: React.FC<{ navigation: any }> = ({ navigation }) =
                       >
                         <View className="flex-row items-center gap-3">
                           {(() => {
-                            const catConfig = DEFAULT_CATEGORIES.find(c => c.name === tx.category) || { color: '#94a3b8', bgColor: 'rgba(148, 163, 184, 0.1)' };
+                            const catConfig = categories.find(c => c.name === tx.category) || { color: '#94a3b8', bgColor: 'rgba(148, 163, 184, 0.1)', icon: 'category' };
                             return (
                               <View 
                                 style={{ backgroundColor: catConfig.bgColor, borderColor: catConfig.color + '33' }}
                                 className="w-8 h-8 rounded-full border items-center justify-center"
                               >
-                                <MaterialIcon name={getCategoryIcon(tx.category)} size={16} color={catConfig.color} />
+                                <MaterialIcon name={catConfig.icon as any} size={16} color={catConfig.color} />
                               </View>
                             );
                           })()}

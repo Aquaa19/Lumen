@@ -11,7 +11,7 @@ import GlowOrb from '../components/GlowOrb';
 import LinearGradient from 'react-native-linear-gradient';
 
 export const StatisticsScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
-  const { transactions, monthlyBudget } = useMockStore();
+  const { transactions, monthlyBudget, categories } = useMockStore();
   const insets = useSafeAreaInsets();
   // Matches the exact bottom placement of your GlobalBottomNavbar
   const navbarBottomMargin = Math.max(insets.bottom, 12); 
@@ -83,7 +83,7 @@ export const StatisticsScreen: React.FC<{ navigation: any }> = ({ navigation }) 
   const path = getDynamicPath();
 
   // Compute category breakdown metrics
-  const categoryStats = DEFAULT_CATEGORIES.map(cat => {
+  const categoryStats = categories.map(cat => {
     const catTxs = transactions.filter(t => t.category === cat.name);
     const amount = catTxs.reduce((sum, t) => sum + t.amount, 0);
     const count = catTxs.length;
@@ -96,16 +96,7 @@ export const StatisticsScreen: React.FC<{ navigation: any }> = ({ navigation }) 
     };
   });
 
-  const getCategoryIcon = (category: string): 'restaurant' | 'directions_car' | 'menu_book' | 'local_mall' | 'movie' | 'category' => {
-    switch (category) {
-      case 'Food': return 'restaurant';
-      case 'Travel': return 'directions_car';
-      case 'Stationery': return 'menu_book';
-      case 'Shopping': return 'local_mall';
-      case 'Entertainment': return 'movie';
-      default: return 'category';
-    }
-  };
+
 
   return (
     <GlobalLayout
@@ -275,7 +266,7 @@ export const StatisticsScreen: React.FC<{ navigation: any }> = ({ navigation }) 
                     style={{ backgroundColor: stat.bgColor || 'rgba(0,0,0,0.3)', borderColor: stat.color ? stat.color + '33' : 'rgba(255,255,255,0.1)' }}
                     className="w-12 h-12 rounded-full border items-center justify-center"
                   >
-                    <MaterialIcon name={getCategoryIcon(stat.name)} size={22} color={stat.color || '#adc6ff'} />
+                    <MaterialIcon name={stat.icon as any} size={22} color={stat.color || '#adc6ff'} />
                   </View>
                   
                   {/* Text Block */}

@@ -9,7 +9,7 @@ import { DEFAULT_CATEGORIES } from '../utils/constants';
 
 export const TransactionDetailScreen: React.FC<{ route: any; navigation: any }> = ({ route, navigation }) => {
   const { transactionId } = route.params;
-  const { transactions, refundTransaction } = useMockStore();
+  const { transactions, refundTransaction, categories } = useMockStore();
 
   const tx = transactions.find(t => t.id === transactionId);
 
@@ -31,16 +31,7 @@ export const TransactionDetailScreen: React.FC<{ route: any; navigation: any }> 
     ]);
   };
 
-  const getCategoryIcon = (category: string): 'restaurant' | 'directions_car' | 'menu_book' | 'local_mall' | 'movie' | 'category' => {
-    switch (category) {
-      case 'Food': return 'restaurant';
-      case 'Travel': return 'directions_car';
-      case 'Stationery': return 'menu_book';
-      case 'Shopping': return 'local_mall';
-      case 'Entertainment': return 'movie';
-      default: return 'category';
-    }
-  };
+
 
   return (
     <GlobalLayout
@@ -62,7 +53,7 @@ export const TransactionDetailScreen: React.FC<{ route: any; navigation: any }> 
             />
             {/* Icon Container */}
             {(() => {
-              const catConfig = DEFAULT_CATEGORIES.find(c => c.name === tx.category) || { color: '#94a3b8', bgColor: 'rgba(148, 163, 184, 0.1)' };
+              const catConfig = categories.find(c => c.name === tx.category) || { color: '#94a3b8', bgColor: 'rgba(148, 163, 184, 0.1)', icon: 'category' };
               return (
                 <View 
                   style={{ 
@@ -77,7 +68,7 @@ export const TransactionDetailScreen: React.FC<{ route: any; navigation: any }> 
                   }}
                   className="border mb-4 shadow-lg"
                 >
-                  <MaterialIcon name={getCategoryIcon(tx.category)} size={36} color={catConfig.color} />
+                  <MaterialIcon name={catConfig.icon as any} size={36} color={catConfig.color} />
                 </View>
               );
             })()}

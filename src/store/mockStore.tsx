@@ -4,8 +4,8 @@ import { createMMKV } from 'react-native-mmkv';
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
-import { Transaction, UserProfile } from '../types';
-import { INITIAL_TRANSACTIONS } from '../utils/constants';
+import { Transaction, UserProfile, Category } from '../types';
+import { INITIAL_TRANSACTIONS, DEFAULT_CATEGORIES } from '../utils/constants';
 import { formatTo24h, formatDateToShort } from '../utils/timeFormatter';
 import googleServices from '../../android/app/google-services.json';
 
@@ -22,6 +22,7 @@ interface MockStoreContextProps {
   transactions: Transaction[];
   categoryLimits: Record<string, number>;
   pinnedCategories: string[];
+  categories: Category[];
   login: () => void;
   logout: () => void;
   completeSetup: (cashOnHand: number, upiOnHand: number, monthlyBudget: number, pin: string | null, biometricLock: boolean) => void;
@@ -34,6 +35,9 @@ interface MockStoreContextProps {
   addFunds: (amount: number, source: 'cash' | 'upi') => void;
   updateCategoryLimit: (category: string, limit: number) => void;
   togglePinCategory: (category: string) => void;
+  addCustomCategory: (name: string, icon: string, color: string) => void;
+  editCategory: (oldName: string, newName: string, icon: string, color: string) => void;
+  deleteCategory: (name: string) => void;
   toastMessage: string | null;
   showToast: (msg: string) => void;
 }
@@ -100,6 +104,16 @@ export const MockStoreProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     return ['Food', 'Travel', 'Stationery'];
   });
 
+  const [categories, setCategories] = useState<Category[]>(() => {
+    const saved = storage.getString('categories');
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch {}
+    }
+    return DEFAULT_CATEGORIES;
+  });
+
   // Configure Google Sign-In
   useEffect(() => {
     try {
@@ -139,6 +153,7 @@ export const MockStoreProvider: React.FC<{ children: React.ReactNode }> = ({ chi
               if (data.userProfile !== undefined) setUserProfile(data.userProfile);
               if (data.categoryLimits !== undefined) setCategoryLimits(data.categoryLimits);
               if (data.pinnedCategories !== undefined) setPinnedCategories(data.pinnedCategories);
+              if (data.categories !== undefined) setCategories(data.categories);
             }
           }
         } catch (err) {
@@ -173,6 +188,7 @@ export const MockStoreProvider: React.FC<{ children: React.ReactNode }> = ({ chi
             if (data.userProfile !== undefined) setUserProfile(data.userProfile);
             if (data.categoryLimits !== undefined) setCategoryLimits(data.categoryLimits);
             if (data.pinnedCategories !== undefined) setPinnedCategories(data.pinnedCategories);
+            if (data.categories !== undefined) setCategories(data.categories);
           }
         }
       }, err => console.log('Firestore user snapshot error:', err));
@@ -246,17 +262,21 @@ export const MockStoreProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     storage.set('pinnedCategories', JSON.stringify(pinnedCategories));
   }, [pinnedCategories]);
 
-  // Sync category limits & pins up to Firestore
+  useEffect(() => {
+    storage.set('categories', JSON.stringify(categories));
+  }, [categories]);
+
+  // Sync category limits, pins & categories up to Firestore
   useEffect(() => {
     const user = auth().currentUser;
     if (user && hasCompletedSetup) {
       firestore()
         .collection('users')
         .doc(user.uid)
-        .update({ categoryLimits, pinnedCategories })
+        .update({ categoryLimits, pinnedCategories, categories })
         .catch(err => console.log('Firestore category settings sync failed:', err));
     }
-  }, [categoryLimits, pinnedCategories, hasCompletedSetup]);
+  }, [categoryLimits, pinnedCategories, categories, hasCompletedSetup]);
 
   // Sync monthly budget changes up to Firestore
   useEffect(() => {
@@ -320,6 +340,7 @@ export const MockStoreProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       Others: 0
     });
     setPinnedCategories(['Food', 'Travel', 'Stationery']);
+    setCategories(DEFAULT_CATEGORIES);
     storage.clearAll();
   };
 
@@ -344,7 +365,8 @@ export const MockStoreProvider: React.FC<{ children: React.ReactNode }> = ({ chi
           userProfile: updatedProfile,
           hasCompletedSetup: true,
           categoryLimits,
-          pinnedCategories
+          pinnedCategories,
+          categories
         });
       } catch (err) {
         console.log('Error writing setup to Firestore:', err);
@@ -529,6 +551,94 @@ export const MockStoreProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     }
   };
 
+  const addCustomCategory = (name: string, icon: string, color: string) => {
+    let bgColor = 'rgba(148, 163, 184, 0.1)';
+    if (color.startsWith('#')) {
+      const hex = color.replace('#', '');
+      const r = parseInt(hex.substring(0, 2), 16);
+      const g = parseInt(hex.substring(2, 4), 16);
+      const b = parseInt(hex.substring(4, 6), 16);
+      bgColor = `rgba(${r}, ${g}, ${b}, 0.1)`;
+    }
+
+    const newCat: Category = { name, icon, color, bgColor, isCustom: true };
+    setCategories(prev => [...prev, newCat]);
+    setCategoryLimits(prev => ({
+      ...prev,
+      [name]: 0
+    }));
+  };
+
+  const editCategory = (oldName: string, newName: string, icon: string, color: string) => {
+    let bgColor = 'rgba(148, 163, 184, 0.1)';
+    if (color.startsWith('#')) {
+      const hex = color.replace('#', '');
+      const r = parseInt(hex.substring(0, 2), 16);
+      const g = parseInt(hex.substring(2, 4), 16);
+      const b = parseInt(hex.substring(4, 6), 16);
+      bgColor = `rgba(${r}, ${g}, ${b}, 0.1)`;
+    }
+
+    setCategories(prev => prev.map(c => c.name === oldName ? { ...c, name: newName, icon, color, bgColor } : c));
+
+    setCategoryLimits(prev => {
+      const copy = { ...prev };
+      if (oldName !== newName) {
+        copy[newName] = copy[oldName] ?? 0;
+        delete copy[oldName];
+      }
+      return copy;
+    });
+
+    setPinnedCategories(prev => prev.map(c => c === oldName ? newName : c));
+
+    setTransactions(prev => prev.map(t => {
+      if (t.category === oldName) {
+        const updatedTx = { ...t, category: newName };
+        const user = auth().currentUser;
+        if (user) {
+          firestore()
+            .collection('users')
+            .doc(user.uid)
+            .collection('transactions')
+            .doc(t.id)
+            .update({ category: newName })
+            .catch(err => console.log('Firestore transaction rename sync failed:', err));
+        }
+        return updatedTx;
+      }
+      return t;
+    }));
+  };
+
+  const deleteCategory = (name: string) => {
+    setCategories(prev => prev.filter(c => c.name !== name));
+    setCategoryLimits(prev => {
+      const copy = { ...prev };
+      delete copy[name];
+      return copy;
+    });
+    setPinnedCategories(prev => prev.filter(c => c !== name));
+
+    setTransactions(prev => prev.map(t => {
+      if (t.category === name) {
+        const updatedTx = { ...t, category: 'Others' };
+        const user = auth().currentUser;
+        if (user) {
+          firestore()
+            .collection('users')
+            .doc(user.uid)
+            .collection('transactions')
+            .doc(t.id)
+            .update({ category: 'Others' })
+            .catch(err => console.log('Firestore transaction delete sync failed:', err));
+        }
+        return updatedTx;
+      }
+      return t;
+    }));
+  };
+
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const showToast = (msg: string) => {
@@ -561,8 +671,12 @@ export const MockStoreProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         addFunds,
         categoryLimits,
         pinnedCategories,
+        categories,
         updateCategoryLimit,
         togglePinCategory,
+        addCustomCategory,
+        editCategory,
+        deleteCategory,
         toastMessage,
         showToast
       }}

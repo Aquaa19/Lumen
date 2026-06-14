@@ -11,9 +11,10 @@ import MaterialIcon from './MaterialIcon';
 interface GlobalLayoutProps {
   children: React.ReactNode;
   navigation: any;
-  activeTab: 'dashboard' | 'statistics' | 'assistant' | 'settings' | 'none';
+  activeTab: 'dashboard' | 'statistics' | 'payments' | 'wallet' | 'settings' | 'none';
   title?: string;
   showBack?: boolean;
+  hideAssistant?: boolean;
 }
 
 export const GlobalLayout: React.FC<GlobalLayoutProps> = ({
@@ -22,6 +23,7 @@ export const GlobalLayout: React.FC<GlobalLayoutProps> = ({
   activeTab,
   title,
   showBack = false,
+  hideAssistant = false,
 }) => {
   const { toastMessage } = useMockStore();
   const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -91,6 +93,7 @@ export const GlobalLayout: React.FC<GlobalLayoutProps> = ({
             showBack={showBack}
             navigation={navigation}
             activeTab={activeTab}
+            hideAssistant={hideAssistant}
           />
 
           {/* Toast Notification */}

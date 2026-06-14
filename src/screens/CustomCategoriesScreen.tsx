@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, ScrollView, TextInput, TouchableOpacity, Modal, StyleSheet } from 'react-native';
 import { BlurView } from '@react-native-community/blur';
 import { useMockStore } from '../store/mockStore';
@@ -19,6 +19,13 @@ export const CustomCategoriesScreen: React.FC<{ navigation: any }> = ({ navigati
     editCategory,
     deleteCategory
   } = useMockStore();
+
+  // Local limits state to decouple active typing from global Firestore sync
+  const [localLimits, setLocalLimits] = useState(() => categoryLimits);
+
+  useEffect(() => {
+    setLocalLimits(categoryLimits);
+  }, [categoryLimits]);
 
   // Modal States
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -43,7 +50,10 @@ export const CustomCategoriesScreen: React.FC<{ navigation: any }> = ({ navigati
 
   const handleLimitChange = (catName: string, text: string) => {
     const numericValue = parseInt(text.replace(/[^0-9]/g, ''), 10) || 0;
-    updateCategoryLimit(catName, numericValue);
+    setLocalLimits(prev => ({
+      ...prev,
+      [catName]: numericValue
+    }));
   };
 
   const handleOpenCreateModal = () => {
@@ -144,7 +154,7 @@ export const CustomCategoriesScreen: React.FC<{ navigation: any }> = ({ navigati
 
           <View className="gap-4">
             {categories.map(cat => {
-              const currentLimit = categoryLimits[cat.name] ?? 0;
+              const currentLimit = localLimits[cat.name] ?? 0;
               const isPinned = pinnedCategories.includes(cat.name);
 
               return (
@@ -181,15 +191,23 @@ export const CustomCategoriesScreen: React.FC<{ navigation: any }> = ({ navigati
                   <View className="flex-row items-center gap-3">
                     {/* Limit Input */}
                     <View className="flex-row items-center bg-white/[0.04] border border-white/10 rounded-xl px-3 h-11 w-28">
-                      <Text style={{ fontFamily: 'Montserrat-Bold', color: 'rgba(255, 255, 255, 0.4)' }} className="text-sm mr-1">₹</Text>
+                      <Text style={{ fontFamily: 'Montserrat-Bold', color: 'rgba(255, 255, 255, 0.4)', fontSize: 14 }} className="mr-1">₹</Text>
                       <TextInput
                         keyboardType="numeric"
                         value={currentLimit === 0 ? '' : currentLimit.toString()}
                         onChangeText={(t) => handleLimitChange(cat.name, t)}
+                        onBlur={() => updateCategoryLimit(cat.name, currentLimit)}
                         placeholder="0"
                         placeholderTextColor="rgba(255, 255, 255, 0.2)"
-                        className="text-white font-bold p-0 flex-1 text-right text-sm"
-                        style={{ fontFamily: 'Montserrat-Bold' }}
+                        style={{
+                          fontFamily: 'Montserrat-Bold',
+                          color: '#FFFFFF',
+                          fontWeight: 'bold',
+                          padding: 0,
+                          flex: 1,
+                          textAlign: 'right',
+                          fontSize: 14,
+                        }}
                       />
                     </View>
 
@@ -245,8 +263,19 @@ export const CustomCategoriesScreen: React.FC<{ navigation: any }> = ({ navigati
                 placeholderTextColor="rgba(255, 255, 255, 0.3)"
                 value={categoryNameInput}
                 onChangeText={setCategoryNameInput}
-                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white font-bold text-sm"
-                style={{ fontFamily: 'Montserrat-Bold' }}
+                style={{
+                  fontFamily: 'Montserrat-Bold',
+                  width: '100%',
+                  backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                  borderWidth: 1,
+                  borderColor: 'rgba(255, 255, 255, 0.1)',
+                  borderRadius: 12,
+                  paddingHorizontal: 16,
+                  paddingVertical: 12,
+                  color: 'white',
+                  fontWeight: 'bold',
+                  fontSize: 14,
+                }}
               />
               {errorMessage && (
                 <Text style={{ fontFamily: 'Montserrat-Regular' }} className="text-red-400 text-xs mt-1.5 font-semibold uppercase">{errorMessage}</Text>

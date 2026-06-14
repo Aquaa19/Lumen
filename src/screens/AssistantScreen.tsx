@@ -130,7 +130,9 @@ export const AssistantScreen: React.FC<{ navigation: any }> = ({ navigation }) =
 
   return (
     <GlobalLayout
-      activeTab="assistant"
+      activeTab="none"
+      showBack={true}
+      hideAssistant={true}
       navigation={navigation}
       title="FINANCE INTELLIGENCE"
     >

@@ -9,9 +9,15 @@ import FingerprintIcon from '../public/assets/icons/FingerprintIcon';
 import TrashIcon from '../public/assets/icons/TrashIcon';
 
 export const SettingsScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
-  const { userProfile, logout, setBiometricLock, purgeData } = useMockStore();
+  const { userProfile, logout, setBiometricLock, purgeData, setPinCode, setMonthlyBudget, pinCode, monthlyBudget } = useMockStore();
   const [showPurgeModal, setShowPurgeModal] = useState(false);
   const [purgeText, setPurgeText] = useState('');
+
+  const [showPinModal, setShowPinModal] = useState(false);
+  const [newPin, setNewPin] = useState('');
+
+  const [showBudgetModal, setShowBudgetModal] = useState(false);
+  const [newBudget, setNewBudget] = useState('');
 
   const handleExportCSV = () => {
     Alert.alert('Success', 'Transaction records exported as CSV successfully!');
@@ -28,6 +34,27 @@ export const SettingsScreen: React.FC<{ navigation: any }> = ({ navigation }) =>
   const handleSignOut = () => {
     logout();
     navigation.getParent()?.replace('Login');
+  };
+
+  const handleSavePin = () => {
+    if (newPin.length !== 4 || isNaN(parseInt(newPin, 10))) {
+      Alert.alert('Error', 'PIN must be exactly 4 digits.');
+      return;
+    }
+    setPinCode(newPin);
+    setShowPinModal(false);
+    Alert.alert('Success', 'PIN code updated successfully!');
+  };
+
+  const handleSaveBudget = () => {
+    const budgetVal = parseFloat(newBudget);
+    if (isNaN(budgetVal) || budgetVal < 0) {
+      Alert.alert('Error', 'Please enter a valid budget amount.');
+      return;
+    }
+    setMonthlyBudget(budgetVal);
+    setShowBudgetModal(false);
+    Alert.alert('Success', 'Monthly budget updated successfully!');
   };
 
   const handlePurgeDataPress = () => {
@@ -61,12 +88,12 @@ export const SettingsScreen: React.FC<{ navigation: any }> = ({ navigation }) =>
       navigation={navigation}
       title="Lumen"
     >
-
-      <ScrollView 
-        className="flex-1 mt-6 px-6" 
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: 90 }}
-      >
+      <View className="flex-1 relative">
+        <ScrollView 
+          className="flex-1 mt-6 px-6" 
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ paddingBottom: 130 }}
+        >
         {/* Profile Header */}
         <View className="items-center py-6">
           <LinearGradient
@@ -170,6 +197,36 @@ export const SettingsScreen: React.FC<{ navigation: any }> = ({ navigation }) =>
             </GlassCard>
           </TouchableOpacity>
 
+          {/* Change PIN Code */}
+          <TouchableOpacity onPress={() => { setNewPin(''); setShowPinModal(true); }} activeOpacity={0.9}>
+            <GlassCard contentClassName="flex-row items-center justify-between p-4">
+              <View className="flex-row items-center gap-3">
+                <View className="w-12 h-12 rounded-2xl bg-white/[0.06] items-center justify-center border border-white/5">
+                  <MaterialIcon name="lock" color="white" size={22} />
+                </View>
+                <Text style={{ fontFamily: 'Montserrat-Bold', fontSize: 20, color: 'white', fontWeight: 'bold' }}>
+                  Change PIN Code
+                </Text>
+              </View>
+              <MaterialIcon name="chevron_right" color="#8c909f" size={24} />
+            </GlassCard>
+          </TouchableOpacity>
+
+          {/* Change Monthly Budget */}
+          <TouchableOpacity onPress={() => { setNewBudget(monthlyBudget > 0 ? monthlyBudget.toString() : ''); setShowBudgetModal(true); }} activeOpacity={0.9}>
+            <GlassCard contentClassName="flex-row items-center justify-between p-4">
+              <View className="flex-row items-center gap-3">
+                <View className="w-12 h-12 rounded-2xl bg-white/[0.06] items-center justify-center border border-white/5">
+                  <MaterialIcon name="payments" color="white" size={22} />
+                </View>
+                <Text style={{ fontFamily: 'Montserrat-Bold', fontSize: 20, color: 'white', fontWeight: 'bold' }}>
+                  Change Monthly Budget
+                </Text>
+              </View>
+              <MaterialIcon name="chevron_right" color="#8c909f" size={24} />
+            </GlassCard>
+          </TouchableOpacity>
+
           {/* Sync with Firebase */}
           <TouchableOpacity onPress={handleFirebaseSync} activeOpacity={0.9}>
             <GlassCard contentClassName="flex-row items-center justify-between p-4">
@@ -201,6 +258,18 @@ export const SettingsScreen: React.FC<{ navigation: any }> = ({ navigation }) =>
           </TouchableOpacity>
         </View>
       </ScrollView>
+      <LinearGradient
+        colors={['rgba(0, 0, 0, 0)', 'rgba(0, 0, 0, 1)']} // True Pitch Black
+        style={{
+          position: 'absolute',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          height: 140,
+        }}
+        pointerEvents="none"
+      />
+      </View>
 
       {/* Verification Modal for Purge Confirmation */}
       <Modal
@@ -262,6 +331,140 @@ export const SettingsScreen: React.FC<{ navigation: any }> = ({ navigation }) =>
               >
                 <Text style={{ fontFamily: 'Montserrat-Bold', color: 'white', fontWeight: 'bold' }}>
                   Purge
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </GlassCard>
+        </View>
+      </Modal>
+
+      {/* Change PIN Modal */}
+      <Modal
+        visible={showPinModal}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setShowPinModal(false)}
+      >
+        <View className="flex-1 justify-center items-center px-6" style={{ backgroundColor: 'rgba(0, 0, 0, 0.75)' }}>
+          <GlassCard className="w-full max-w-sm p-6 border border-white/10">
+            <Text 
+              style={{ fontFamily: 'Montserrat-Bold', fontSize: 22, color: 'white', marginBottom: 12, textAlign: 'center', fontWeight: 'bold' }}
+            >
+              Change PIN Code
+            </Text>
+            <Text 
+              style={{ fontFamily: 'Montserrat-Regular', fontSize: 14, color: '#c2c6d6', marginBottom: 20, textAlign: 'center', lineHeight: 20 }}
+            >
+              Enter a new 4-digit security PIN fallback code.
+            </Text>
+            
+            <TextInput
+              value={newPin}
+              onChangeText={setNewPin}
+              placeholder="Enter 4-digit PIN"
+              placeholderTextColor="rgba(255, 255, 255, 0.3)"
+              keyboardType="numeric"
+              maxLength={4}
+              secureTextEntry={true}
+              style={{
+                backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                borderWidth: 1,
+                borderColor: 'rgba(255, 255, 255, 0.1)',
+                borderRadius: 12,
+                color: 'white',
+                fontFamily: 'Montserrat-Bold',
+                fontSize: 16,
+                paddingHorizontal: 16,
+                paddingVertical: 12,
+                textAlign: 'center',
+                marginBottom: 20,
+              }}
+            />
+
+            <View className="flex-row gap-3">
+              <TouchableOpacity
+                onPress={() => setShowPinModal(false)}
+                className="flex-1 py-3 rounded-xl bg-white/5 border border-white/10 items-center"
+              >
+                <Text style={{ fontFamily: 'Montserrat-Bold', color: '#c2c6d6', fontWeight: 'bold' }}>
+                  Cancel
+                </Text>
+              </TouchableOpacity>
+              
+              <TouchableOpacity
+                disabled={newPin.length !== 4}
+                onPress={handleSavePin}
+                style={{ opacity: newPin.length === 4 ? 1 : 0.5 }}
+                className="flex-1 py-3 rounded-xl bg-primary items-center"
+              >
+                <Text style={{ fontFamily: 'Montserrat-Bold', color: 'white', fontWeight: 'bold' }}>
+                  Save
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </GlassCard>
+        </View>
+      </Modal>
+
+      {/* Change Monthly Budget Modal */}
+      <Modal
+        visible={showBudgetModal}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setShowBudgetModal(false)}
+      >
+        <View className="flex-1 justify-center items-center px-6" style={{ backgroundColor: 'rgba(0, 0, 0, 0.75)' }}>
+          <GlassCard className="w-full max-w-sm p-6 border border-white/10">
+            <Text 
+              style={{ fontFamily: 'Montserrat-Bold', fontSize: 22, color: 'white', marginBottom: 12, textAlign: 'center', fontWeight: 'bold' }}
+            >
+              Change Monthly Budget
+            </Text>
+            <Text 
+              style={{ fontFamily: 'Montserrat-Regular', fontSize: 14, color: '#c2c6d6', marginBottom: 20, textAlign: 'center', lineHeight: 20 }}
+            >
+              Enter your new total monthly spending budget limit.
+            </Text>
+            
+            <TextInput
+              value={newBudget}
+              onChangeText={setNewBudget}
+              placeholder="Enter budget (e.g. 15000)"
+              placeholderTextColor="rgba(255, 255, 255, 0.3)"
+              keyboardType="numeric"
+              style={{
+                backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                borderWidth: 1,
+                borderColor: 'rgba(255, 255, 255, 0.1)',
+                borderRadius: 12,
+                color: 'white',
+                fontFamily: 'Montserrat-Bold',
+                fontSize: 16,
+                paddingHorizontal: 16,
+                paddingVertical: 12,
+                textAlign: 'center',
+                marginBottom: 20,
+              }}
+            />
+
+            <View className="flex-row gap-3">
+              <TouchableOpacity
+                onPress={() => setShowBudgetModal(false)}
+                className="flex-1 py-3 rounded-xl bg-white/5 border border-white/10 items-center"
+              >
+                <Text style={{ fontFamily: 'Montserrat-Bold', color: '#c2c6d6', fontWeight: 'bold' }}>
+                  Cancel
+                </Text>
+              </TouchableOpacity>
+              
+              <TouchableOpacity
+                disabled={newBudget.trim() === ''}
+                onPress={handleSaveBudget}
+                style={{ opacity: newBudget.trim() !== '' ? 1 : 0.5 }}
+                className="flex-1 py-3 rounded-xl bg-primary items-center"
+              >
+                <Text style={{ fontFamily: 'Montserrat-Bold', color: 'white', fontWeight: 'bold' }}>
+                  Save
                 </Text>
               </TouchableOpacity>
             </View>

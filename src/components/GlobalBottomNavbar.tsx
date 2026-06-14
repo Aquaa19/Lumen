@@ -2,16 +2,18 @@ import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Animated } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import MaterialIcon from './MaterialIcon';
+import LogsIcon from '../public/assets/icons/LogsIcon';
 
 interface GlobalBottomNavbarProps {
-  activeTab: 'dashboard' | 'statistics' | 'assistant' | 'settings' | 'none';
+  activeTab: 'dashboard' | 'statistics' | 'payments' | 'wallet' | 'settings' | 'none';
   navigation: any;
 }
 
 const TABS = [
   { key: 'dashboard', label: 'Dashboard', icon: 'home', route: 'Dashboard' },
   { key: 'statistics', label: 'Statistics', icon: 'line_chart', route: 'Statistics' },
-  { key: 'assistant', label: 'Assistant', icon: 'smart_toy', route: 'Assistant' },
+  { key: 'payments', label: 'Payments', icon: 'payment_logs', route: 'Payments' },
+  { key: 'wallet', label: 'Wallet', icon: 'wallet', route: 'Wallet' },
   { key: 'settings', label: 'Settings', icon: 'settings', route: 'Settings' },
 ] as const;
 
@@ -89,10 +91,8 @@ export const GlobalBottomNavbar: React.FC<GlobalBottomNavbarProps> = ({
   },
   {
     scaleX: tabIndexAnim.interpolate({
-      inputRange: [0, 0.5, 1, 1.5, 2, 2.5, 3],
-      // Replaced the dynamic math with a fixed '1.4' stretch multiplier.
-      // This prevents the pill from stretching into a crazy spaghetti noodle on long jumps.
-      outputRange: [1, 1.4, 1, 1.4, 1, 1.4, 1],
+      inputRange: [0, 0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4],
+      outputRange: [1, 1.4, 1, 1.4, 1, 1.4, 1, 1.4, 1],
       extrapolate: 'clamp', 
     }),
   },
@@ -116,23 +116,29 @@ export const GlobalBottomNavbar: React.FC<GlobalBottomNavbarProps> = ({
             >
               {/* Icon Wrapper matches the height of the pill for perfect centering */}
               <View className="h-10 w-10 items-center justify-center">
-                <MaterialIcon name={tab.icon} size={22} color={color} />
+                {tab.key === 'payments' ? (
+                  <LogsIcon size={22} color={color} />
+                ) : (
+                  <MaterialIcon name={tab.icon} size={22} color={color} />
+                )}
               </View>
               
-              <Text
-                allowFontScaling={false}
-                style={{
-                  fontSize: 10,
-                  fontWeight: isActive ? 'bold' : '600',
-                  letterSpacing: 0.5,
-                  textTransform: 'uppercase',
-                  fontFamily: isActive ? 'Montserrat-Bold' : 'Montserrat-Regular',
-                  color,
-                  marginTop: 4,
-                }}
-              >
-                {tab.label}
-              </Text>
+              {isActive && (
+                <Text
+                  allowFontScaling={false}
+                  style={{
+                    fontSize: 10,
+                    fontWeight: 'bold',
+                    letterSpacing: 0.5,
+                    textTransform: 'uppercase',
+                    fontFamily: 'Montserrat-Bold',
+                    color,
+                    marginTop: 4,
+                  }}
+                >
+                  {tab.label}
+                </Text>
+              )}
             </TouchableOpacity>
           );
         })}

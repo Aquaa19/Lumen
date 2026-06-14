@@ -9,7 +9,8 @@ interface GlobalHeaderProps {
   title?: string;
   showBack?: boolean;
   navigation: any;
-  activeTab?: 'dashboard' | 'statistics' | 'assistant' | 'settings' | 'none';
+  activeTab?: 'dashboard' | 'statistics' | 'payments' | 'wallet' | 'settings' | 'none';
+  hideAssistant?: boolean;
 }
 
 export const GlobalHeader: React.FC<GlobalHeaderProps> = ({
@@ -17,6 +18,7 @@ export const GlobalHeader: React.FC<GlobalHeaderProps> = ({
   showBack = false,
   navigation,
   activeTab = 'none',
+  hideAssistant = false,
 }) => {
   const insets = useSafeAreaInsets();
   const { userProfile } = useMockStore();
@@ -25,11 +27,12 @@ export const GlobalHeader: React.FC<GlobalHeaderProps> = ({
     if (activeTab === 'dashboard') {
       const hour = new Date().getHours();
       const greeting = hour < 12 ? 'Morning' : hour < 17 ? 'Afternoon' : 'Evening';
-      const name = userProfile.name || 'Aqua';
+      const name = (userProfile.name || 'Aqua').trim().split(/\s+/)[0];
       return Math.random() < 0.5 ? `Welcome, ${name}` : `Good ${greeting}, ${name}`;
     }
     if (activeTab === 'statistics') return 'Lumen Growth';
-    if (activeTab === 'assistant') return 'Lumen Intelligence';
+    if (activeTab === 'payments') return 'Payments';
+    if (activeTab === 'wallet') return 'Wallet';
     if (activeTab === 'settings') return 'Settings';
     return title;
   }, [activeTab, title, userProfile.name]);
@@ -85,13 +88,27 @@ export const GlobalHeader: React.FC<GlobalHeaderProps> = ({
           </Text>
         </View>
 
-        <TouchableOpacity
-          onPress={() => navigation.navigate('BiometricGate')}
-          activeOpacity={0.8}
-          className="w-10 h-10 rounded-full bg-white/5 border border-white/10 items-center justify-center shadow-lg"
-        >
-          <MaterialIcon name="shield" size={22} color="#3B82F6" />
-        </TouchableOpacity>
+        <View className="flex-row items-center gap-2">
+          {/* Assistant icon */}
+          {!hideAssistant && (
+            <TouchableOpacity
+              onPress={() => navigation.navigate('Assistant')}
+              activeOpacity={0.8}
+              className="w-10 h-10 rounded-full bg-white/5 border border-white/10 items-center justify-center shadow-lg"
+            >
+              <MaterialIcon name="smart_toy" size={22} color="#adc6ff" />
+            </TouchableOpacity>
+          )}
+
+          {/* Biometric Shield icon */}
+          <TouchableOpacity
+            onPress={() => navigation.navigate('BiometricGate')}
+            activeOpacity={0.8}
+            className="w-10 h-10 rounded-full bg-white/5 border border-white/10 items-center justify-center shadow-lg"
+          >
+            <MaterialIcon name="shield" size={22} color="#3B82F6" />
+          </TouchableOpacity>
+        </View>
       </View>
     </View>
   );

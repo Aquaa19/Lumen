@@ -11,6 +11,8 @@ import BiometricGateScreen from '../screens/BiometricGateScreen';
 import DashboardScreen from '../screens/DashboardScreen';
 import StatisticsScreen from '../screens/StatisticsScreen';
 import AssistantScreen from '../screens/AssistantScreen';
+import PaymentsScreen from '../screens/PaymentsScreen';
+import WalletScreen from '../screens/WalletScreen';
 import SettingsScreen from '../screens/SettingsScreen';
 import CustomCategoriesScreen from '../screens/CustomCategoriesScreen';
 import TransactionDetailScreen from '../screens/TransactionDetailScreen';
@@ -33,7 +35,8 @@ const MainTabNavigator = () => {
     >
       <Tab.Screen name="Dashboard" component={DashboardScreen} />
       <Tab.Screen name="Statistics" component={StatisticsScreen} />
-      <Tab.Screen name="Assistant" component={AssistantScreen} />
+      <Tab.Screen name="Payments" component={PaymentsScreen} />
+      <Tab.Screen name="Wallet" component={WalletScreen} />
       <Tab.Screen name="Settings" component={SettingsScreen} />
     </Tab.Navigator>
   );
@@ -60,6 +63,7 @@ export const AppNavigator: React.FC = () => {
         <Stack.Screen name="MainApp" component={MainTabNavigator} />
 
         {/* Global Modal / Push screens */}
+        <Stack.Screen name="Assistant" component={AssistantScreen} />
         <Stack.Screen name="TransactionDetail" component={TransactionDetailScreen} />
         <Stack.Screen name="SelfTransfer" component={SelfTransferScreen} />
         <Stack.Screen name="CustomCategories" component={CustomCategoriesScreen} />

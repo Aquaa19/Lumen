@@ -12,11 +12,9 @@ import { BlurView } from '@react-native-community/blur';
 import LinearGradient from 'react-native-linear-gradient';
 import { DEFAULT_CATEGORIES } from '../utils/constants';
 
-const TABS = ['total', 'cash', 'upi'] as const;
-
 export const DashboardScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
   const { cashBalance, upiBalance, transactions, categoryLimits, pinnedCategories, categories } = useMockStore();
-  const [activeTab, setActiveTab] = useState<'total' | 'cash' | 'upi'>('total');
+  const activeTab = 'total';
   const insets = useSafeAreaInsets();
   const bottomMargin = Math.max(insets.bottom, 12);
   const fabBottom = bottomMargin + 70 + 16; // 70 navbar height + 16 spacing
@@ -27,7 +25,6 @@ export const DashboardScreen: React.FC<{ navigation: any }> = ({ navigation }) =
   const [containerWidth, setContainerWidth] = useState(0);
   const [isFabExpanded, setIsFabExpanded] = useState(false);
 
-  const tabIndexAnim = useRef(new Animated.Value(0)).current;
   const fabAnim = useRef(new Animated.Value(0)).current;
   
   const toggleFab = () => {
@@ -70,15 +67,6 @@ export const DashboardScreen: React.FC<{ navigation: any }> = ({ navigation }) =
     },
   ];
 
-  useEffect(() => {
-    const index = TABS.indexOf(activeTab);
-    Animated.spring(tabIndexAnim, {
-      toValue: index,
-      useNativeDriver: true,
-      bounciness: 12,
-      speed: 12,
-    }).start();
-  }, [activeTab, tabIndexAnim]);
 
   // Compute balance safely
   const safeCashBalance = typeof cashBalance === 'number' && !isNaN(cashBalance) ? cashBalance : 0;
@@ -147,63 +135,6 @@ export const DashboardScreen: React.FC<{ navigation: any }> = ({ navigation }) =
     >
       <View className="flex-1 relative">
       <ScrollView contentContainerStyle={{ paddingBottom: 130 }} className="flex-1" showsVerticalScrollIndicator={false}>
-        {/* Wallet Segmented Toggle */}
-        <View className="px-6 mt-4">
-          <View 
-            onLayout={(e) => setContainerWidth(e.nativeEvent.layout.width)}
-            className="flex-row p-1 bg-surface-container/30 rounded-full border border-white/5 relative"
-          >
-            {containerWidth > 0 && (
-              <Animated.View
-                style={{
-                  position: 'absolute',
-                  top: 4,
-                  bottom: 4,
-                  left: 4,
-                  width: (containerWidth - 8) / 3,
-                  backgroundColor: 'rgba(59, 130, 246, 0.2)',
-                  borderRadius: 999,
-                  borderWidth: 1,
-                  borderColor: 'rgba(59, 130, 246, 0.3)',
-                  transform: [
-                    {
-                      translateX: tabIndexAnim.interpolate({
-                        inputRange: [0, 1, 2],
-                        outputRange: [0, (containerWidth - 8) / 3, ((containerWidth - 8) / 3) * 2],
-                      }),
-                    },
-                    {
-                      scaleX: tabIndexAnim.interpolate({
-                        inputRange: [0, 0.5, 1, 1.5, 2],
-                        outputRange: [1, 1.15, 1, 1.15, 1],
-                      }),
-                    },
-                  ],
-                }}
-              />
-            )}
-            {TABS.map(tab => {
-              const isActive = activeTab === tab;
-              return (
-                <TouchableOpacity
-                  key={tab}
-                  onPress={() => setActiveTab(tab)}
-                  activeOpacity={0.8}
-                  className="flex-1 py-2 rounded-full items-center justify-center z-10"
-                >
-                  <Text 
-                    className={`font-label-caps text-label-caps uppercase font-bold ${
-                      isActive ? 'text-primary' : 'text-on-surface-variant/50'
-                    }`}
-                  >
-                    {tab}
-                  </Text>
-                </TouchableOpacity>
-              );
-            })}
-          </View>
-        </View>
-
         {/* Dynamic Balance Card */}
         <View className="px-6 mt-6 relative">
           <GlassCard 
@@ -226,7 +157,7 @@ export const DashboardScreen: React.FC<{ navigation: any }> = ({ navigation }) =
                 style={{ fontSize: 12, lineHeight: 16, fontFamily: 'Montserrat-Regular', color: 'rgba(194, 198, 214, 0.8)' }}
                 className="uppercase tracking-wider mb-2"
               >
-                {activeTab === 'total' ? 'Total Balance' : `${activeTab.charAt(0).toUpperCase() + activeTab.slice(1)} Balance`}
+                Total Balance
               </Text>
               <Text 
                 allowFontScaling={false}
@@ -314,7 +245,7 @@ export const DashboardScreen: React.FC<{ navigation: any }> = ({ navigation }) =
             >
               Recent Activity
             </Text>
-            <TouchableOpacity onPress={() => navigation.navigate('Statistics')}>
+            <TouchableOpacity onPress={() => navigation.navigate('Payments')}>
               <Text 
                 allowFontScaling={false}
                 style={{ fontSize: 12, fontWeight: '700', fontFamily: 'Montserrat-Bold', color: '#e1e2ec' }}
@@ -325,43 +256,46 @@ export const DashboardScreen: React.FC<{ navigation: any }> = ({ navigation }) =
             </TouchableOpacity>
           </View>
           <GlassCard className="p-0">
-            {filteredTransactions.map((tx, idx) => (
-              <TouchableOpacity
-                key={tx.id}
-                onPress={() => navigation.navigate('TransactionDetail', { transactionId: tx.id })}
-                className={`flex-row items-center justify-between p-4 ${
-                  idx !== filteredTransactions.length - 1 ? 'border-b border-white/5' : ''
-                }`}
-              >
-                <View className="flex-row items-center gap-3.5">
-                  {(() => {
-                    const catConfig = categories.find(c => c.name === tx.category) || { color: '#94a3b8', bgColor: 'rgba(148, 163, 184, 0.1)', icon: 'category' };
-                    return (
-                      <View 
-                        style={{ backgroundColor: catConfig.bgColor, borderColor: catConfig.color + '33' }}
-                        className="w-11 h-11 rounded-full border items-center justify-center shadow-md"
-                      >
-                        <MaterialIcon name={catConfig.icon as any} size={20} color={catConfig.color} />
-                      </View>
-                    );
-                  })()}
-                  <View>
-                    <Text className="text-[15px] text-white font-semibold">{tx.title}</Text>
-                    <Text className="text-xs text-white font-bold mt-0.5">
-                      {tx.title === 'Photocopy' ? 'Yesterday' : tx.timestamp}
-                    </Text>
-                  </View>
-                </View>
-                 <Text 
-                  style={{ fontFamily: 'Montserrat-Bold' }} 
-                  className={`text-base font-bold ${
-                    tx.type === 'income' ? 'text-green-400' : tx.type === 'transfer' ? 'text-primary' : 'text-error'
+            {(() => {
+              const recentTxs = filteredTransactions.slice(0, 10);
+              return recentTxs.map((tx, idx) => (
+                <TouchableOpacity
+                  key={tx.id}
+                  onPress={() => navigation.navigate('TransactionDetail', { transactionId: tx.id })}
+                  className={`flex-row items-center justify-between p-4 ${
+                    idx !== recentTxs.length - 1 ? 'border-b border-white/5' : ''
                   }`}
                 >
-                  {tx.type === 'income' ? '+' : tx.type === 'transfer' ? '' : '-'}₹{tx.amount.toFixed(2)}
-                </Text>
-              </TouchableOpacity>
-            ))}
+                  <View className="flex-row items-center gap-3.5">
+                    {(() => {
+                      const catConfig = categories.find(c => c.name === tx.category) || { color: '#94a3b8', bgColor: 'rgba(148, 163, 184, 0.1)', icon: 'category' };
+                      return (
+                        <View 
+                          style={{ backgroundColor: catConfig.bgColor, borderColor: catConfig.color + '33' }}
+                          className="w-11 h-11 rounded-full border items-center justify-center shadow-md"
+                        >
+                          <MaterialIcon name={catConfig.icon as any} size={20} color={catConfig.color} />
+                        </View>
+                      );
+                    })()}
+                    <View>
+                      <Text className="text-[15px] text-white font-semibold">{tx.title}</Text>
+                      <Text className="text-xs text-white font-bold mt-0.5">
+                        {tx.title === 'Photocopy' ? 'Yesterday' : tx.date} • {tx.timestamp}
+                      </Text>
+                    </View>
+                  </View>
+                   <Text 
+                    style={{ fontFamily: 'Montserrat-Bold' }} 
+                    className={`text-base font-bold ${
+                      tx.type === 'income' ? 'text-green-400' : tx.type === 'transfer' ? 'text-primary' : 'text-error'
+                    }`}
+                  >
+                    {tx.type === 'income' ? '+' : tx.type === 'transfer' ? '' : '-'}₹{tx.amount.toFixed(2)}
+                  </Text>
+                </TouchableOpacity>
+              ));
+            })()}
           </GlassCard>
         </View>
       </ScrollView>

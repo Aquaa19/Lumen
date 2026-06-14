@@ -7,6 +7,7 @@ import MaterialIcon from '../components/MaterialIcon';
 import AIIcon from '../public/assets/icons/AIIcon';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { DEFAULT_CATEGORIES } from '../utils/constants';
+import { GEMINI_API_KEY } from '@env';
 
 interface Message {
   id: string;
@@ -15,7 +16,6 @@ interface Message {
   transactions?: any[];
 }
 
-const GEMINI_API_KEY = "AQ.Ab8RN6JkQx9XVyMHchnXakVrVUzS3PI9AxcfHYyomhlNkJ_ptg";
 const GEMINI_MODELS = ['gemini-2.5-flash', 'gemini-2.5-pro', 'gemini-1.5-flash', 'gemini-1.5-pro'];
 
 const PRESETS = [

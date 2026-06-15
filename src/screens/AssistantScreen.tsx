@@ -7,7 +7,7 @@ import MaterialIcon from '../components/MaterialIcon';
 import AIIcon from '../public/assets/icons/AIIcon';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { DEFAULT_CATEGORIES } from '../utils/constants';
-import { GEMINI_API_KEY } from '@env';
+import { GEMINI_API_KEY } from '../config/env';
 
 interface Message {
   id: string;
@@ -38,7 +38,7 @@ export const AssistantScreen: React.FC<{ navigation: any }> = ({ navigation }) =
       {
         id: '1',
         sender: 'ai',
-        text: `Hi ${userProfile.name}, I am your Lumen Assistant. You can ask me to analyze your spending, check budgets, or filter your ledger.`
+        text: `Hi ${userProfile.name}, I am your Lumen AI. You can ask me to analyze your spending, check budgets, or filter your ledger.`
       }
     ]);
   }, [userProfile.name]);
@@ -195,7 +195,7 @@ Provide clear, helpful, and concise insights. Format currency in ₹ (INR). Use 
     } catch (err: any) {
       const isConfigError = err?.message?.includes("Gemini API key");
       setMessages(prev => 
-        prev.map(m => m.id === tempAiId ? { ...m, text: isConfigError ? err.message : "Sorry, I encountered an error while trying to connect to my brain. Please try again." } : m)
+        prev.map(m => m.id === tempAiId ? { ...m, text: isConfigError ? err.message : `Sorry, I encountered an error while trying to connect to my brain: ${err?.message || err}. Please try again.` } : m)
       );
     }
     scrollViewRef.current?.scrollToEnd({ animated: true });
@@ -213,7 +213,7 @@ Provide clear, helpful, and concise insights. Format currency in ₹ (INR). Use 
       showBack={true}
       hideAssistant={true}
       navigation={navigation}
-      title="FINANCE INTELLIGENCE"
+      title="Lumen AI"
     >
       {/* Chat Space */}
       <View className="flex-1 px-6 pt-6">

@@ -57,7 +57,6 @@ const TabLabel: React.FC<{ label: string; isActive: boolean; color: string; navi
       allowFontScaling={false}
       style={{
         fontSize: 10,
-        fontWeight: 'bold',
         letterSpacing: 0.5,
         textTransform: 'uppercase',
         fontFamily: 'Montserrat-Bold',

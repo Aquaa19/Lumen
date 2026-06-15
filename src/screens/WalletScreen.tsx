@@ -45,7 +45,7 @@ export const WalletScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
         >
           <Text 
             allowFontScaling={false}
-            style={{ fontSize: 24, lineHeight: 32, fontWeight: 'bold', fontFamily: 'Montserrat-Bold', color: 'white', marginBottom: 24 }}
+            style={{ fontSize: 24, lineHeight: 32, fontFamily: 'Montserrat-Bold', color: 'white', marginBottom: 24 }}
           >
             Accounts Overview
           </Text>
@@ -63,7 +63,7 @@ export const WalletScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
                 </View>
                 <Text 
                   allowFontScaling={false}
-                  style={{ fontSize: 14, fontFamily: 'Montserrat-Bold', color: '#adc6ff', fontWeight: 'bold' }}
+                  style={{ fontSize: 14, fontFamily: 'Montserrat-Bold', color: '#adc6ff' }}
                   className="uppercase tracking-wider"
                 >
                   Total Combined Balance
@@ -71,7 +71,7 @@ export const WalletScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
               </View>
               <Text 
                 allowFontScaling={false}
-                style={{ fontSize: 42, lineHeight: 50, fontWeight: 'bold', fontFamily: 'Montserrat-Bold', color: 'white', letterSpacing: -1 }}
+                style={{ fontSize: 42, lineHeight: 50, fontFamily: 'Montserrat-Bold', color: 'white', letterSpacing: -1 }}
               >
                 ₹{totalBalance.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
               </Text>
@@ -88,7 +88,7 @@ export const WalletScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
                 </View>
                 <Text 
                   allowFontScaling={false}
-                  style={{ fontSize: 14, fontFamily: 'Montserrat-Bold', color: 'rgba(255,255,255,0.7)', fontWeight: 'bold' }}
+                  style={{ fontSize: 14, fontFamily: 'Montserrat-Bold', color: 'rgba(255,255,255,0.7)' }}
                   className="uppercase tracking-wider"
                 >
                   Cash Wallet
@@ -96,7 +96,7 @@ export const WalletScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
               </View>
               <Text 
                 allowFontScaling={false}
-                style={{ fontSize: 36, lineHeight: 44, fontWeight: 'bold', fontFamily: 'Montserrat-Bold', color: '#34d399', letterSpacing: -1 }}
+                style={{ fontSize: 36, lineHeight: 44, fontFamily: 'Montserrat-Bold', color: '#34d399', letterSpacing: -1 }}
               >
                 ₹{safeCashBalance.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
               </Text>
@@ -113,7 +113,7 @@ export const WalletScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
                 </View>
                 <Text 
                   allowFontScaling={false}
-                  style={{ fontSize: 14, fontFamily: 'Montserrat-Bold', color: 'rgba(255,255,255,0.7)', fontWeight: 'bold' }}
+                  style={{ fontSize: 14, fontFamily: 'Montserrat-Bold', color: 'rgba(255,255,255,0.7)' }}
                   className="uppercase tracking-wider"
                 >
                   UPI Account
@@ -121,7 +121,7 @@ export const WalletScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
               </View>
               <Text 
                 allowFontScaling={false}
-                style={{ fontSize: 36, lineHeight: 44, fontWeight: 'bold', fontFamily: 'Montserrat-Bold', color: '#60a5fa', letterSpacing: -1 }}
+                style={{ fontSize: 36, lineHeight: 44, fontFamily: 'Montserrat-Bold', color: '#60a5fa', letterSpacing: -1 }}
               >
                 ₹{safeUpiBalance.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
               </Text>

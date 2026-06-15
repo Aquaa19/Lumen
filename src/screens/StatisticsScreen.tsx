@@ -93,7 +93,6 @@ export const StatisticsScreen: React.FC<{ navigation: any }> = ({ navigation }) 
                 allowFontScaling={false}
                 style={{ 
                   fontFamily: 'Montserrat-Bold', 
-                  fontWeight: '900', // Forces maximum thickness
                   fontSize: 16,      // Explicitly sets a strong size
                   letterSpacing: 0.5 
                 }} 
@@ -114,7 +113,7 @@ export const StatisticsScreen: React.FC<{ navigation: any }> = ({ navigation }) 
             <View className="flex-row justify-between items-center mb-5">
               <Text 
                 allowFontScaling={false}
-                style={{ fontSize: 12, lineHeight: 16, fontFamily: 'Montserrat-Bold', fontWeight: 'bold', color: '#c2c6d6' }}
+                style={{ fontSize: 12, lineHeight: 16, fontFamily: 'Montserrat-Bold', color: '#c2c6d6' }}
                 className="uppercase tracking-wider"
               >
                 Category Spending
@@ -189,7 +188,7 @@ export const StatisticsScreen: React.FC<{ navigation: any }> = ({ navigation }) 
                 </Text>
                 <Text 
                   allowFontScaling={false}
-                  style={{ fontFamily: 'Montserrat-Bold', fontSize: 24, fontWeight: 'bold', color: 'white', marginTop: 4 }}
+                  style={{ fontFamily: 'Montserrat-Bold', fontSize: 24, color: 'white', marginTop: 4 }}
                 >
                   ₹{totalSpent.toLocaleString('en-IN')}
                 </Text>
@@ -213,7 +212,7 @@ export const StatisticsScreen: React.FC<{ navigation: any }> = ({ navigation }) 
 
           <Text 
             allowFontScaling={false}
-            style={{ fontSize: 20, lineHeight: 28, fontWeight: 'bold', fontFamily: 'Montserrat-Bold', color: 'white' }}
+            style={{ fontSize: 20, lineHeight: 28, fontFamily: 'Montserrat-Bold', color: 'white' }}
             className="mb-4"
           >
             Category Breakdown

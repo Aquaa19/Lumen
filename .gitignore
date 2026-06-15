@@ -82,3 +82,4 @@ seed_transaction.py
 .env
 .env.local
 .env.*
+src/config/env.ts

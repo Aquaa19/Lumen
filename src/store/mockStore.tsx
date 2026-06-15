@@ -42,6 +42,11 @@ interface MockStoreContextProps {
   deleteCategory: (name: string) => void;
   addGoal: (title: string, targetAmount: number, deadline: string) => void;
   deleteGoal: (id: string) => void;
+  backupExists: boolean;
+  checkingBackup: boolean;
+  restoreBackup: () => Promise<void>;
+  startFresh: () => Promise<void>;
+  cancelBackupPrompt: () => void;
   toastMessage: string | null;
   showToast: (msg: string) => void;
   syncFrequency: 'realtime' | 'daily' | 'weekly' | 'never' | 'manual';
@@ -59,6 +64,10 @@ export const MockStoreProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   const [upiBalance, setUpiBalance] = useState(() => storage.getNumber('upiBalance') ?? 0);
   const [monthlyBudget, setMonthlyBudget] = useState(() => storage.getNumber('monthlyBudget') ?? 0);
   const [pinCode, setPinCode] = useState<string | null>(() => storage.getString('pinCode') ?? null);
+
+  const [backupExists, setBackupExists] = useState(false);
+  const [checkingBackup, setCheckingBackup] = useState(true);
+  const [pendingBackup, setPendingBackup] = useState<any>(null);
 
   const [syncFrequency, setSyncFrequencyState] = useState<'realtime' | 'daily' | 'weekly' | 'never' | 'manual'>(() => {
     return (storage.getString('syncFrequency') as any) || 'realtime';
@@ -160,6 +169,7 @@ export const MockStoreProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   // Listen to Firebase Auth state changes
   useEffect(() => {
     const unsubscribe = auth().onAuthStateChanged(async (user) => {
+      setCheckingBackup(true);
       if (user) {
         setIsLoggedIn(true);
         setUserProfile(prev => ({
@@ -174,25 +184,41 @@ export const MockStoreProvider: React.FC<{ children: React.ReactNode }> = ({ chi
           const doc = await firestore().collection('users').doc(user.uid).get();
           if (doc.exists()) {
             const data = doc.data();
-            if (data) {
-              setHasCompletedSetup(data.hasCompletedSetup || false);
-              if (data.cashBalance !== undefined) setCashBalance(data.cashBalance);
-              if (data.upiBalance !== undefined) setUpiBalance(data.upiBalance);
-              if (data.monthlyBudget !== undefined) setMonthlyBudget(data.monthlyBudget);
-              if (data.pinCode !== undefined) setPinCode(data.pinCode);
-              if (data.userProfile !== undefined) setUserProfile(data.userProfile);
-              if (data.categoryLimits !== undefined) setCategoryLimits(data.categoryLimits);
-              if (data.pinnedCategories !== undefined) setPinnedCategories(data.pinnedCategories);
-              if (data.categories !== undefined) setCategories(data.categories);
-              if (data.goals !== undefined) setGoals(data.goals);
+            if (data && data.hasCompletedSetup) {
+              const localSetupCompleted = storage.getBoolean('hasCompletedSetup') || false;
+              if (localSetupCompleted) {
+                setHasCompletedSetup(true);
+                if (data.cashBalance !== undefined) setCashBalance(data.cashBalance);
+                if (data.upiBalance !== undefined) setUpiBalance(data.upiBalance);
+                if (data.monthlyBudget !== undefined) setMonthlyBudget(data.monthlyBudget);
+                if (data.pinCode !== undefined) setPinCode(data.pinCode);
+                if (data.userProfile !== undefined) setUserProfile(data.userProfile);
+                if (data.categoryLimits !== undefined) setCategoryLimits(data.categoryLimits);
+                if (data.pinnedCategories !== undefined) setPinnedCategories(data.pinnedCategories);
+                if (data.categories !== undefined) setCategories(data.categories);
+                if (data.goals !== undefined) setGoals(data.goals);
+              } else {
+                // We have a cloud backup but no local setup. Prompt user!
+                setPendingBackup(data);
+                setBackupExists(true);
+              }
+            } else {
+              setHasCompletedSetup(false);
             }
+          } else {
+            setHasCompletedSetup(false);
           }
         } catch (err) {
           console.log('Error reading setup from Firestore:', err);
+        } finally {
+          setCheckingBackup(false);
         }
       } else {
         setIsLoggedIn(false);
         setHasCompletedSetup(false);
+        setBackupExists(false);
+        setPendingBackup(null);
+        setCheckingBackup(false);
       }
     });
 
@@ -203,6 +229,10 @@ export const MockStoreProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   useEffect(() => {
     const user = auth().currentUser;
     if (!user) return;
+
+    // We only listen if they have completed setup (either restored or did wizard)
+    const localSetupCompleted = storage.getBoolean('hasCompletedSetup') || false;
+    if (!localSetupCompleted) return;
 
     // Listen to user document updates
     const userUnsubscribe = firestore()
@@ -247,7 +277,7 @@ export const MockStoreProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       userUnsubscribe();
       txUnsubscribe();
     };
-  }, [isLoggedIn]);
+  }, [isLoggedIn, hasCompletedSetup]);
 
   // Sync state changes to MMKV local cache (offline backup)
   useEffect(() => {
@@ -803,6 +833,140 @@ export const MockStoreProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     }
   };
 
+  const restoreBackup = async () => {
+    if (!pendingBackup) return;
+    const user = auth().currentUser;
+    if (!user) return;
+
+    try {
+      // 1. Fetch transactions from Firestore
+      const txSnapshot = await firestore()
+        .collection('users')
+        .doc(user.uid)
+        .collection('transactions')
+        .get();
+      const list: Transaction[] = [];
+      txSnapshot.forEach(doc => {
+        list.push(doc.data() as Transaction);
+      });
+      list.sort((a, b) => b.id.localeCompare(a.id));
+      
+      // 2. Update states
+      if (pendingBackup.cashBalance !== undefined) setCashBalance(pendingBackup.cashBalance);
+      if (pendingBackup.upiBalance !== undefined) setUpiBalance(pendingBackup.upiBalance);
+      if (pendingBackup.monthlyBudget !== undefined) setMonthlyBudget(pendingBackup.monthlyBudget);
+      if (pendingBackup.pinCode !== undefined) setPinCode(pendingBackup.pinCode);
+      if (pendingBackup.userProfile !== undefined) setUserProfile(pendingBackup.userProfile);
+      if (pendingBackup.categoryLimits !== undefined) setCategoryLimits(pendingBackup.categoryLimits);
+      if (pendingBackup.pinnedCategories !== undefined) setPinnedCategories(pendingBackup.pinnedCategories);
+      if (pendingBackup.categories !== undefined) setCategories(pendingBackup.categories);
+      if (pendingBackup.goals !== undefined) setGoals(pendingBackup.goals);
+      if (list.length > 0) setTransactions(list);
+
+      setHasCompletedSetup(true);
+      storage.set('hasCompletedSetup', true);
+
+      // Save everything else to MMKV
+      storage.set('cashBalance', pendingBackup.cashBalance ?? 0);
+      storage.set('upiBalance', pendingBackup.upiBalance ?? 0);
+      storage.set('monthlyBudget', pendingBackup.monthlyBudget ?? 0);
+      if (pendingBackup.pinCode) {
+        storage.set('pinCode', pendingBackup.pinCode);
+      } else {
+        storage.remove('pinCode');
+      }
+      storage.set('userProfile', JSON.stringify(pendingBackup.userProfile || userProfile));
+      if (list.length > 0) {
+        storage.set('transactions', JSON.stringify(list));
+      }
+      storage.set('categoryLimits', JSON.stringify(pendingBackup.categoryLimits || {}));
+      storage.set('pinnedCategories', JSON.stringify(pendingBackup.pinnedCategories || []));
+      storage.set('categories', JSON.stringify(pendingBackup.categories || []));
+      storage.set('goals', JSON.stringify(pendingBackup.goals || []));
+
+      // 3. Clear pending backup state
+      setPendingBackup(null);
+      setBackupExists(false);
+      showToast('Backup restored successfully!');
+    } catch (err) {
+      console.log('Error restoring backup:', err);
+      showToast('Failed to restore backup');
+    }
+  };
+
+  const startFresh = async () => {
+    const user = auth().currentUser;
+    if (user) {
+      try {
+        // Delete Firestore data
+        const snapshot = await firestore()
+          .collection('users')
+          .doc(user.uid)
+          .collection('transactions')
+          .get();
+        const batch = firestore().batch();
+        snapshot.docs.forEach(doc => {
+          batch.delete(doc.ref);
+        });
+        await batch.commit();
+
+        await firestore().collection('users').doc(user.uid).delete();
+      } catch (err) {
+        console.log('Error purging Firestore data for fresh start:', err);
+      }
+    }
+
+    // Reset local data but keep user logged in!
+    setHasCompletedSetup(false);
+    setCashBalance(0);
+    setUpiBalance(0);
+    setMonthlyBudget(0);
+    setPinCode(null);
+    setUserProfile(prev => ({ ...prev, biometricLock: false }));
+    setTransactions(INITIAL_TRANSACTIONS);
+    setGoals([]);
+    setCategoryLimits({
+      Food: 0,
+      Travel: 0,
+      Stationery: 0,
+      Shopping: 0,
+      Entertainment: 0,
+      Others: 0
+    });
+    setPinnedCategories(['Food', 'Travel', 'Stationery']);
+    setCategories(DEFAULT_CATEGORIES);
+
+    // Save states to MMKV
+    storage.set('hasCompletedSetup', false);
+    storage.set('cashBalance', 0);
+    storage.set('upiBalance', 0);
+    storage.set('monthlyBudget', 0);
+    storage.remove('pinCode');
+    storage.set('userProfile', JSON.stringify({ ...userProfile, biometricLock: false }));
+    storage.set('transactions', JSON.stringify(INITIAL_TRANSACTIONS));
+    storage.set('categoryLimits', JSON.stringify({
+      Food: 0,
+      Travel: 0,
+      Stationery: 0,
+      Shopping: 0,
+      Entertainment: 0,
+      Others: 0
+    }));
+    storage.set('pinnedCategories', JSON.stringify(['Food', 'Travel', 'Stationery']));
+    storage.set('categories', JSON.stringify(DEFAULT_CATEGORIES));
+    storage.set('goals', JSON.stringify([]));
+
+    setPendingBackup(null);
+    setBackupExists(false);
+    showToast('Started fresh! Please complete setup.');
+  };
+
+  const cancelBackupPrompt = () => {
+    logout();
+    setBackupExists(false);
+    setPendingBackup(null);
+  };
+
   return (
     <MockStoreContext.Provider
       value={{
@@ -836,6 +1000,11 @@ export const MockStoreProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         deleteCategory,
         addGoal,
         deleteGoal,
+        backupExists,
+        checkingBackup,
+        restoreBackup,
+        startFresh,
+        cancelBackupPrompt,
         toastMessage,
         showToast,
         syncFrequency,

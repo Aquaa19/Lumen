@@ -77,7 +77,6 @@ export const GlobalHeader: React.FC<GlobalHeaderProps> = ({
             allowFontScaling={false}
             style={{
               fontSize: 20,
-              fontWeight: 'bold',
               fontFamily: 'Montserrat-Bold',
               color: '#FFFFFF',
             }}

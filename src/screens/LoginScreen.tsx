@@ -7,17 +7,26 @@ import GlowOrb from '../components/GlowOrb';
 import { useMockStore } from '../store/mockStore';
 
 export const LoginScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
-  const { login, isLoggedIn, hasCompletedSetup } = useMockStore();
+  const { 
+    login, 
+    isLoggedIn, 
+    hasCompletedSetup, 
+    backupExists, 
+    checkingBackup,
+    restoreBackup, 
+    startFresh, 
+    cancelBackupPrompt 
+  } = useMockStore();
 
   useEffect(() => {
-    if (isLoggedIn) {
+    if (isLoggedIn && !checkingBackup) {
       if (hasCompletedSetup) {
         navigation.replace('MainApp');
-      } else {
+      } else if (!backupExists) {
         navigation.replace('SetupWizard');
       }
     }
-  }, [isLoggedIn, hasCompletedSetup, navigation]);
+  }, [isLoggedIn, hasCompletedSetup, backupExists, checkingBackup, navigation]);
 
   const handleGoogleSignIn = async () => {
     await login();
@@ -43,7 +52,7 @@ export const LoginScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
             />
           </View>
           <Text 
-            style={{ fontSize: 44, fontWeight: '900', fontFamily: 'Montserrat-Bold', color: '#FFFFFF', letterSpacing: 2 }}
+            style={{ fontSize: 44, fontFamily: 'Montserrat-Bold', color: '#FFFFFF', letterSpacing: 2 }}
             className="text-on-surface text-center"
           >
             LUMEN
@@ -53,7 +62,7 @@ export const LoginScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
         {/* Card */}
         <GlassCard active={true} className="p-6">
           <View className="items-center mb-8">
-            <Text style={{ fontFamily: 'Montserrat-Bold', fontSize: 34, fontWeight: 'bold', color: 'white' }} className="mb-2 text-center">
+            <Text style={{ fontFamily: 'Montserrat-Bold', fontSize: 34, color: 'white' }} className="mb-2 text-center">
               Welcome back
             </Text>
             <Text style={{ fontFamily: 'Montserrat-SemiBold', fontSize: 17, color: 'rgba(255,255,255,0.7)' }} className="text-center">
@@ -86,7 +95,7 @@ export const LoginScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
                 fill="#EA4335"
               />
             </Svg>
-            <Text style={{ fontFamily: 'Montserrat-Bold', fontSize: 17, color: 'white', fontWeight: 'bold' }}>
+            <Text style={{ fontFamily: 'Montserrat-Bold', fontSize: 17, color: 'white' }}>
               Continue with Google
             </Text>
           </TouchableOpacity>
@@ -108,6 +117,50 @@ export const LoginScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
           SECURE LOGIN INITIATIVE
         </Text>
       </View>
+
+      {/* Glassmorphic Modal overlay for Backup option */}
+      {backupExists && (
+        <View style={{ backgroundColor: 'rgba(0,0,0,0.7)' }} className="absolute inset-0 z-50 justify-center items-center px-6">
+          <GlassCard active={true} className="p-6 w-full max-w-sm border border-white/20">
+            <Text style={{ fontFamily: 'Montserrat-Bold', fontSize: 22, color: 'white' }} className="mb-3 text-center">
+              Backup Found
+            </Text>
+            <Text style={{ fontFamily: 'Montserrat-Medium', fontSize: 14, color: 'rgba(255,255,255,0.7)', lineHeight: 20 }} className="mb-6 text-center">
+              We found an existing cloud backup for your account. Would you like to restore your data or start fresh?
+            </Text>
+            
+            <TouchableOpacity
+              onPress={restoreBackup}
+              activeOpacity={0.85}
+              className="w-full h-12 bg-primary rounded-xl justify-center items-center mb-3"
+            >
+              <Text style={{ fontFamily: 'Montserrat-Bold', fontSize: 15, color: 'white' }}>
+                Restore Backup
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              onPress={startFresh}
+              activeOpacity={0.85}
+              className="w-full h-12 bg-white/10 border border-white/10 rounded-xl justify-center items-center mb-3"
+            >
+              <Text style={{ fontFamily: 'Montserrat-Bold', fontSize: 15, color: '#EF4444' }}>
+                Start Fresh
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              onPress={cancelBackupPrompt}
+              activeOpacity={0.85}
+              className="w-full h-10 justify-center items-center"
+            >
+              <Text style={{ fontFamily: 'Montserrat-SemiBold', fontSize: 13, color: 'rgba(255,255,255,0.5)' }}>
+                Cancel
+              </Text>
+            </TouchableOpacity>
+          </GlassCard>
+        </View>
+      )}
     </View>
   </BackgroundLayout>
   );

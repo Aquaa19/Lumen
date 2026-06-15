@@ -285,7 +285,7 @@ export const SettingsScreen: React.FC<{ navigation: any }> = ({ navigation }) =>
               <View className="w-12 h-12 rounded-2xl bg-white/[0.06] items-center justify-center border border-white/5">
                 <FingerprintIcon color="white" size={22} />
               </View>
-              <Text style={{ fontFamily: 'Montserrat-Bold', fontSize: 20, color: 'white', fontWeight: 'bold' }}>
+              <Text style={{ fontFamily: 'Montserrat-Bold', fontSize: 20, color: 'white' }}>
                 Biometric Lock
               </Text>
             </View>
@@ -303,7 +303,7 @@ export const SettingsScreen: React.FC<{ navigation: any }> = ({ navigation }) =>
                 <View className="w-12 h-12 rounded-2xl bg-white/[0.06] items-center justify-center border border-white/5">
                   <MaterialIcon name="file_download" color="white" size={22} />
                 </View>
-                <Text style={{ fontFamily: 'Montserrat-Bold', fontSize: 20, color: 'white', fontWeight: 'bold' }}>
+                <Text style={{ fontFamily: 'Montserrat-Bold', fontSize: 20, color: 'white' }}>
                   Export Data to CSV
                 </Text>
               </View>
@@ -317,7 +317,7 @@ export const SettingsScreen: React.FC<{ navigation: any }> = ({ navigation }) =>
                 <View className="w-12 h-12 rounded-2xl bg-white/[0.06] items-center justify-center border border-white/5">
                   <MaterialIcon name="folder" color="white" size={22} />
                 </View>
-                <Text style={{ fontFamily: 'Montserrat-Bold', fontSize: 20, color: 'white', fontWeight: 'bold' }}>
+                <Text style={{ fontFamily: 'Montserrat-Bold', fontSize: 20, color: 'white' }}>
                   Custom Categories
                 </Text>
               </View>
@@ -337,7 +337,7 @@ export const SettingsScreen: React.FC<{ navigation: any }> = ({ navigation }) =>
                 <View className="w-12 h-12 rounded-2xl bg-white/[0.06] items-center justify-center border border-white/5">
                   <MaterialIcon name="lock" color="white" size={22} />
                 </View>
-                <Text style={{ fontFamily: 'Montserrat-Bold', fontSize: 20, color: 'white', fontWeight: 'bold' }}>
+                <Text style={{ fontFamily: 'Montserrat-Bold', fontSize: 20, color: 'white' }}>
                   Change PIN Code
                 </Text>
               </View>
@@ -354,8 +354,8 @@ export const SettingsScreen: React.FC<{ navigation: any }> = ({ navigation }) =>
                 <View className="w-12 h-12 rounded-2xl bg-white/[0.06] items-center justify-center border border-white/5">
                   <MaterialIcon name="menu" color="white" size={30} />
                 </View>
-                <Text style={{ fontFamily: 'Montserrat-Bold', fontSize: 20, color: 'white', fontWeight: 'bold' }}>
-                  Change Monthly Budget
+                <Text style={{ fontFamily: 'Montserrat-Bold', fontSize: 20, color: 'white' }}>
+                  Monthly Budget
                 </Text>
               </View>
               <MaterialIcon name="chevron_right" color="#8c909f" size={24} />
@@ -369,8 +369,8 @@ export const SettingsScreen: React.FC<{ navigation: any }> = ({ navigation }) =>
                   <MaterialIcon name="sync" color="white" size={22} />
                 </View>
                 <View>
-                  <Text style={{ fontFamily: 'Montserrat-Bold', fontSize: 20, color: 'white', fontWeight: 'bold' }}>
-                    Firebase Synchronization
+                  <Text style={{ fontFamily: 'Montserrat-Bold', fontSize: 20, color: 'white' }}>
+                    Firebase Sync
                   </Text>
                   <Text style={{ fontFamily: 'Montserrat-Regular', fontSize: 13, color: '#8c909f' }}>
                     Frequency: {syncFrequency === 'realtime' ? 'Real-time' : syncFrequency.charAt(0).toUpperCase() + syncFrequency.slice(1)} • {formatLastSync()}
@@ -387,7 +387,7 @@ export const SettingsScreen: React.FC<{ navigation: any }> = ({ navigation }) =>
                 <View className="w-12 h-12 rounded-2xl bg-error/10 items-center justify-center border border-error/20">
                   <TrashIcon size={22} color="#EF4444" />
                 </View>
-                <Text style={{ fontFamily: 'Montserrat-Bold', fontSize: 20, color: '#EF4444', fontWeight: 'bold' }}>
+                <Text style={{ fontFamily: 'Montserrat-Bold', fontSize: 20, color: '#EF4444' }}>
                   Purge Data
                 </Text>
               </View>
@@ -628,7 +628,7 @@ export const SettingsScreen: React.FC<{ navigation: any }> = ({ navigation }) =>
                 onPress={() => setShowPinSetupModal(false)}
                 className="w-full h-12 rounded-xl bg-white/5 border border-white/10 items-center justify-center"
               >
-                <Text style={{ fontFamily: 'Montserrat-Bold', color: '#c2c6d6', fontWeight: 'bold' }}>
+                <Text style={{ fontFamily: 'Montserrat-Bold', color: '#c2c6d6' }}>
                   Cancel
                 </Text>
               </TouchableOpacity>
@@ -646,7 +646,7 @@ export const SettingsScreen: React.FC<{ navigation: any }> = ({ navigation }) =>
         <View className="flex-1 justify-center items-center px-6" style={{ backgroundColor: 'rgba(0, 0, 0, 0.75)' }}>
           <GlassCard className="w-full max-w-sm p-6 border border-error/20">
             <Text 
-              style={{ fontFamily: 'Montserrat-Bold', fontSize: 22, color: '#EF4444', marginBottom: 12, textAlign: 'center', fontWeight: 'bold' }}
+              style={{ fontFamily: 'Montserrat-Bold', fontSize: 22, color: '#EF4444', marginBottom: 12, textAlign: 'center' }}
             >
               Verify Purge
             </Text>
@@ -683,7 +683,7 @@ export const SettingsScreen: React.FC<{ navigation: any }> = ({ navigation }) =>
                 onPress={() => setShowPurgeModal(false)}
                 className="flex-1 py-3 rounded-xl bg-white/5 border border-white/10 items-center"
               >
-                <Text style={{ fontFamily: 'Montserrat-Bold', color: '#c2c6d6', fontWeight: 'bold' }}>
+                <Text style={{ fontFamily: 'Montserrat-Bold', color: '#c2c6d6' }}>
                   Cancel
                 </Text>
               </TouchableOpacity>
@@ -694,7 +694,7 @@ export const SettingsScreen: React.FC<{ navigation: any }> = ({ navigation }) =>
                 style={{ opacity: purgeText === 'PURGE' ? 1 : 0.5 }}
                 className="flex-1 py-3 rounded-xl bg-error items-center"
               >
-                <Text style={{ fontFamily: 'Montserrat-Bold', color: 'white', fontWeight: 'bold' }}>
+                <Text style={{ fontFamily: 'Montserrat-Bold', color: 'white' }}>
                   Purge
                 </Text>
               </TouchableOpacity>
@@ -712,9 +712,9 @@ export const SettingsScreen: React.FC<{ navigation: any }> = ({ navigation }) =>
         <View className="flex-1 justify-center items-center px-6" style={{ backgroundColor: 'rgba(0, 0, 0, 0.75)' }}>
           <GlassCard className="w-full max-w-sm p-6 border border-white/10">
             <Text 
-              style={{ fontFamily: 'Montserrat-Bold', fontSize: 22, color: 'white', marginBottom: 12, textAlign: 'center', fontWeight: 'bold' }}
+              style={{ fontFamily: 'Montserrat-Bold', fontSize: 22, color: 'white', marginBottom: 12, textAlign: 'center' }}
             >
-              Change Monthly Budget
+              Monthly Budget
             </Text>
             <Text 
               style={{ fontFamily: 'Montserrat-Regular', fontSize: 14, color: '#c2c6d6', marginBottom: 20, textAlign: 'center', lineHeight: 20 }}
@@ -748,7 +748,7 @@ export const SettingsScreen: React.FC<{ navigation: any }> = ({ navigation }) =>
                 onPress={() => setShowBudgetModal(false)}
                 className="flex-1 py-3 rounded-xl bg-white/5 border border-white/10 items-center"
               >
-                <Text style={{ fontFamily: 'Montserrat-Bold', color: '#c2c6d6', fontWeight: 'bold' }}>
+                <Text style={{ fontFamily: 'Montserrat-Bold', color: '#c2c6d6' }}>
                   Cancel
                 </Text>
               </TouchableOpacity>
@@ -759,7 +759,7 @@ export const SettingsScreen: React.FC<{ navigation: any }> = ({ navigation }) =>
                 style={{ opacity: newBudget.trim() !== '' ? 1 : 0.5 }}
                 className="flex-1 py-3 rounded-xl bg-primary items-center"
               >
-                <Text style={{ fontFamily: 'Montserrat-Bold', color: 'white', fontWeight: 'bold' }}>
+                <Text style={{ fontFamily: 'Montserrat-Bold', color: 'white' }}>
                   Save
                 </Text>
               </TouchableOpacity>
@@ -778,7 +778,7 @@ export const SettingsScreen: React.FC<{ navigation: any }> = ({ navigation }) =>
         <View className="flex-1 justify-center items-center px-6" style={{ backgroundColor: 'rgba(0, 0, 0, 0.85)' }}>
           <GlassCard className="w-full max-w-sm p-6 border border-white/10">
             <Text 
-              style={{ fontFamily: 'Montserrat-Bold', fontSize: 22, color: 'white', marginBottom: 12, textAlign: 'center', fontWeight: 'bold' }}
+              style={{ fontFamily: 'Montserrat-Bold', fontSize: 22, color: 'white', marginBottom: 12, textAlign: 'center' }}
             >
               Firebase Sync settings
             </Text>
@@ -801,7 +801,7 @@ export const SettingsScreen: React.FC<{ navigation: any }> = ({ navigation }) =>
                       : 'bg-white/5 border-white/10'
                   }`}
                 >
-                  <Text style={{ fontFamily: 'Montserrat-Bold', color: 'white', fontWeight: 'bold', fontSize: 15 }}>
+                  <Text style={{ fontFamily: 'Montserrat-Bold', color: 'white', fontSize: 15 }}>
                     {freq === 'realtime' ? 'Real-time (Instant)' : freq.charAt(0).toUpperCase() + freq.slice(1)}
                   </Text>
                   {syncFrequency === freq && (
@@ -823,7 +823,7 @@ export const SettingsScreen: React.FC<{ navigation: any }> = ({ navigation }) =>
                 className="w-full py-3 rounded-xl flex-row justify-center items-center gap-2"
               >
                 <MaterialIcon name="sync" color="white" size={18} />
-                <Text style={{ fontFamily: 'Montserrat-Bold', color: 'white', fontWeight: 'bold' }}>
+                <Text style={{ fontFamily: 'Montserrat-Bold', color: 'white' }}>
                   {syncing ? 'Syncing...' : 'Sync Data Now'}
                 </Text>
               </TouchableOpacity>
@@ -833,7 +833,7 @@ export const SettingsScreen: React.FC<{ navigation: any }> = ({ navigation }) =>
               onPress={() => setShowSyncFreqModal(false)}
               className="w-full py-3 rounded-xl bg-white/5 border border-white/10 items-center"
             >
-              <Text style={{ fontFamily: 'Montserrat-Bold', color: '#c2c6d6', fontWeight: 'bold' }}>
+              <Text style={{ fontFamily: 'Montserrat-Bold', color: '#c2c6d6' }}>
                 Done
               </Text>
             </TouchableOpacity>

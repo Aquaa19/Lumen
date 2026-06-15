@@ -61,7 +61,7 @@ export const SelfTransferScreen: React.FC<{ navigation: any }> = ({ navigation }
                 </Text>
                 <Text 
                   allowFontScaling={false}
-                  style={{ fontSize: 20, lineHeight: 28, fontWeight: 'bold', fontFamily: 'Montserrat-Bold', color: 'white' }}
+                  style={{ fontSize: 20, lineHeight: 28, fontFamily: 'Montserrat-Bold', color: 'white' }}
                 >
                   {fromSource === 'cash' ? 'Cash Wallet' : 'UPI Account'}
                 </Text>
@@ -87,7 +87,7 @@ export const SelfTransferScreen: React.FC<{ navigation: any }> = ({ navigation }
                 </Text>
                 <Text 
                   allowFontScaling={false}
-                  style={{ fontSize: 20, lineHeight: 28, fontWeight: 'bold', fontFamily: 'Montserrat-Bold', color: 'white' }}
+                  style={{ fontSize: 20, lineHeight: 28, fontFamily: 'Montserrat-Bold', color: 'white' }}
                 >
                   {toSource === 'cash' ? 'Cash Wallet' : 'UPI Account'}
                 </Text>
@@ -110,7 +110,7 @@ export const SelfTransferScreen: React.FC<{ navigation: any }> = ({ navigation }
             <View className="flex-row justify-center items-center h-20 border border-white/10 rounded-2xl bg-white/[0.03] px-4">
               <Text 
                 allowFontScaling={false}
-                style={{ fontSize: 48, lineHeight: 56, fontWeight: 'bold', fontFamily: 'Montserrat-Bold', color: 'white' }}
+                style={{ fontSize: 48, lineHeight: 56, fontFamily: 'Montserrat-Bold', color: 'white' }}
                 className="mr-1"
               >
                 ₹
@@ -122,7 +122,7 @@ export const SelfTransferScreen: React.FC<{ navigation: any }> = ({ navigation }
                 onChangeText={handleAmountChange}
                 placeholder="0.00"
                 placeholderTextColor="rgba(225, 226, 236, 0.2)"
-                style={{ fontSize: 48, lineHeight: 56, fontWeight: 'bold', fontFamily: 'Montserrat-Bold', color: 'white', padding: 0 }}
+                style={{ fontSize: 48, lineHeight: 56, fontFamily: 'Montserrat-Bold', color: 'white', padding: 0 }}
                 className="flex-1 h-full"
               />
             </View>
@@ -136,7 +136,7 @@ export const SelfTransferScreen: React.FC<{ navigation: any }> = ({ navigation }
           style={{ height: 56 }}
           className="w-full self-stretch rounded-2xl bg-primary-container items-center justify-center shadow-[0_0_25px_rgba(77,142,255,0.4)]"
         >
-          <Text style={{ fontFamily: 'Montserrat-Bold', fontSize: 16, color: '#00285d', fontWeight: 'bold' }}>
+          <Text style={{ fontFamily: 'Montserrat-Bold', fontSize: 16, color: '#00285d' }}>
             Confirm Transfer
           </Text>
         </TouchableOpacity>

@@ -239,7 +239,7 @@ export const SplashScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
           
           <Animated.View style={{ opacity: textOpacity }}>
             <Text 
-              style={{ fontFamily: 'Montserrat-Bold' , fontSize: 28, fontWeight: 'bold', letterSpacing: 1 }} 
+              style={{ fontFamily: 'Montserrat-Bold' , fontSize: 28, letterSpacing: 1 }} 
               className="mt-8 text-primary text-center"
             >
               Lumen

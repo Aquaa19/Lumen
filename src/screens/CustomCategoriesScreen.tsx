@@ -172,7 +172,7 @@ export const CustomCategoriesScreen: React.FC<{ navigation: any }> = ({ navigati
                     <View className="flex-row items-center gap-1.5 flex-1">
                       <Text
                         numberOfLines={1}
-                        style={{ fontFamily: 'Montserrat-Bold', fontSize: 16, color: '#FFFFFF', fontWeight: 'bold' }}
+                        style={{ fontFamily: 'Montserrat-Bold', fontSize: 16, color: '#FFFFFF' }}
                         className="flex-shrink"
                       >
                         {cat.name}
@@ -202,7 +202,6 @@ export const CustomCategoriesScreen: React.FC<{ navigation: any }> = ({ navigati
                         style={{
                           fontFamily: 'Montserrat-Bold',
                           color: '#FFFFFF',
-                          fontWeight: 'bold',
                           padding: 0,
                           flex: 1,
                           textAlign: 'right',
@@ -251,7 +250,7 @@ export const CustomCategoriesScreen: React.FC<{ navigation: any }> = ({ navigati
           <TouchableOpacity style={StyleSheet.absoluteFill} activeOpacity={1} onPress={() => setIsModalVisible(false)} />
 
           <GlassCard className="w-full border border-white/10 relative z-10" contentClassName="p-6 gap-5">
-            <Text style={{ fontFamily: 'Montserrat-Bold' }} className="text-white text-xl font-bold text-center">
+            <Text style={{ fontFamily: 'Montserrat-Bold' }} className="text-white text-xl text-center">
               {modalMode === 'create' ? 'Create Custom Category' : 'Edit Category'}
             </Text>
 
@@ -273,7 +272,6 @@ export const CustomCategoriesScreen: React.FC<{ navigation: any }> = ({ navigati
                   paddingHorizontal: 16,
                   paddingVertical: 12,
                   color: 'white',
-                  fontWeight: 'bold',
                   fontSize: 14,
                 }}
               />

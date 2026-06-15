@@ -166,7 +166,7 @@ export const DashboardScreen: React.FC<{ navigation: any }> = ({ navigation }) =
               </Text>
               <Text 
                 allowFontScaling={false}
-                style={{ fontSize: 48, lineHeight: 56, fontWeight: 'bold', fontFamily: 'Montserrat-Bold', color: 'white', letterSpacing: -1 }}
+                style={{ fontSize: 48, lineHeight: 56, fontFamily: 'Montserrat-Bold', color: 'white', letterSpacing: -1 }}
                 className="tracking-tight mb-4"
               >
                 ₹{currentBalance.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
@@ -179,6 +179,7 @@ export const DashboardScreen: React.FC<{ navigation: any }> = ({ navigation }) =
                 />
                 <Text 
                   allowFontScaling={false}
+                  style={{ fontFamily: 'Montserrat-Medium' }}
                   className={netWeeklyChange >= 0 ? "text-green-400 text-sm font-medium" : "text-red-400 text-sm font-medium"}
                 >
                   {netWeeklyChange >= 0 ? `+₹${netWeeklyChange.toLocaleString('en-IN')}` : `-₹${Math.abs(netWeeklyChange).toLocaleString('en-IN')}`} this week
@@ -219,7 +220,7 @@ export const DashboardScreen: React.FC<{ navigation: any }> = ({ navigation }) =
           <View className="px-6 mt-8">
             <Text 
               allowFontScaling={false}
-              style={{ fontSize: 20, lineHeight: 28, fontWeight: 'bold', fontFamily: 'Montserrat-Bold', color: 'white' }}
+              style={{ fontSize: 20, lineHeight: 28, fontFamily: 'Montserrat-Bold', color: 'white' }}
               className="mb-4"
             >
               Financial Goals
@@ -269,7 +270,7 @@ export const DashboardScreen: React.FC<{ navigation: any }> = ({ navigation }) =
         <View className="px-6 mt-8">
           <Text 
             allowFontScaling={false}
-            style={{ fontSize: 20, lineHeight: 28, fontWeight: 'bold', fontFamily: 'Montserrat-Bold', color: 'white' }}
+            style={{ fontSize: 20, lineHeight: 28, fontFamily: 'Montserrat-Bold', color: 'white' }}
             className="mb-4"
           >
             Monthly Budget
@@ -296,9 +297,9 @@ export const DashboardScreen: React.FC<{ navigation: any }> = ({ navigation }) =
                     <View className="flex-row justify-between items-center mb-1.5">
                       <View className="flex-row items-center gap-2">
                         <MaterialIcon name={catInfo.icon} size={18} color={catInfo.color} />
-                        <Text style={{ fontSize: 16, lineHeight: 24, fontWeight: '500', fontFamily: 'Montserrat-Regular', color: 'white' }}>{catName}</Text>
+                        <Text style={{ fontSize: 16, lineHeight: 24, fontFamily: 'Montserrat-Medium', color: 'white' }}>{catName}</Text>
                       </View>
-                      <Text style={{ fontSize: 14, lineHeight: 20, fontWeight: 'bold', fontFamily: 'Montserrat-Bold', color: 'white' }}>
+                      <Text style={{ fontSize: 14, lineHeight: 20, fontFamily: 'Montserrat-Bold', color: 'white' }}>
                         ₹{spent.toLocaleString('en-IN')} / ₹{limit.toLocaleString('en-IN')} ({Math.round(progress)}%)
                       </Text>
                     </View>
@@ -323,14 +324,14 @@ export const DashboardScreen: React.FC<{ navigation: any }> = ({ navigation }) =
           <View className="flex-row justify-between items-center mb-4">
             <Text 
               allowFontScaling={false}
-              style={{ fontSize: 20, lineHeight: 28, fontWeight: 'bold', fontFamily: 'Montserrat-Bold', color: 'white' }}
+              style={{ fontSize: 20, lineHeight: 28, fontFamily: 'Montserrat-Bold', color: 'white' }}
             >
               Recent Activity
             </Text>
             <TouchableOpacity onPress={() => navigation.navigate('Payments')}>
               <Text 
                 allowFontScaling={false}
-                style={{ fontSize: 12, fontWeight: '700', fontFamily: 'Montserrat-Bold', color: '#e1e2ec' }}
+                style={{ fontSize: 12, fontFamily: 'Montserrat-Bold', color: '#e1e2ec' }}
                 className="font-label-caps text-primary text-xs font-semibold tracking-wider"
               >
                 SEE ALL
@@ -361,15 +362,15 @@ export const DashboardScreen: React.FC<{ navigation: any }> = ({ navigation }) =
                       );
                     })()}
                     <View>
-                      <Text className="text-[15px] text-white font-semibold">{tx.title}</Text>
-                      <Text className="text-xs text-white font-bold mt-0.5">
+                      <Text style={{ fontFamily: 'Montserrat-SemiBold' }} className="text-[15px] text-white">{tx.title}</Text>
+                      <Text style={{ fontFamily: 'Montserrat-Medium' }} className="text-xs text-white mt-0.5">
                         {tx.title === 'Photocopy' ? 'Yesterday' : tx.date} • {tx.timestamp}
                       </Text>
                     </View>
                   </View>
                    <Text 
                     style={{ fontFamily: 'Montserrat-Bold' }} 
-                    className={`text-base font-bold ${
+                    className={`text-base ${
                       tx.type === 'income' ? 'text-green-400' : tx.type === 'transfer' ? 'text-primary' : 'text-error'
                     }`}
                   >
@@ -444,7 +445,7 @@ export const DashboardScreen: React.FC<{ navigation: any }> = ({ navigation }) =
       >
         {/* Option Label */}
         <View className="bg-surface-container-high/90 border border-white/10 px-3 py-1.5 rounded-xl shadow-md mr-3">
-          <Text style={{ fontFamily: 'Montserrat-Bold' }} className="text-white text-xs font-bold uppercase tracking-wider">
+          <Text style={{ fontFamily: 'Montserrat-Bold' }} className="text-white text-xs uppercase tracking-wider">
             {item.label}
           </Text>
         </View>

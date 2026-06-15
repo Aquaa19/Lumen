@@ -75,20 +75,20 @@ export const TransactionDetailScreen: React.FC<{ route: any; navigation: any }> 
             
             <Text 
               allowFontScaling={false}
-              style={{ fontSize: 28, lineHeight: 34, fontWeight: 'bold', fontFamily: 'Montserrat-Bold', color: '#e1e2ec' }}
+              style={{ fontSize: 28, lineHeight: 34, fontFamily: 'Montserrat-Bold', color: '#e1e2ec' }}
               className="mb-1 text-center"
             >
               {tx.title}
             </Text>
             <Text 
               style={{ fontFamily: 'Montserrat-Bold' }} 
-              className="font-body-sm text-body-sm text-on-surface-variant mb-6 text-center font-bold"
+              className="font-body-sm text-body-sm text-on-surface-variant mb-6 text-center"
             >
               {tx.timestamp}, {tx.date}
             </Text>
             <Text 
               allowFontScaling={false}
-              style={{ fontSize: 48, lineHeight: 56, fontWeight: 'bold', fontFamily: 'Montserrat-Bold', color: '#ffb4ab', letterSpacing: -1 }}
+              style={{ fontSize: 48, lineHeight: 56, fontFamily: 'Montserrat-Bold', color: '#ffb4ab', letterSpacing: -1 }}
               className="mb-6 text-center"
             >
               -₹{tx.amount.toFixed(2)}
@@ -98,13 +98,13 @@ export const TransactionDetailScreen: React.FC<{ route: any; navigation: any }> 
             <View className="flex-row gap-3">
               <View className="bg-primary/10 border border-primary/20 rounded-full px-4 py-1.5 flex-row items-center gap-1">
                 <MaterialIcon name="credit_card" color="#3B82F6" size={12} />
-                <Text style={{ fontFamily: 'Montserrat-Bold' }} className="font-label-caps text-label-caps text-primary uppercase font-bold">
+                <Text style={{ fontFamily: 'Montserrat-Bold' }} className="font-label-caps text-label-caps text-primary uppercase">
                   {tx.source}
                 </Text>
               </View>
               <View className="bg-white/5 border border-white/10 rounded-full px-4 py-1.5 flex-row items-center gap-1">
                 <MaterialIcon name="local_offer" color="#8c909f" size={12} />
-                <Text style={{ fontFamily: 'Montserrat-Bold' }} className="font-label-caps text-label-caps text-on-surface-variant uppercase font-bold">
+                <Text style={{ fontFamily: 'Montserrat-Bold' }} className="font-label-caps text-label-caps text-on-surface-variant uppercase">
                   {tx.category}
                 </Text>
               </View>
@@ -121,7 +121,7 @@ export const TransactionDetailScreen: React.FC<{ route: any; navigation: any }> 
             />
             <Text 
               allowFontScaling={false}
-              style={{ fontSize: 20, lineHeight: 28, fontWeight: 'semibold', fontFamily: 'Montserrat-Bold', color: 'white' }}
+              style={{ fontSize: 20, lineHeight: 28, fontFamily: 'Montserrat-Bold', color: 'white' }}
               className="mb-4"
             >
               Transaction Details

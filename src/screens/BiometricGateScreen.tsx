@@ -84,7 +84,7 @@ export const BiometricGateScreen: React.FC<{ navigation: any }> = ({ navigation 
         <View className="items-center justify-center flex-1 w-full gap-8">
           <Text 
             allowFontScaling={false}
-            style={{ fontSize: 32, fontWeight: 'bold', fontFamily: 'Montserrat-Bold', color: '#FFFFFF', letterSpacing: 2 }}
+            style={{ fontSize: 32, fontFamily: 'Montserrat-Bold', color: '#FFFFFF', letterSpacing: 2 }}
             className="mb-2"
           >
             LUMEN

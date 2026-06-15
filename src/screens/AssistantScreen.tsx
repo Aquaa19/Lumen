@@ -27,7 +27,8 @@ const PRESETS = [
 ];
 
 export const AssistantScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
-  const { transactions, monthlyBudget, userProfile, categories, categoryLimits, addGoal, goals } = useMockStore();
+  const { transactions, monthlyBudget, userProfile, categories, categoryLimits, addGoal, goals, customApiKey } = useMockStore();
+  const activeApiKey = customApiKey || GEMINI_API_KEY;
   const insets = useSafeAreaInsets();
   const bottomMargin = Math.max(insets.bottom, 12);
   const inputPaddingBottom = bottomMargin + 70 + 12; // 70 navbar height + 12 spacing
@@ -78,8 +79,8 @@ export const AssistantScreen: React.FC<{ navigation: any }> = ({ navigation }) =
   }, [inputPaddingBottom]);
 
   const fetchGeminiResponse = async (userMessage: string, chatHistory: { role: string; text: string }[]) => {
-    if (!GEMINI_API_KEY) {
-      throw new Error("Gemini API key is not configured. Please check your .env file and restart Metro with 'npm start -- --clear-cache'.");
+    if (!activeApiKey) {
+      throw new Error("No API key configured. Please add your Gemini API key in Settings → Custom AI API Key.");
     }
 
     const systemInstruction = `You are Lumen Assistant, a premium AI personal finance advisor.
@@ -113,7 +114,7 @@ Provide clear, helpful, and concise insights. Format currency in ₹ (INR). Use 
     for (const model of GEMINI_MODELS) {
       try {
         const response = await fetch(
-          `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GEMINI_API_KEY}`,
+          `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${activeApiKey}`,
           {
             method: 'POST',
             headers: {
@@ -274,16 +275,15 @@ Provide clear, helpful, and concise insights. Format currency in ₹ (INR). Use 
                 <View className="flex-1">
                   <Text 
                     style={{ fontFamily: 'Montserrat-Bold', letterSpacing: 0.8, color: "white" }} 
-                    className="font-label-caps text-[11px] text-on-surface-variant/80 uppercase font-bold"
+                    className="font-label-caps text-[11px] text-on-surface-variant/80 uppercase"
                   >
                     Proactive Insight
                   </Text>
                   <Text 
                     style={{ fontFamily: 'Montserrat-Bold', fontSize: 16, lineHeight: 22 }}
-                    className="font-bold mt-1.5"
                   >
-                    <Text className={isPositive ? "text-emerald-400" : "text-red-400"}>{highlightText}{"\n"}</Text>
-                    <Text className="text-white">{insightText}</Text>
+                    <Text style={{ fontFamily: 'Montserrat-Bold', fontSize: 16, color: isPositive ? '#34d399' : '#f87171' }}>{highlightText}{"\n"}</Text>
+                    <Text style={{ fontFamily: 'Montserrat-Regular', fontSize: 15, color: 'white' }}>{insightText}</Text>
                   </Text>
                 </View>
               </GlassCard>
@@ -319,8 +319,7 @@ Provide clear, helpful, and concise insights. Format currency in ₹ (INR). Use 
                 }`}
               >
                 <Text 
-                  style={{ fontFamily: 'Montserrat-Bold', fontSize: 17, lineHeight: 24 }}
-                  className="text-white font-bold"
+                  style={{ fontFamily: msg.sender === 'user' ? 'Montserrat-SemiBold' : 'Montserrat-Regular', fontSize: 16, lineHeight: 24, color: 'white' }}
                 >
                   {msg.text}
                 </Text>
@@ -386,7 +385,7 @@ Provide clear, helpful, and concise insights. Format currency in ₹ (INR). Use 
                 className="px-4 py-2.5 rounded-full bg-white/5 border border-white/10"
                 activeOpacity={0.8}
               >
-                <Text style={{ fontFamily: 'Montserrat-Bold', color: '#FFFFFF' }} className="text-xs font-bold">
+                <Text style={{ fontFamily: 'Montserrat-Bold', color: '#FFFFFF' }} className="text-xs">
                   {preset.label}
                 </Text>
               </TouchableOpacity>
@@ -401,7 +400,7 @@ Provide clear, helpful, and concise insights. Format currency in ₹ (INR). Use 
             value={inputText}
             onChangeText={setInputText}
             onSubmitEditing={handleSend}
-            className="flex-1 h-full text-white font-body"
+            style={{ flex: 1, fontFamily: 'Montserrat-Regular', fontSize: 15, color: 'white', height: '100%' }}
           />
           <TouchableOpacity onPress={handleSend} className="w-10 h-10 items-center justify-center">
             <MaterialIcon name="send" color="#3B82F6" size={20} />

@@ -128,14 +128,14 @@ export const TransactionDetailScreen: React.FC<{ route: any; navigation: any }> 
             </Text>
             <View className="gap-3">
               <View className="flex-row justify-between items-center py-2 border-b border-white/5">
-                <Text style={{ fontFamily: 'Montserrat-Bold' }} className="font-body-sm text-body-sm text-on-surface-variant font-bold">Status</Text>
-                <Text style={{ fontFamily: 'Montserrat-Bold' }} className="font-body-sm text-body-sm text-emerald-400 font-semibold">
+                <Text style={{ fontFamily: 'Montserrat-SemiBold', fontSize: 14, color: '#c2c6d6' }}>Status</Text>
+                <Text style={{ fontFamily: 'Montserrat-SemiBold', fontSize: 14, color: '#34d399' }}>
                   ✓ Completed
                 </Text>
               </View>
               <View className="flex-row justify-between items-center py-2">
-                <Text style={{ fontFamily: 'Montserrat-Bold' }} className="font-body-sm text-body-sm text-on-surface-variant font-bold">Note</Text>
-                <Text style={{ fontFamily: 'Montserrat-Regular' }} className="font-body-sm text-body-sm text-on-surface italic">
+                <Text style={{ fontFamily: 'Montserrat-SemiBold', fontSize: 14, color: '#c2c6d6' }}>Note</Text>
+                <Text style={{ fontFamily: 'Montserrat-Regular', fontSize: 14, color: '#e1e2ec', fontStyle: 'italic' }}>
                   {tx.note || 'None'}
                 </Text>
               </View>
@@ -151,7 +151,7 @@ export const TransactionDetailScreen: React.FC<{ route: any; navigation: any }> 
             className="w-full py-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex-row items-center justify-center gap-2"
           >
             <MaterialIcon name="undo" color="#34d399" size={18} />
-            <Text style={{ fontFamily: 'Montserrat-Bold' }} className="text-emerald-400 font-title-md text-title-md font-bold">
+            <Text style={{ fontFamily: 'Montserrat-Bold', color: '#34d399', fontSize: 16 }}>
               Mark as Refunded
             </Text>
           </TouchableOpacity>
@@ -164,7 +164,7 @@ export const TransactionDetailScreen: React.FC<{ route: any; navigation: any }> 
             activeOpacity={0.85}
             className="w-full py-4 rounded-xl border border-error/30 items-center justify-center"
           >
-            <Text style={{ fontFamily: 'Montserrat-Bold' }} className="text-error font-title-md text-title-md font-bold">
+            <Text style={{ fontFamily: 'Montserrat-Bold', color: '#ffb4ab', fontSize: 16 }}>
               Delete Record
             </Text>
           </TouchableOpacity>

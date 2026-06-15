@@ -159,8 +159,8 @@ export const PaymentsScreen: React.FC<{ navigation: any }> = ({ navigation }) =>
                         );
                       })()}
                       <View>
-                        <Text className="text-[15px] text-white font-semibold">{tx.title}</Text>
-                        <Text className="text-xs text-white font-bold mt-0.5">
+                        <Text style={{ fontFamily: 'Montserrat-SemiBold', fontSize: 15, color: 'white' }}>{tx.title}</Text>
+                        <Text style={{ fontFamily: 'Montserrat-Regular', fontSize: 12, color: 'rgba(255,255,255,0.6)', marginTop: 2 }}>
                           {tx.date} • {tx.timestamp}
                         </Text>
                       </View>

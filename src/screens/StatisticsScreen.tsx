@@ -238,15 +238,13 @@ export const StatisticsScreen: React.FC<{ navigation: any }> = ({ navigation }) 
                   {/* Text Block */}
                   <View className="flex-col items-start">
                     <Text 
-                      style={{ fontFamily: 'Montserrat-Bold', fontSize: 22 }} 
-                      className="text-white font-bold"
+                      style={{ fontFamily: 'Montserrat-Bold', fontSize: 22, color: 'white' }}
                     >
                       {stat.name}
                     </Text>
                     {/* Transaction Count */}
                     <Text 
-                      style={{ fontSize: 16, fontFamily: 'Montserrat-Bold', color: 'rgba(255, 255, 255, 0.63)' }} // Changed to Bold, added exact size
-                      className="text-xl mt-0.5" // Removed text-sm, added font-bold
+                      style={{ fontSize: 14, fontFamily: 'Montserrat-Regular', color: 'rgba(255, 255, 255, 0.63)', marginTop: 2 }}
                     >
                       {stat.count} Transactions
                     </Text>
@@ -256,14 +254,12 @@ export const StatisticsScreen: React.FC<{ navigation: any }> = ({ navigation }) 
                 {/* Right Group (Metrics) */}
                 <View className="flex-col items-end">
                   <Text 
-                    style={{ fontFamily: 'Montserrat-Bold', fontSize: 22 }} 
-                    className="text-white font-bold"
+                    style={{ fontFamily: 'Montserrat-Bold', fontSize: 22, color: 'white' }}
                   >
                     ₹{stat.amount.toFixed(2)}
                   </Text>
                   <Text 
-                    style={{ fontFamily: 'Montserrat-Bold' }} 
-                    className="text-sm text-primary font-bold mt-1"
+                    style={{ fontFamily: 'Montserrat-Bold', fontSize: 13, color: '#adc6ff', marginTop: 4 }}
                   >
                     {stat.percentage}%
                   </Text>

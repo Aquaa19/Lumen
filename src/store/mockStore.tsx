@@ -42,6 +42,8 @@ interface MockStoreContextProps {
   deleteCategory: (name: string) => void;
   addGoal: (title: string, targetAmount: number, deadline: string) => void;
   deleteGoal: (id: string) => void;
+  customApiKey: string;
+  setCustomApiKey: (key: string) => void;
   backupExists: boolean;
   checkingBackup: boolean;
   restoreBackup: () => Promise<void>;
@@ -68,6 +70,13 @@ export const MockStoreProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   const [backupExists, setBackupExists] = useState(false);
   const [checkingBackup, setCheckingBackup] = useState(true);
   const [pendingBackup, setPendingBackup] = useState<any>(null);
+
+  const [customApiKey, setCustomApiKeyState] = useState<string>(() => storage.getString('customApiKey') ?? '');
+
+  const setCustomApiKey = (key: string) => {
+    setCustomApiKeyState(key);
+    storage.set('customApiKey', key);
+  };
 
   const [syncFrequency, setSyncFrequencyState] = useState<'realtime' | 'daily' | 'weekly' | 'never' | 'manual'>(() => {
     return (storage.getString('syncFrequency') as any) || 'realtime';
@@ -1000,6 +1009,8 @@ export const MockStoreProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         deleteCategory,
         addGoal,
         deleteGoal,
+        customApiKey,
+        setCustomApiKey,
         backupExists,
         checkingBackup,
         restoreBackup,

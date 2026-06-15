@@ -8,6 +8,7 @@ import MaterialIcon from '../components/MaterialIcon';
 import FingerprintIcon from '../public/assets/icons/FingerprintIcon';
 import TrashIcon from '../public/assets/icons/TrashIcon';
 import BiometricService from '../services/BiometricService';
+import AIIcon from '../public/assets/icons/AIIcon';
 
 const numpadRows = [
   ['1', '2', '3'],
@@ -18,7 +19,8 @@ const numpadRows = [
 export const SettingsScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
   const { 
     userProfile, logout, setBiometricLock, purgeData, setPinCode, setMonthlyBudget, 
-    pinCode, monthlyBudget, syncFrequency, setSyncFrequency, lastSyncTimestamp, triggerManualSync 
+    pinCode, monthlyBudget, syncFrequency, setSyncFrequency, lastSyncTimestamp, triggerManualSync,
+    customApiKey, setCustomApiKey
   } = useMockStore();
   
   const [showPurgeModal, setShowPurgeModal] = useState(false);
@@ -40,6 +42,9 @@ export const SettingsScreen: React.FC<{ navigation: any }> = ({ navigation }) =>
 
   const [showSyncFreqModal, setShowSyncFreqModal] = useState(false);
   const [syncing, setSyncing] = useState(false);
+
+  const [showApiKeyModal, setShowApiKeyModal] = useState(false);
+  const [apiKeyInput, setApiKeyInput] = useState('');
 
   const requireVerification = (action: () => void) => {
     setPendingAction(() => action);
@@ -374,6 +379,28 @@ export const SettingsScreen: React.FC<{ navigation: any }> = ({ navigation }) =>
                   </Text>
                   <Text style={{ fontFamily: 'Montserrat-Regular', fontSize: 13, color: '#8c909f' }}>
                     Frequency: {syncFrequency === 'realtime' ? 'Real-time' : syncFrequency.charAt(0).toUpperCase() + syncFrequency.slice(1)} • {formatLastSync()}
+                  </Text>
+                </View>
+              </View>
+              <MaterialIcon name="chevron_right" color="#8c909f" size={24} />
+            </GlassCard>
+          </TouchableOpacity>
+
+          <TouchableOpacity onPress={() => {
+            setApiKeyInput(customApiKey);
+            setShowApiKeyModal(true);
+          }} activeOpacity={0.9}>
+            <GlassCard contentClassName="flex-row items-center justify-between p-4">
+              <View className="flex-row items-center gap-3">
+                <View className="w-12 h-12 rounded-2xl bg-white/[0.06] items-center justify-center border border-white/5">
+                  <AIIcon size={22} />
+                </View>
+                <View>
+                  <Text style={{ fontFamily: 'Montserrat-Bold', fontSize: 20, color: 'white' }}>
+                    Custom AI API Key
+                  </Text>
+                  <Text style={{ fontFamily: 'Montserrat-Regular', fontSize: 13, color: '#8c909f' }}>
+                    {customApiKey ? 'Key set (tap to change)' : 'Using built-in key'}
                   </Text>
                 </View>
               </View>
@@ -838,6 +865,83 @@ export const SettingsScreen: React.FC<{ navigation: any }> = ({ navigation }) =>
               </Text>
             </TouchableOpacity>
           </GlassCard>
+        </View>
+      </Modal>
+
+      {/* Custom AI API Key Modal */}
+      <Modal
+        visible={showApiKeyModal}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setShowApiKeyModal(false)}
+      >
+        <View className="flex-1 justify-end" style={{ backgroundColor: 'rgba(0, 0, 0, 0.85)' }}>
+          <View className="bg-[#10131a] rounded-t-[32px] border-t border-white/10 p-6 pb-10">
+            <View className="w-12 h-1.5 bg-white/10 rounded-full self-center mb-6" />
+            <Text style={{ fontFamily: 'Montserrat-Bold', fontSize: 22, color: '#FFFFFF', textAlign: 'center', marginBottom: 6 }}>
+              Custom AI API Key
+            </Text>
+            <Text style={{ fontFamily: 'Montserrat-Regular', fontSize: 14, color: '#8c909f', textAlign: 'center', marginBottom: 24, lineHeight: 20 }}>
+              Paste your Gemini API key below. This overrides the built-in key and is stored only on your device.
+            </Text>
+
+            <TextInput
+              value={apiKeyInput}
+              onChangeText={setApiKeyInput}
+              placeholder="Paste your Gemini API key here..."
+              placeholderTextColor="rgba(255, 255, 255, 0.3)"
+              autoCapitalize="none"
+              autoCorrect={false}
+              multiline={false}
+              style={{
+                backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                borderWidth: 1,
+                borderColor: apiKeyInput ? '#3B82F6' : 'rgba(255, 255, 255, 0.1)',
+                borderRadius: 12,
+                color: 'white',
+                fontFamily: 'Montserrat-Regular',
+                fontSize: 13,
+                paddingHorizontal: 16,
+                paddingVertical: 14,
+                marginBottom: 16,
+              }}
+            />
+
+            <TouchableOpacity
+              onPress={() => {
+                setCustomApiKey(apiKeyInput.trim());
+                setShowApiKeyModal(false);
+                Alert.alert('Saved', apiKeyInput.trim() ? 'Custom API key saved successfully!' : 'Reverted to built-in key.');
+              }}
+              activeOpacity={0.85}
+              style={{ backgroundColor: '#3B82F6', borderRadius: 12, paddingVertical: 14, alignItems: 'center', marginBottom: 10 }}
+            >
+              <Text style={{ fontFamily: 'Montserrat-Bold', color: 'white', fontSize: 15 }}>Save Key</Text>
+            </TouchableOpacity>
+
+            {customApiKey ? (
+              <TouchableOpacity
+                onPress={() => {
+                  setCustomApiKey('');
+                  setApiKeyInput('');
+                  setShowApiKeyModal(false);
+                  Alert.alert('Cleared', 'Custom key removed. Using built-in key.');
+                }}
+                activeOpacity={0.85}
+                style={{ borderRadius: 12, paddingVertical: 12, alignItems: 'center', marginBottom: 8, backgroundColor: 'rgba(239,68,68,0.1)', borderWidth: 1, borderColor: 'rgba(239,68,68,0.3)' }}
+              >
+                <Text style={{ fontFamily: 'Montserrat-Bold', color: '#EF4444', fontSize: 14 }}>Clear Custom Key</Text>
+              </TouchableOpacity>
+            ) : null}
+
+            <TouchableOpacity
+              onPress={() => setShowApiKeyModal(false)}
+              activeOpacity={0.85}
+              style={{ paddingVertical: 12, alignItems: 'center' }}
+            >
+              <Text style={{ fontFamily: 'Montserrat-SemiBold', color: 'rgba(255,255,255,0.5)', fontSize: 14 }}>Cancel</Text>
+            </TouchableOpacity>
+          </View>
         </View>
       </Modal>
     </GlobalLayout>

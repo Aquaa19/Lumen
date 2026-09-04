@@ -10,7 +10,7 @@ interface GlobalBottomNavbarProps {
 }
 
 const TABS = [
-  { key: 'dashboard', label: 'Dashboard', icon: 'home', route: 'Dashboard' },
+  { key: 'dashboard', label: 'Home', icon: 'home', route: 'Dashboard' },
   { key: 'statistics', label: 'Statistics', icon: 'line_chart', route: 'Statistics' },
   { key: 'payments', label: 'Payments', icon: 'payment_logs', route: 'Payments' },
   { key: 'wallet', label: 'Wallet', icon: 'wallet', route: 'Wallet' },

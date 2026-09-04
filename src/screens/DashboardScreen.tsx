@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, Animated, StyleSheet } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Animated, StyleSheet, useWindowDimensions } from 'react-native';
 import { useMockStore } from '../store/mockStore';
 import { GlassCard } from '../components/GlassCard';
 import LogPaymentModal from '../components/LogPaymentModal';
@@ -18,7 +18,10 @@ export const DashboardScreen: React.FC<{ navigation: any }> = ({ navigation }) =
     cashBalance, upiBalance, transactions, categoryLimits, pinnedCategories, categories, goals, deleteGoal, monthlyBudget,
     includeCashInTotal, includeBankInTotal 
   } = useMockStore();
-  const activeTab = 'total';
+  const [activeTab, setActiveTab] = useState<'total' | 'upi' | 'cash'>('total');
+  const { width: screenWidth } = useWindowDimensions();
+  const cardWidth = Math.max(280, screenWidth - 48);
+  const carouselScrollRef = useRef<ScrollView>(null);
   const insets = useSafeAreaInsets();
   const bottomMargin = Math.max(insets.bottom, 12);
   const fabBottom = bottomMargin + 70 + 16; // 70 navbar height + 16 spacing
@@ -117,15 +120,20 @@ export const DashboardScreen: React.FC<{ navigation: any }> = ({ navigation }) =
     }
   });
 
-  const totalSpentThisWeek = thisWeeksTransactions
-    .filter(t => t.type === 'expense')
-    .reduce((sum, t) => sum + (t.amount ?? 0), 0);
+  // Weekly net change per account
+  const computeWeeklyNet = (source?: 'cash' | 'upi') => {
+    const list = source 
+      ? thisWeeksTransactions.filter(t => t.source === source)
+      : thisWeeksTransactions;
+    const spent = list.filter(t => t.type === 'expense').reduce((sum, t) => sum + (t.amount ?? 0), 0);
+    const income = list.filter(t => t.type === 'income').reduce((sum, t) => sum + (t.amount ?? 0), 0);
+    return income - spent;
+  };
 
-  const totalIncomeThisWeek = thisWeeksTransactions
-    .filter(t => t.type === 'income')
-    .reduce((sum, t) => sum + (t.amount ?? 0), 0);
-
-  const netWeeklyChange = totalIncomeThisWeek - totalSpentThisWeek;
+  const totalWeeklyNet = computeWeeklyNet();
+  const upiWeeklyNet = computeWeeklyNet('upi');
+  const cashWeeklyNet = computeWeeklyNet('cash');
+  const netWeeklyChange = activeTab === 'total' ? totalWeeklyNet : activeTab === 'upi' ? upiWeeklyNet : cashWeeklyNet;
 
   // Compute category budgets dynamically
   const getProgress = (spent: number, limit: number) => {
@@ -146,62 +154,295 @@ export const DashboardScreen: React.FC<{ navigation: any }> = ({ navigation }) =
     >
       <View className="flex-1 relative">
       <ScrollView contentContainerStyle={{ paddingBottom: 130 }} className="flex-1" showsVerticalScrollIndicator={false}>
-        {/* Dynamic Balance Card */}
-        <View className="px-6 mt-6 relative">
-          <GlassCard 
-            active={true} 
-            className="px-6" 
-            contentClassName="pt-3 pb-6"
-            backgroundChildren={
-              <GlowOrb 
-                size={260} 
-                color="#adc6ff" 
-                opacity={0.2} 
-                style={{ position: 'absolute', top: -130, right: -130 }} 
-                gradientId="balance-card-glow"
-              />
-            }
-          >
-            <View className="items-start w-full">
-              <View className="flex-row items-center justify-between w-full mb-2">
-                <Text 
-                  allowFontScaling={false}
-                  style={{ fontSize: 12, lineHeight: 16, fontFamily: 'Montserrat-Regular', color: 'rgba(194, 198, 214, 0.8)' }}
-                  className="uppercase tracking-wider"
+        {/* Segmented Account Switcher */}
+        <View className="px-6 mt-5 mb-3">
+          <View className="flex-row p-1 rounded-full bg-white/[0.04] border border-white/10">
+            {(
+              [
+                { id: 'total', label: 'Total' },
+                { id: 'upi', label: 'Bank (UPI)' },
+                { id: 'cash', label: 'Cash' },
+              ] as const
+            ).map((tab, idx) => {
+              const isActive = activeTab === tab.id;
+              return (
+                <TouchableOpacity
+                  key={tab.id}
+                  onPress={() => {
+                    setActiveTab(tab.id);
+                    carouselScrollRef.current?.scrollTo({ x: idx * (cardWidth + 12), animated: true });
+                  }}
+                  activeOpacity={0.8}
+                  className={`flex-1 py-1.5 rounded-full items-center justify-center ${
+                    isActive ? 'bg-primary/25 border border-primary/40' : ''
+                  }`}
                 >
-                  Total Balance
-                </Text>
-                {(!includeCashInTotal || !includeBankInTotal) && (
-                  <View className="px-2 py-0.5 rounded-full bg-white/10 border border-white/15">
-                    <Text style={{ fontSize: 10, fontFamily: 'Montserrat-SemiBold', color: '#93c5fd' }}>
-                      {includeBankInTotal ? 'Bank Only' : 'Cash Only'}
+                  <Text
+                    allowFontScaling={false}
+                    style={{
+                      fontFamily: isActive ? 'Montserrat-Bold' : 'Montserrat-Medium',
+                      fontSize: 12,
+                      color: isActive ? '#93c5fd' : 'rgba(194, 198, 214, 0.6)',
+                    }}
+                  >
+                    {tab.label}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+        </View>
+
+        {/* Swipeable Accounts Carousel */}
+        <ScrollView
+          ref={carouselScrollRef}
+          horizontal
+          pagingEnabled={false}
+          snapToInterval={cardWidth + 12}
+          snapToAlignment="start"
+          decelerationRate="fast"
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={{ paddingHorizontal: 24, gap: 12 }}
+          onMomentumScrollEnd={(e) => {
+            const offsetX = e.nativeEvent.contentOffset.x;
+            const index = Math.round(offsetX / (cardWidth + 12));
+            const tabs: ('total' | 'upi' | 'cash')[] = ['total', 'upi', 'cash'];
+            if (tabs[index] && tabs[index] !== activeTab) {
+              setActiveTab(tabs[index]);
+            }
+          }}
+        >
+          {/* Card 1: Total Balance */}
+          <View style={{ width: cardWidth }}>
+            <GlassCard
+              active={activeTab === 'total'}
+              contentClassName="pt-3 pb-6 px-6"
+              backgroundChildren={
+                <GlowOrb
+                  size={260}
+                  color="#adc6ff"
+                  opacity={0.2}
+                  style={{ position: 'absolute', top: -130, right: -130 }}
+                  gradientId="balance-card-glow-total"
+                />
+              }
+            >
+              <View className="items-start w-full">
+                <View className="flex-row items-center justify-between w-full mb-2">
+                  <View className="flex-row items-center gap-1.5">
+                    <MaterialIcon name="account_balance_wallet" size={16} color="#adc6ff" />
+                    <Text
+                      allowFontScaling={false}
+                      style={{ fontSize: 12, lineHeight: 16, fontFamily: 'Montserrat-Regular', color: 'rgba(194, 198, 214, 0.8)' }}
+                      className="uppercase tracking-wider"
+                    >
+                      Total Balance
                     </Text>
                   </View>
-                )}
-              </View>
-              <Text 
-                allowFontScaling={false}
-                style={{ fontSize: 48, lineHeight: 56, fontFamily: 'Montserrat-Bold', color: 'white', letterSpacing: -1 }}
-                className="tracking-tight mb-4"
-              >
-                ₹{currentBalance.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
-              </Text>
-              <View className="flex-row items-center gap-1.5">
-                <MaterialIcon 
-                  name={netWeeklyChange >= 0 ? "trending_up" : "trending_down"} 
-                  size={16} 
-                  color={netWeeklyChange >= 0 ? "#4ade80" : "#f87171"} 
-                />
-                <Text 
+                  <View className="px-2 py-0.5 rounded-full bg-white/10 border border-white/15">
+                    <Text style={{ fontSize: 10, fontFamily: 'Montserrat-SemiBold', color: '#93c5fd' }}>
+                      {includeBankInTotal && includeCashInTotal
+                        ? 'Bank + Cash'
+                        : includeBankInTotal
+                        ? 'Bank Only'
+                        : 'Cash Only'}
+                    </Text>
+                  </View>
+                </View>
+
+                <Text
                   allowFontScaling={false}
-                  style={{ fontFamily: 'Montserrat-Medium' }}
-                  className={netWeeklyChange >= 0 ? "text-green-400 text-sm font-medium" : "text-red-400 text-sm font-medium"}
+                  style={{ fontSize: 44, lineHeight: 52, fontFamily: 'Montserrat-Bold', color: 'white', letterSpacing: -1 }}
+                  className="tracking-tight mb-4"
                 >
-                  {netWeeklyChange >= 0 ? `+₹${netWeeklyChange.toLocaleString('en-IN')}` : `-₹${Math.abs(netWeeklyChange).toLocaleString('en-IN')}`} this week
+                  ₹{computedTotalBalance.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
                 </Text>
+
+                <View className="flex-row items-center justify-between w-full">
+                  <View className="flex-row items-center gap-1.5">
+                    <MaterialIcon
+                      name={totalWeeklyNet >= 0 ? "trending_up" : "trending_down"}
+                      size={16}
+                      color={totalWeeklyNet >= 0 ? "#4ade80" : "#f87171"}
+                    />
+                    <Text
+                      allowFontScaling={false}
+                      style={{ fontFamily: 'Montserrat-Medium' }}
+                      className={totalWeeklyNet >= 0 ? "text-green-400 text-sm font-medium" : "text-red-400 text-sm font-medium"}
+                    >
+                      {totalWeeklyNet >= 0 ? `+₹${totalWeeklyNet.toLocaleString('en-IN')}` : `-₹${Math.abs(totalWeeklyNet).toLocaleString('en-IN')}`} this week
+                    </Text>
+                  </View>
+                  <Text style={{ fontFamily: 'Montserrat-Regular', fontSize: 11, color: 'rgba(255,255,255,0.4)' }}>
+                    Swipe for accounts →
+                  </Text>
+                </View>
               </View>
-            </View>
-          </GlassCard>
+            </GlassCard>
+          </View>
+
+          {/* Card 2: Bank Account (UPI) */}
+          <View style={{ width: cardWidth }}>
+            <GlassCard
+              active={activeTab === 'upi'}
+              contentClassName="pt-3 pb-6 px-6"
+              backgroundChildren={
+                <GlowOrb
+                  size={260}
+                  color="#3B82F6"
+                  opacity={0.22}
+                  style={{ position: 'absolute', top: -130, right: -130 }}
+                  gradientId="balance-card-glow-upi"
+                />
+              }
+            >
+              <View className="items-start w-full">
+                <View className="flex-row items-center justify-between w-full mb-2">
+                  <View className="flex-row items-center gap-1.5">
+                    <MaterialIcon name="account_balance" size={16} color="#60a5fa" />
+                    <Text
+                      allowFontScaling={false}
+                      style={{ fontSize: 12, lineHeight: 16, fontFamily: 'Montserrat-Regular', color: 'rgba(194, 198, 214, 0.8)' }}
+                      className="uppercase tracking-wider"
+                    >
+                      Bank Account (UPI)
+                    </Text>
+                  </View>
+                  <View className={`px-2 py-0.5 rounded-full border ${
+                    includeBankInTotal ? 'bg-primary/20 border-primary/40' : 'bg-white/5 border-white/10'
+                  }`}>
+                    <Text style={{ fontSize: 10, fontFamily: 'Montserrat-SemiBold', color: includeBankInTotal ? '#60a5fa' : '#8c909f' }}>
+                      {includeBankInTotal ? 'In Total' : 'Excluded'}
+                    </Text>
+                  </View>
+                </View>
+
+                <Text
+                  allowFontScaling={false}
+                  style={{ fontSize: 44, lineHeight: 52, fontFamily: 'Montserrat-Bold', color: '#60a5fa', letterSpacing: -1 }}
+                  className="tracking-tight mb-4"
+                >
+                  ₹{safeUpiBalance.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                </Text>
+
+                <View className="flex-row items-center justify-between w-full">
+                  <View className="flex-row items-center gap-1.5">
+                    <MaterialIcon
+                      name={upiWeeklyNet >= 0 ? "trending_up" : "trending_down"}
+                      size={16}
+                      color={upiWeeklyNet >= 0 ? "#4ade80" : "#f87171"}
+                    />
+                    <Text
+                      allowFontScaling={false}
+                      style={{ fontFamily: 'Montserrat-Medium' }}
+                      className={upiWeeklyNet >= 0 ? "text-green-400 text-sm font-medium" : "text-red-400 text-sm font-medium"}
+                    >
+                      {upiWeeklyNet >= 0 ? `+₹${upiWeeklyNet.toLocaleString('en-IN')}` : `-₹${Math.abs(upiWeeklyNet).toLocaleString('en-IN')}`} this week
+                    </Text>
+                  </View>
+                  <Text style={{ fontFamily: 'Montserrat-Regular', fontSize: 11, color: 'rgba(96,165,250,0.6)' }}>
+                    Online / UPI
+                  </Text>
+                </View>
+              </View>
+            </GlassCard>
+          </View>
+
+          {/* Card 3: Cash Wallet */}
+          <View style={{ width: cardWidth }}>
+            <GlassCard
+              active={activeTab === 'cash'}
+              contentClassName="pt-3 pb-6 px-6"
+              backgroundChildren={
+                <GlowOrb
+                  size={260}
+                  color="#34d399"
+                  opacity={0.18}
+                  style={{ position: 'absolute', top: -130, right: -130 }}
+                  gradientId="balance-card-glow-cash"
+                />
+              }
+            >
+              <View className="items-start w-full">
+                <View className="flex-row items-center justify-between w-full mb-2">
+                  <View className="flex-row items-center gap-1.5">
+                    <MaterialIcon name="payments" size={16} color="#34d399" />
+                    <Text
+                      allowFontScaling={false}
+                      style={{ fontSize: 12, lineHeight: 16, fontFamily: 'Montserrat-Regular', color: 'rgba(194, 198, 214, 0.8)' }}
+                      className="uppercase tracking-wider"
+                    >
+                      Cash on Hand
+                    </Text>
+                  </View>
+                  <View className={`px-2 py-0.5 rounded-full border ${
+                    includeCashInTotal ? 'bg-emerald-500/20 border-emerald-500/40' : 'bg-white/5 border-white/10'
+                  }`}>
+                    <Text style={{ fontSize: 10, fontFamily: 'Montserrat-SemiBold', color: includeCashInTotal ? '#34d399' : '#8c909f' }}>
+                      {includeCashInTotal ? 'In Total' : 'Excluded'}
+                    </Text>
+                  </View>
+                </View>
+
+                <Text
+                  allowFontScaling={false}
+                  style={{ fontSize: 44, lineHeight: 52, fontFamily: 'Montserrat-Bold', color: '#34d399', letterSpacing: -1 }}
+                  className="tracking-tight mb-4"
+                >
+                  ₹{safeCashBalance.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                </Text>
+
+                <View className="flex-row items-center justify-between w-full">
+                  <View className="flex-row items-center gap-1.5">
+                    <MaterialIcon
+                      name={cashWeeklyNet >= 0 ? "trending_up" : "trending_down"}
+                      size={16}
+                      color={cashWeeklyNet >= 0 ? "#4ade80" : "#f87171"}
+                    />
+                    <Text
+                      allowFontScaling={false}
+                      style={{ fontFamily: 'Montserrat-Medium' }}
+                      className={cashWeeklyNet >= 0 ? "text-green-400 text-sm font-medium" : "text-red-400 text-sm font-medium"}
+                    >
+                      {cashWeeklyNet >= 0 ? `+₹${cashWeeklyNet.toLocaleString('en-IN')}` : `-₹${Math.abs(cashWeeklyNet).toLocaleString('en-IN')}`} this week
+                    </Text>
+                  </View>
+                  <Text style={{ fontFamily: 'Montserrat-Regular', fontSize: 11, color: 'rgba(52,211,153,0.6)' }}>
+                    Physical Cash
+                  </Text>
+                </View>
+              </View>
+            </GlassCard>
+          </View>
+        </ScrollView>
+
+        {/* Carousel Pagination Dots */}
+        <View className="flex-row justify-center items-center gap-2 mt-3 mb-1">
+          {(
+            [
+              { id: 'total', color: '#adc6ff' },
+              { id: 'upi', color: '#60a5fa' },
+              { id: 'cash', color: '#34d399' },
+            ] as const
+          ).map((dot, idx) => {
+            const isActive = activeTab === dot.id;
+            return (
+              <TouchableOpacity
+                key={dot.id}
+                onPress={() => {
+                  setActiveTab(dot.id);
+                  carouselScrollRef.current?.scrollTo({ x: idx * (cardWidth + 12), animated: true });
+                }}
+                activeOpacity={0.8}
+                style={{
+                  width: isActive ? 20 : 6,
+                  height: 6,
+                  borderRadius: 3,
+                  backgroundColor: isActive ? dot.color : 'rgba(255, 255, 255, 0.2)',
+                }}
+              />
+            );
+          })}
         </View>
 
         {/* Weekly Spending Limit Card (only when monthly budget is configured) */}
@@ -337,12 +578,21 @@ export const DashboardScreen: React.FC<{ navigation: any }> = ({ navigation }) =
         {/* Recent Activity List */}
         <View className="px-6 mt-8">
           <View className="flex-row justify-between items-center mb-4">
-            <Text 
-              allowFontScaling={false}
-              style={{ fontSize: 20, lineHeight: 28, fontFamily: 'Montserrat-Bold', color: 'white' }}
-            >
-              Recent Activity
-            </Text>
+            <View className="flex-row items-center gap-2">
+              <Text 
+                allowFontScaling={false}
+                style={{ fontSize: 20, lineHeight: 28, fontFamily: 'Montserrat-Bold', color: 'white' }}
+              >
+                Recent Activity
+              </Text>
+              {activeTab !== 'total' && (
+                <View className="px-2 py-0.5 rounded-full bg-white/10 border border-white/10">
+                  <Text style={{ fontSize: 10, fontFamily: 'Montserrat-Medium', color: activeTab === 'cash' ? '#34d399' : '#60a5fa' }}>
+                    {activeTab === 'cash' ? 'Cash' : 'Bank (UPI)'}
+                  </Text>
+                </View>
+              )}
+            </View>
             <TouchableOpacity onPress={() => navigation.navigate('Payments')}>
               <Text 
                 allowFontScaling={false}
@@ -356,6 +606,15 @@ export const DashboardScreen: React.FC<{ navigation: any }> = ({ navigation }) =
           <GlassCard className="p-0">
             {(() => {
               const recentTxs = filteredTransactions.slice(0, 10);
+              if (recentTxs.length === 0) {
+                return (
+                  <View className="py-6 items-center justify-center">
+                    <Text style={{ fontFamily: 'Montserrat-Regular' }} className="text-on-surface-variant text-sm">
+                      No recent transactions for {activeTab === 'cash' ? 'Cash' : activeTab === 'upi' ? 'Bank (UPI)' : 'this account'}
+                    </Text>
+                  </View>
+                );
+              }
               return recentTxs.map((tx, idx) => (
                 <TouchableOpacity
                   key={tx.id}

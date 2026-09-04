@@ -380,7 +380,7 @@ export const SettingsScreen: React.FC<{ navigation: any }> = ({ navigation }) =>
             <View className="flex-row items-center justify-between mb-3">
               <View className="flex-row items-center gap-3">
                 <View className="w-12 h-12 rounded-2xl bg-white/[0.06] items-center justify-center border border-white/5">
-                  <MaterialIcon name="account_balance_wallet" color="#3B82F6" size={24} />
+                  <MaterialIcon name="currency_rupee" color="#3B82F6" size={24} />
                 </View>
                 <View>
                   <Text style={{ fontFamily: 'Montserrat-Bold', fontSize: 18, color: 'white' }}>
@@ -512,7 +512,7 @@ export const SettingsScreen: React.FC<{ navigation: any }> = ({ navigation }) =>
             <GlassCard contentClassName="flex-row items-center justify-between p-4 border border-amber-500/20 bg-amber-500/5">
               <View className="flex-row items-center gap-3">
                 <View className="w-12 h-12 rounded-2xl bg-amber-500/10 items-center justify-center border border-amber-500/20">
-                  <MaterialIcon name="restart_alt" size={24} color="#F59E0B" />
+                  <MaterialIcon name="broom" size={24} color="#F59E0B" />
                 </View>
                 <View>
                   <Text style={{ fontFamily: 'Montserrat-Bold', fontSize: 20, color: '#F59E0B' }}>

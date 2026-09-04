@@ -53,7 +53,14 @@ export const TransactionDetailScreen: React.FC<{ route: any; navigation: any }> 
             />
             {/* Icon Container */}
             {(() => {
-              const catConfig = categories.find(c => c.name === tx.category) || { color: '#94a3b8', bgColor: 'rgba(148, 163, 184, 0.1)', icon: 'category' };
+              const isIncome = tx.type === 'income';
+              const isTransfer = tx.type === 'transfer';
+              const catConfig = isIncome 
+                ? { color: '#4ade80', bgColor: 'rgba(74, 222, 128, 0.15)', icon: 'trending_up' }
+                : isTransfer
+                ? { color: '#60a5fa', bgColor: 'rgba(96, 165, 250, 0.15)', icon: 'swap_horiz' }
+                : categories.find(c => c.name === tx.category) || { color: '#94a3b8', bgColor: 'rgba(148, 163, 184, 0.1)', icon: 'category' };
+
               return (
                 <View 
                   style={{ 
@@ -88,10 +95,16 @@ export const TransactionDetailScreen: React.FC<{ route: any; navigation: any }> 
             </Text>
             <Text 
               allowFontScaling={false}
-              style={{ fontSize: 48, lineHeight: 56, fontFamily: 'Montserrat-Bold', color: '#ffb4ab', letterSpacing: -1 }}
+              style={{ 
+                fontSize: 48, 
+                lineHeight: 56, 
+                fontFamily: 'Montserrat-Bold', 
+                color: tx.type === 'income' ? '#4ade80' : tx.type === 'transfer' ? '#adc6ff' : '#ffb4ab', 
+                letterSpacing: -1 
+              }}
               className="mb-6 text-center"
             >
-              -₹{tx.amount.toFixed(2)}
+              {tx.type === 'income' ? '+' : tx.type === 'transfer' ? '' : '-'}₹{tx.amount.toFixed(2)}
             </Text>
 
             {/* Badges Container */}
@@ -145,16 +158,18 @@ export const TransactionDetailScreen: React.FC<{ route: any; navigation: any }> 
 
         {/* Action Buttons */}
         <View className="gap-3 mb-4">
-          <TouchableOpacity
-            onPress={handleRefund}
-            activeOpacity={0.85}
-            className="w-full py-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex-row items-center justify-center gap-2"
-          >
-            <MaterialIcon name="undo" color="#34d399" size={18} />
-            <Text style={{ fontFamily: 'Montserrat-Bold', color: '#34d399', fontSize: 16 }}>
-              Mark as Refunded
-            </Text>
-          </TouchableOpacity>
+          {tx.type === 'expense' && (
+            <TouchableOpacity
+              onPress={handleRefund}
+              activeOpacity={0.85}
+              className="w-full py-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex-row items-center justify-center gap-2"
+            >
+              <MaterialIcon name="undo" color="#34d399" size={18} />
+              <Text style={{ fontFamily: 'Montserrat-Bold', color: '#34d399', fontSize: 16 }}>
+                Mark as Refunded
+              </Text>
+            </TouchableOpacity>
+          )}
 
           <TouchableOpacity
             onPress={() => {

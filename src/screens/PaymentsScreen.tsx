@@ -10,7 +10,7 @@ import LinearGradient from 'react-native-linear-gradient';
 export const PaymentsScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
   const { transactions, categories } = useMockStore();
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedDate, setSelectedDate] = useState(new Date(2026, 5, 14)); // June 2026
+  const [selectedDate, setSelectedDate] = useState(new Date());
 
   const months = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
   const monthNames = [

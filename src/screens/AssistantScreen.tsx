@@ -163,7 +163,7 @@ export const AssistantScreen: React.FC<{ navigation: any }> = ({ navigation }) =
     }
 
     const systemInstruction = `You are Lumen Assistant, a premium AI personal finance advisor with agentic execution powers.
-Today's date is 2026-06-14.
+Today's date is ${new Date().toISOString().split('T')[0]}.
 The user's name is ${userProfile.name}.
 Monthly Budget: ₹${monthlyBudget}.
 Categories available: ${categories.map(c => `${c.name} (Budget: ₹${categoryLimits[c.name] || 0})`).join(', ')}.

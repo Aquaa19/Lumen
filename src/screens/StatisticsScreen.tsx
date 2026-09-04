@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
 import Svg, { Path, Defs, LinearGradient as SvgLinearGradient, Stop, Filter, FeGaussianBlur, Circle, G } from 'react-native-svg';
@@ -18,13 +18,41 @@ export const StatisticsScreen: React.FC<{ navigation: any }> = ({ navigation }) 
   // 70 (Navbar Height) + exact bottom margin + 4px (to protect the drop shadow)
   const bottomPadding = 70 + navbarBottomMargin + 4;
   
-  // Compute total spent dynamically (only expenses)
-  const totalSpent = transactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0);
+  // Real-time dynamic month selector
+  const [selectedDate, setSelectedDate] = useState(new Date());
 
-  // Compute category breakdown metrics
+  const months = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+  const monthNames = [
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December'
+  ];
+
+  const handlePrevMonth = () => {
+    setSelectedDate(prev => new Date(prev.getFullYear(), prev.getMonth() - 1, 1));
+  };
+
+  const handleNextMonth = () => {
+    setSelectedDate(prev => new Date(prev.getFullYear(), prev.getMonth() + 1, 1));
+  };
+
+  const filterMonthStr = months[selectedDate.getMonth()];
+  const displayMonthYear = `${monthNames[selectedDate.getMonth()]} ${selectedDate.getFullYear()}`;
+
+  // Filter transactions strictly for the active selected month
+  const monthTransactions = transactions.filter(t => {
+    if (!t) return false;
+    const parts = t.date.split(' ');
+    const txMonth = parts[1];
+    return txMonth === filterMonthStr;
+  });
+
+  // Compute total spent dynamically for this month (only expenses)
+  const totalSpent = monthTransactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + (t.amount ?? 0), 0);
+
+  // Compute category breakdown metrics for this month
   const categoryStats = categories.map(cat => {
-    const catTxs = transactions.filter(t => t.category === cat.name && t.type === 'expense');
-    const amount = catTxs.reduce((sum, t) => sum + t.amount, 0);
+    const catTxs = monthTransactions.filter(t => t.category === cat.name && t.type === 'expense');
+    const amount = catTxs.reduce((sum, t) => sum + (t.amount ?? 0), 0);
     const count = catTxs.length;
     const percentage = totalSpent > 0 ? Math.round((amount / totalSpent) * 100) : 0;
     return {
@@ -85,7 +113,7 @@ export const StatisticsScreen: React.FC<{ navigation: any }> = ({ navigation }) 
           {/* Month Selector */}
           <View className="items-center mb-6">
             <View className="glass-panel rounded-full px-5 py-2.5 flex-row items-center gap-5 border border-white/10">
-              <TouchableOpacity>
+              <TouchableOpacity onPress={handlePrevMonth} activeOpacity={0.7}>
                 <MaterialIcon name="chevron_left" color="#c2c6d6" size={26} />
               </TouchableOpacity>
               
@@ -93,15 +121,15 @@ export const StatisticsScreen: React.FC<{ navigation: any }> = ({ navigation }) 
                 allowFontScaling={false}
                 style={{ 
                   fontFamily: 'Montserrat-Bold', 
-                  fontSize: 16,      // Explicitly sets a strong size
+                  fontSize: 16,
                   letterSpacing: 0.5 
                 }} 
                 className="text-white"
               >
-                June 2026
+                {displayMonthYear}
               </Text>
               
-              <TouchableOpacity>
+              <TouchableOpacity onPress={handleNextMonth} activeOpacity={0.7}>
                 <MaterialIcon name="chevron_right" color="#c2c6d6" size={26} />
               </TouchableOpacity>
             </View>

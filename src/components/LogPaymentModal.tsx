@@ -20,7 +20,19 @@ export const LogPaymentModal: React.FC<LogPaymentModalProps> = ({ visible, onClo
   const [title, setTitle] = useState('');
   const [containerWidth, setContainerWidth] = useState(0);
 
-  const toggleAnim = useRef(new Animated.Value(source === 'cash' ? 0 : 1)).current;
+  const toggleAnim = useRef(new Animated.Value(0)).current;
+
+  // Whenever modal opens, guarantee source is cash and pill is strictly at 0
+  useEffect(() => {
+    if (visible) {
+      setAmount('0');
+      setSource('cash');
+      toggleAnim.setValue(0);
+      setSelectedCategory('Others');
+      setNote('');
+      setTitle('');
+    }
+  }, [visible, toggleAnim]);
 
   useEffect(() => {
     Animated.spring(toggleAnim, {
@@ -63,6 +75,16 @@ export const LogPaymentModal: React.FC<LogPaymentModalProps> = ({ visible, onClo
     }
   };
 
+  const handleClose = () => {
+    setAmount('0');
+    setSource('cash');
+    toggleAnim.setValue(0);
+    setSelectedCategory('Others');
+    setNote('');
+    setTitle('');
+    onClose();
+  };
+
   const executeSave = (numericAmount: number) => {
     const finalTitle = title.trim() || selectedCategory;
     addTransaction(finalTitle, numericAmount, source, selectedCategory, note || undefined);
@@ -71,6 +93,7 @@ export const LogPaymentModal: React.FC<LogPaymentModalProps> = ({ visible, onClo
     // Reset inputs
     setAmount('0');
     setSource('cash');
+    toggleAnim.setValue(0);
     setSelectedCategory('Others');
     setNote('');
     setTitle('');
@@ -131,7 +154,7 @@ export const LogPaymentModal: React.FC<LogPaymentModalProps> = ({ visible, onClo
       visible={visible}
       transparent={true}
       animationType="slide"
-      onRequestClose={onClose}
+      onRequestClose={handleClose}
     >
       <View className="flex-1 justify-end">
         {/* Backdrop Blur */}
@@ -146,7 +169,7 @@ export const LogPaymentModal: React.FC<LogPaymentModalProps> = ({ visible, onClo
         <TouchableOpacity 
           style={StyleSheet.absoluteFill} 
           activeOpacity={1} 
-          onPress={onClose} 
+          onPress={handleClose} 
         />
 
         {/* Modal Sheet Container */}

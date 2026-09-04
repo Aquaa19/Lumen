@@ -104,7 +104,7 @@ export const DashboardScreen: React.FC<{ navigation: any }> = ({ navigation }) =
       JUL: 6, AUG: 7, SEP: 8, OCT: 9, NOV: 10, DEC: 11
     };
     const month = months[monthStr] ?? 0;
-    const year = 2026;
+    const year = new Date().getFullYear();
     return new Date(year, month, day);
   };
 
@@ -524,55 +524,82 @@ export const DashboardScreen: React.FC<{ navigation: any }> = ({ navigation }) =
 
         {/* Budget Progress Bars */}
         <View className="px-6 mt-8">
-          <Text 
-            allowFontScaling={false}
-            style={{ fontSize: 20, lineHeight: 28, fontFamily: 'Montserrat-Bold', color: 'white' }}
-            className="mb-4"
-          >
-            Monthly Budget
-          </Text>
-          <GlassCard contentClassName="p-4">
-            {pinnedCategories.length === 0 ? (
-              <Text style={{ fontFamily: 'Montserrat-Regular' }} className="text-on-surface-variant text-center py-4">
-                No pinned categories. Configure them in Settings under Custom Categories.
-              </Text>
-            ) : (
-              pinnedCategories.map((catName, idx) => {
-                const spent = filteredTransactions.filter(t => t.category === catName).reduce((sum, t) => sum + (t.amount ?? 0), 0);
-                const limit = categoryLimits[catName] ?? 0;
-                const progress = getProgress(spent, limit);
-                
-                // Get matching category properties (color, icon)
-                const catInfo = categories.find(c => c.name === catName) ?? {
-                  icon: 'category',
-                  color: '#94a3b8'
-                };
+          {(() => {
+            const monthsList = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+            const currentMonthCode = monthsList[now.getMonth()];
+            const monthNames = [
+              'January', 'February', 'March', 'April', 'May', 'June',
+              'July', 'August', 'September', 'October', 'November', 'December'
+            ];
+            const currentMonthLabel = `${monthNames[now.getMonth()]} ${now.getFullYear()}`;
 
-                return (
-                  <View key={catName} className={idx < pinnedCategories.length - 1 ? "mb-5" : ""}>
-                    <View className="flex-row justify-between items-center mb-1.5">
-                      <View className="flex-row items-center gap-2">
-                        <MaterialIcon name={catInfo.icon} size={18} color={catInfo.color} />
-                        <Text style={{ fontSize: 16, lineHeight: 24, fontFamily: 'Montserrat-Medium', color: 'white' }}>{catName}</Text>
-                      </View>
-                      <Text style={{ fontSize: 14, lineHeight: 20, fontFamily: 'Montserrat-Bold', color: 'white' }}>
-                        ₹{spent.toLocaleString('en-IN')} / ₹{limit.toLocaleString('en-IN')} ({Math.round(progress)}%)
-                      </Text>
-                    </View>
-                    <View 
-                      style={{ height: 5 }} 
-                      className="w-full bg-[#13161d] rounded-full overflow-hidden"
-                    >
-                      <View 
-                        className="h-full rounded-full" 
-                        style={{ width: `${progress}%`, backgroundColor: catInfo.color }} 
-                      />
-                    </View>
+            // Filter expenses strictly for the active real-time month (auto-resets at month change)
+            const currentMonthExpenses = filteredTransactions.filter(t => {
+              if (!t || t.type !== 'expense') return false;
+              const parts = t.date.split(' ');
+              return parts[1] === currentMonthCode;
+            });
+
+            return (
+              <>
+                <View className="flex-row justify-between items-center mb-4">
+                  <Text 
+                    allowFontScaling={false}
+                    style={{ fontSize: 20, lineHeight: 28, fontFamily: 'Montserrat-Bold', color: 'white' }}
+                  >
+                    Monthly Budget
+                  </Text>
+                  <View className="px-2.5 py-1 rounded-full bg-white/[0.06] border border-white/10">
+                    <Text style={{ fontFamily: 'Montserrat-SemiBold', fontSize: 11, color: '#adc6ff' }}>
+                      {currentMonthLabel}
+                    </Text>
                   </View>
-                );
-              })
-            )}
-          </GlassCard>
+                </View>
+                <GlassCard contentClassName="p-4">
+                  {pinnedCategories.length === 0 ? (
+                    <Text style={{ fontFamily: 'Montserrat-Regular' }} className="text-on-surface-variant text-center py-4">
+                      No pinned categories. Configure them in Settings under Custom Categories.
+                    </Text>
+                  ) : (
+                    pinnedCategories.map((catName, idx) => {
+                      const spent = currentMonthExpenses.filter(t => t.category === catName).reduce((sum, t) => sum + (t.amount ?? 0), 0);
+                      const limit = categoryLimits[catName] ?? 0;
+                      const progress = getProgress(spent, limit);
+                      
+                      // Get matching category properties (color, icon)
+                      const catInfo = categories.find(c => c.name === catName) ?? {
+                        icon: 'category',
+                        color: '#94a3b8'
+                      };
+
+                      return (
+                        <View key={catName} className={idx < pinnedCategories.length - 1 ? "mb-5" : ""}>
+                          <View className="flex-row justify-between items-center mb-1.5">
+                            <View className="flex-row items-center gap-2">
+                              <MaterialIcon name={catInfo.icon} size={18} color={catInfo.color} />
+                              <Text style={{ fontSize: 16, lineHeight: 24, fontFamily: 'Montserrat-Medium', color: 'white' }}>{catName}</Text>
+                            </View>
+                            <Text style={{ fontSize: 14, lineHeight: 20, fontFamily: 'Montserrat-Bold', color: 'white' }}>
+                              ₹{spent.toLocaleString('en-IN')} / ₹{limit.toLocaleString('en-IN')} ({Math.round(progress)}%)
+                            </Text>
+                          </View>
+                          <View 
+                            style={{ height: 5 }} 
+                            className="w-full bg-[#13161d] rounded-full overflow-hidden"
+                          >
+                            <View 
+                              className="h-full rounded-full" 
+                              style={{ width: `${progress}%`, backgroundColor: catInfo.color }} 
+                            />
+                          </View>
+                        </View>
+                      );
+                    })
+                  )}
+                </GlassCard>
+              </>
+            );
+          })()}
         </View>
 
         {/* Recent Activity List */}
@@ -625,20 +652,26 @@ export const DashboardScreen: React.FC<{ navigation: any }> = ({ navigation }) =
                 >
                   <View className="flex-row items-center gap-3.5">
                     {(() => {
-                      const catConfig = categories.find(c => c.name === tx.category) || { color: '#94a3b8', bgColor: 'rgba(148, 163, 184, 0.1)', icon: 'category' };
+                      const isIncome = tx.type === 'income';
+                      const isTransfer = tx.type === 'transfer';
+                      const defaultCat = categories.find(c => c.name === tx.category) || { color: '#94a3b8', bgColor: 'rgba(148, 163, 184, 0.1)', icon: 'category' };
+                      const iconName = isIncome ? 'trending_up' : isTransfer ? 'swap_horiz' : defaultCat.icon;
+                      const iconColor = isIncome ? '#4ade80' : isTransfer ? '#60a5fa' : defaultCat.color;
+                      const iconBg = isIncome ? 'rgba(74, 222, 128, 0.15)' : isTransfer ? 'rgba(96, 165, 250, 0.15)' : defaultCat.bgColor;
+
                       return (
                         <View 
-                          style={{ backgroundColor: catConfig.bgColor, borderColor: catConfig.color + '33' }}
+                          style={{ backgroundColor: iconBg, borderColor: iconColor + '33' }}
                           className="w-11 h-11 rounded-full border items-center justify-center shadow-md"
                         >
-                          <MaterialIcon name={catConfig.icon as any} size={20} color={catConfig.color} />
+                          <MaterialIcon name={iconName as any} size={20} color={iconColor} />
                         </View>
                       );
                     })()}
                     <View>
                       <Text style={{ fontFamily: 'Montserrat-SemiBold' }} className="text-[15px] text-white">{tx.title}</Text>
-                      <Text style={{ fontFamily: 'Montserrat-Medium' }} className="text-xs text-white mt-0.5">
-                        {tx.title === 'Photocopy' ? 'Yesterday' : tx.date} • {tx.timestamp}
+                      <Text style={{ fontFamily: 'Montserrat-Medium' }} className="text-xs text-white/60 mt-0.5">
+                        {tx.date} • {tx.timestamp} • {tx.source.toUpperCase()}
                       </Text>
                     </View>
                   </View>

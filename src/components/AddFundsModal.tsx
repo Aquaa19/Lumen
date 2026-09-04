@@ -16,7 +16,16 @@ export const AddFundsModal: React.FC<AddFundsModalProps> = ({ visible, onClose }
   const [source, setSource] = useState<'cash' | 'upi'>('cash');
   const [containerWidth, setContainerWidth] = useState(0);
 
-  const toggleAnim = useRef(new Animated.Value(source === 'cash' ? 0 : 1)).current;
+  const toggleAnim = useRef(new Animated.Value(0)).current;
+
+  // Whenever modal opens, guarantee source is cash and pill is strictly at 0
+  useEffect(() => {
+    if (visible) {
+      setAmount('0');
+      setSource('cash');
+      toggleAnim.setValue(0);
+    }
+  }, [visible, toggleAnim]);
 
   useEffect(() => {
     Animated.spring(toggleAnim, {
@@ -59,6 +68,13 @@ export const AddFundsModal: React.FC<AddFundsModalProps> = ({ visible, onClose }
     }
   };
 
+  const handleClose = () => {
+    setAmount('0');
+    setSource('cash');
+    toggleAnim.setValue(0);
+    onClose();
+  };
+
   const handleSave = () => {
     const numericAmount = parseFloat(amount);
     if (isNaN(numericAmount) || numericAmount <= 0) return;
@@ -69,6 +85,7 @@ export const AddFundsModal: React.FC<AddFundsModalProps> = ({ visible, onClose }
     // Reset inputs
     setAmount('0');
     setSource('cash');
+    toggleAnim.setValue(0);
     onClose();
   };
 
@@ -77,7 +94,7 @@ export const AddFundsModal: React.FC<AddFundsModalProps> = ({ visible, onClose }
       visible={visible}
       transparent={true}
       animationType="slide"
-      onRequestClose={onClose}
+      onRequestClose={handleClose}
     >
       <View className="flex-1 justify-end">
         {/* Backdrop Blur */}
@@ -92,7 +109,7 @@ export const AddFundsModal: React.FC<AddFundsModalProps> = ({ visible, onClose }
         <TouchableOpacity 
           style={StyleSheet.absoluteFill} 
           activeOpacity={1} 
-          onPress={onClose} 
+          onPress={handleClose} 
         />
 
         {/* Modal Sheet Container */}

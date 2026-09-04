@@ -9,11 +9,11 @@ import TotalBalanceIcon from '../public/assets/icons/TotalBalanceIcon';
 import CashIcon from '../public/assets/icons/CashIcon';
 
 export const WalletScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
-  const { cashBalance, upiBalance } = useMockStore();
+  const { cashBalance, upiBalance, includeCashInTotal, includeBankInTotal } = useMockStore();
 
   const safeCashBalance = typeof cashBalance === 'number' && !isNaN(cashBalance) ? cashBalance : 0;
   const safeUpiBalance = typeof upiBalance === 'number' && !isNaN(upiBalance) ? upiBalance : 0;
-  const totalBalance = safeCashBalance + safeUpiBalance;
+  const totalBalance = (includeCashInTotal ? safeCashBalance : 0) + (includeBankInTotal ? safeUpiBalance : 0);
 
   return (
     <GlobalLayout
@@ -57,17 +57,28 @@ export const WalletScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
               className="w-full p-6 border border-white/10"
               contentClassName="items-start"
             >
-              <View className="flex-row items-center gap-3 mb-2">
-                <View className="w-10 h-10 rounded-full bg-primary/20 items-center justify-center border border-primary/30">
-                  <TotalBalanceIcon size={22} />
+              <View className="flex-row items-center justify-between w-full mb-2">
+                <View className="flex-row items-center gap-3">
+                  <View className="w-10 h-10 rounded-full bg-primary/20 items-center justify-center border border-primary/30">
+                    <TotalBalanceIcon size={22} />
+                  </View>
+                  <Text 
+                    allowFontScaling={false}
+                    style={{ fontSize: 14, fontFamily: 'Montserrat-Bold', color: '#adc6ff' }}
+                    className="uppercase tracking-wider"
+                  >
+                    Total Combined Balance
+                  </Text>
                 </View>
-                <Text 
-                  allowFontScaling={false}
-                  style={{ fontSize: 14, fontFamily: 'Montserrat-Bold', color: '#adc6ff' }}
-                  className="uppercase tracking-wider"
-                >
-                  Total Combined Balance
-                </Text>
+                <View className="px-2.5 py-0.5 rounded-full bg-white/10 border border-white/15">
+                  <Text style={{ fontSize: 10, fontFamily: 'Montserrat-SemiBold', color: '#93c5fd' }}>
+                    {includeBankInTotal && includeCashInTotal
+                      ? 'Bank + Cash'
+                      : includeBankInTotal
+                      ? 'Bank Only'
+                      : 'Cash Only'}
+                  </Text>
+                </View>
               </View>
               <Text 
                 allowFontScaling={false}

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, Image, Alert, Switch, ScrollView, TextInput, Modal } from 'react-native';
+import { View, Text, TouchableOpacity, Image, Alert, Switch, ScrollView, TextInput, Modal, StyleSheet } from 'react-native';
+import { BlurView } from '@react-native-community/blur';
 import { useMockStore } from '../store/mockStore';
 import { GlassCard } from '../components/GlassCard';
 import GlobalLayout from '../components/GlobalLayout';
@@ -20,7 +21,9 @@ export const SettingsScreen: React.FC<{ navigation: any }> = ({ navigation }) =>
   const { 
     userProfile, logout, setBiometricLock, purgeData, setPinCode, setMonthlyBudget, 
     pinCode, monthlyBudget, syncFrequency, setSyncFrequency, lastSyncTimestamp, triggerManualSync,
-    customApiKey, setCustomApiKey
+    customApiKey, setCustomApiKey,
+    includeCashInTotal, includeBankInTotal, setIncludeCashInTotal, setIncludeBankInTotal,
+    clearBalances
   } = useMockStore();
   
   const [showPurgeModal, setShowPurgeModal] = useState(false);
@@ -47,10 +50,32 @@ export const SettingsScreen: React.FC<{ navigation: any }> = ({ navigation }) =>
   const [apiKeyInput, setApiKeyInput] = useState('');
 
   const requireVerification = (action: () => void) => {
+    if (!pinCode && !userProfile.biometricLock) {
+      action();
+      return;
+    }
     setPendingAction(() => action);
     setVerificationPin('');
     setVerificationError(null);
     setVerificationVisible(true);
+  };
+
+  const handleClearBalancesPress = () => {
+    Alert.alert(
+      'Clear Balances',
+      'Are you sure you want to reset both Bank (UPI) and Cash balances to ₹0.00? Your transaction history will remain intact.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { 
+          text: 'Reset to ₹0', 
+          style: 'destructive',
+          onPress: async () => {
+            await clearBalances();
+            Alert.alert('Success', 'Bank and Cash balances have been reset to ₹0.00.');
+          } 
+        }
+      ]
+    );
   };
 
   const handleExportCSV = () => {
@@ -350,6 +375,80 @@ export const SettingsScreen: React.FC<{ navigation: any }> = ({ navigation }) =>
             </GlassCard>
           </TouchableOpacity>
 
+          {/* Total Balance Sources Option */}
+          <GlassCard contentClassName="p-4">
+            <View className="flex-row items-center justify-between mb-3">
+              <View className="flex-row items-center gap-3">
+                <View className="w-12 h-12 rounded-2xl bg-white/[0.06] items-center justify-center border border-white/5">
+                  <MaterialIcon name="account_balance_wallet" color="#3B82F6" size={24} />
+                </View>
+                <View>
+                  <Text style={{ fontFamily: 'Montserrat-Bold', fontSize: 18, color: 'white' }}>
+                    Total Balance Sources
+                  </Text>
+                  <Text style={{ fontFamily: 'Montserrat-Regular', fontSize: 12, color: '#8c909f' }}>
+                    Select accounts to sum into Total Balance
+                  </Text>
+                </View>
+              </View>
+              <View className="px-2.5 py-1 rounded-full bg-primary/15 border border-primary/30">
+                <Text style={{ fontFamily: 'Montserrat-Bold', fontSize: 11, color: '#60A5FA' }}>
+                  {includeBankInTotal && includeCashInTotal
+                    ? 'Bank + Cash'
+                    : includeBankInTotal
+                    ? 'Bank Only'
+                    : 'Cash Only'}
+                </Text>
+              </View>
+            </View>
+
+            {/* Bank (UPI) Sub-row */}
+            <View className="flex-row items-center justify-between py-2.5 px-3 mb-2 rounded-xl bg-white/[0.03] border border-white/5">
+              <View className="flex-row items-center gap-2.5">
+                <MaterialIcon name="account_balance" color="#60A5FA" size={20} />
+                <View>
+                  <Text style={{ fontFamily: 'Montserrat-SemiBold', fontSize: 15, color: 'white' }}>
+                    Bank Account (UPI)
+                  </Text>
+                  <Text style={{ fontFamily: 'Montserrat-Regular', fontSize: 11, color: '#8c909f' }}>
+                    Include electronic bank balance
+                  </Text>
+                </View>
+              </View>
+              <Switch
+                value={includeBankInTotal}
+                onValueChange={(val) => {
+                  setIncludeBankInTotal(val);
+                }}
+                trackColor={{ false: '#272a31', true: '#3B82F6' }}
+                thumbColor={includeBankInTotal ? '#3B82F6' : '#8c909f'}
+              />
+            </View>
+
+            {/* Cash Sub-row */}
+            <View className="flex-row items-center justify-between py-2.5 px-3 rounded-xl bg-white/[0.03] border border-white/5">
+              <View className="flex-row items-center gap-2.5">
+                <MaterialIcon name="payments" color="#34D399" size={20} />
+                <View>
+                  <Text style={{ fontFamily: 'Montserrat-SemiBold', fontSize: 15, color: 'white' }}>
+                    Cash on Hand
+                  </Text>
+                  <Text style={{ fontFamily: 'Montserrat-Regular', fontSize: 11, color: '#8c909f' }}>
+                    Include physical cash balance
+                  </Text>
+                </View>
+              </View>
+              <Switch
+                value={includeCashInTotal}
+                onValueChange={(val) => {
+                  setIncludeCashInTotal(val);
+                }}
+                trackColor={{ false: '#272a31', true: '#3B82F6' }}
+                thumbColor={includeCashInTotal ? '#3B82F6' : '#8c909f'}
+              />
+            </View>
+          </GlassCard>
+
           <TouchableOpacity onPress={() => requireVerification(() => {
               setNewBudget(monthlyBudget > 0 ? monthlyBudget.toString() : '');
               setShowBudgetModal(true);
@@ -408,6 +507,26 @@ export const SettingsScreen: React.FC<{ navigation: any }> = ({ navigation }) =>
             </GlassCard>
           </TouchableOpacity>
 
+          {/* Clear Balances */}
+          <TouchableOpacity onPress={() => requireVerification(handleClearBalancesPress)} activeOpacity={0.9}>
+            <GlassCard contentClassName="flex-row items-center justify-between p-4 border border-amber-500/20 bg-amber-500/5">
+              <View className="flex-row items-center gap-3">
+                <View className="w-12 h-12 rounded-2xl bg-amber-500/10 items-center justify-center border border-amber-500/20">
+                  <MaterialIcon name="restart_alt" size={24} color="#F59E0B" />
+                </View>
+                <View>
+                  <Text style={{ fontFamily: 'Montserrat-Bold', fontSize: 20, color: '#F59E0B' }}>
+                    Clear Balances
+                  </Text>
+                  <Text style={{ fontFamily: 'Montserrat-Regular', fontSize: 13, color: '#8c909f' }}>
+                    Reset Bank and Cash balances to ₹0.00
+                  </Text>
+                </View>
+              </View>
+              <MaterialIcon name="chevron_right" color="#F59E0B" size={24} />
+            </GlassCard>
+          </TouchableOpacity>
+
           <TouchableOpacity onPress={() => requireVerification(handlePurgeDataPress)} activeOpacity={0.9}>
             <GlassCard contentClassName="flex-row items-center justify-between p-4 border border-error/20 bg-error/5">
               <View className="flex-row items-center gap-3">
@@ -442,7 +561,14 @@ export const SettingsScreen: React.FC<{ navigation: any }> = ({ navigation }) =>
         animationType="slide"
         onRequestClose={() => setVerificationVisible(false)}
       >
-        <View className="flex-1 justify-end" style={{ backgroundColor: 'rgba(0, 0, 0, 0.85)' }}>
+        <View className="flex-1 justify-end">
+          <BlurView
+            style={StyleSheet.absoluteFill}
+            blurType="dark"
+            blurAmount={20}
+            reducedTransparencyFallbackColor="rgba(10, 13, 20, 0.85)"
+          />
+          <View style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(6, 9, 15, 0.75)' }]} />
           <View className="bg-[#10131a] rounded-t-[32px] border-t border-white/10 p-6 pb-8">
             <View className="items-center mb-6">
               <View className="w-12 h-1.5 bg-white/10 rounded-full mb-4" />
@@ -541,7 +667,14 @@ export const SettingsScreen: React.FC<{ navigation: any }> = ({ navigation }) =>
         animationType="slide"
         onRequestClose={() => setShowPinSetupModal(false)}
       >
-        <View className="flex-1 justify-end" style={{ backgroundColor: 'rgba(0, 0, 0, 0.85)' }}>
+        <View className="flex-1 justify-end">
+          <BlurView
+            style={StyleSheet.absoluteFill}
+            blurType="dark"
+            blurAmount={20}
+            reducedTransparencyFallbackColor="rgba(10, 13, 20, 0.85)"
+          />
+          <View style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(6, 9, 15, 0.75)' }]} />
           <View className="bg-[#10131a] rounded-t-[32px] border-t border-white/10 p-6 pb-8">
             <View className="items-center mb-6">
               <View className="w-12 h-1.5 bg-white/10 rounded-full mb-4" />
@@ -670,8 +803,31 @@ export const SettingsScreen: React.FC<{ navigation: any }> = ({ navigation }) =>
         animationType="fade"
         onRequestClose={() => setShowPurgeModal(false)}
       >
-        <View className="flex-1 justify-center items-center px-6" style={{ backgroundColor: 'rgba(0, 0, 0, 0.75)' }}>
-          <GlassCard className="w-full max-w-sm p-6 border border-error/20">
+        <View className="flex-1 justify-center items-center px-6">
+          <BlurView
+            style={StyleSheet.absoluteFill}
+            blurType="dark"
+            blurAmount={25}
+            reducedTransparencyFallbackColor="rgba(10, 13, 20, 0.85)"
+          />
+          <View style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(6, 9, 15, 0.8)' }]} />
+
+          <View 
+            style={{
+              width: '100%',
+              maxWidth: 360,
+              padding: 24,
+              borderRadius: 24,
+              backgroundColor: 'rgba(23, 27, 36, 0.98)',
+              borderWidth: 1,
+              borderColor: 'rgba(239, 68, 68, 0.3)',
+              elevation: 10,
+              shadowColor: '#000',
+              shadowOffset: { width: 0, height: 10 },
+              shadowOpacity: 0.5,
+              shadowRadius: 20,
+            }}
+          >
             <Text 
               style={{ fontFamily: 'Montserrat-Bold', fontSize: 22, color: '#EF4444', marginBottom: 12, textAlign: 'center' }}
             >
@@ -726,7 +882,7 @@ export const SettingsScreen: React.FC<{ navigation: any }> = ({ navigation }) =>
                 </Text>
               </TouchableOpacity>
             </View>
-          </GlassCard>
+          </View>
         </View>
       </Modal>
 
@@ -736,8 +892,31 @@ export const SettingsScreen: React.FC<{ navigation: any }> = ({ navigation }) =>
         animationType="fade"
         onRequestClose={() => setShowBudgetModal(false)}
       >
-        <View className="flex-1 justify-center items-center px-6" style={{ backgroundColor: 'rgba(0, 0, 0, 0.75)' }}>
-          <GlassCard className="w-full max-w-sm p-6 border border-white/10">
+        <View className="flex-1 justify-center items-center px-6">
+          <BlurView
+            style={StyleSheet.absoluteFill}
+            blurType="dark"
+            blurAmount={25}
+            reducedTransparencyFallbackColor="rgba(10, 13, 20, 0.85)"
+          />
+          <View style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(6, 9, 15, 0.8)' }]} />
+
+          <View 
+            style={{
+              width: '100%',
+              maxWidth: 360,
+              padding: 24,
+              borderRadius: 24,
+              backgroundColor: 'rgba(23, 27, 36, 0.98)',
+              borderWidth: 1,
+              borderColor: 'rgba(255, 255, 255, 0.15)',
+              elevation: 10,
+              shadowColor: '#000',
+              shadowOffset: { width: 0, height: 10 },
+              shadowOpacity: 0.5,
+              shadowRadius: 20,
+            }}
+          >
             <Text 
               style={{ fontFamily: 'Montserrat-Bold', fontSize: 22, color: 'white', marginBottom: 12, textAlign: 'center' }}
             >
@@ -791,7 +970,7 @@ export const SettingsScreen: React.FC<{ navigation: any }> = ({ navigation }) =>
                 </Text>
               </TouchableOpacity>
             </View>
-          </GlassCard>
+          </View>
         </View>
       </Modal>
 
@@ -802,8 +981,31 @@ export const SettingsScreen: React.FC<{ navigation: any }> = ({ navigation }) =>
         animationType="fade"
         onRequestClose={() => setShowSyncFreqModal(false)}
       >
-        <View className="flex-1 justify-center items-center px-6" style={{ backgroundColor: 'rgba(0, 0, 0, 0.85)' }}>
-          <GlassCard className="w-full max-w-sm p-6 border border-white/10">
+        <View className="flex-1 justify-center items-center px-6">
+          <BlurView
+            style={StyleSheet.absoluteFill}
+            blurType="dark"
+            blurAmount={25}
+            reducedTransparencyFallbackColor="rgba(10, 13, 20, 0.85)"
+          />
+          <View style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(6, 9, 15, 0.8)' }]} />
+
+          <View 
+            style={{
+              width: '100%',
+              maxWidth: 360,
+              padding: 24,
+              borderRadius: 24,
+              backgroundColor: 'rgba(23, 27, 36, 0.98)',
+              borderWidth: 1,
+              borderColor: 'rgba(255, 255, 255, 0.15)',
+              elevation: 10,
+              shadowColor: '#000',
+              shadowOffset: { width: 0, height: 10 },
+              shadowOpacity: 0.5,
+              shadowRadius: 20,
+            }}
+          >
             <Text 
               style={{ fontFamily: 'Montserrat-Bold', fontSize: 22, color: 'white', marginBottom: 12, textAlign: 'center' }}
             >
@@ -864,7 +1066,7 @@ export const SettingsScreen: React.FC<{ navigation: any }> = ({ navigation }) =>
                 Done
               </Text>
             </TouchableOpacity>
-          </GlassCard>
+          </View>
         </View>
       </Modal>
 
@@ -875,7 +1077,14 @@ export const SettingsScreen: React.FC<{ navigation: any }> = ({ navigation }) =>
         animationType="slide"
         onRequestClose={() => setShowApiKeyModal(false)}
       >
-        <View className="flex-1 justify-end" style={{ backgroundColor: 'rgba(0, 0, 0, 0.85)' }}>
+        <View className="flex-1 justify-end">
+          <BlurView
+            style={StyleSheet.absoluteFill}
+            blurType="dark"
+            blurAmount={20}
+            reducedTransparencyFallbackColor="rgba(10, 13, 20, 0.85)"
+          />
+          <View style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(6, 9, 15, 0.75)' }]} />
           <View className="bg-[#10131a] rounded-t-[32px] border-t border-white/10 p-6 pb-10">
             <View className="w-12 h-1.5 bg-white/10 rounded-full self-center mb-6" />
             <Text style={{ fontFamily: 'Montserrat-Bold', fontSize: 22, color: '#FFFFFF', textAlign: 'center', marginBottom: 6 }}>

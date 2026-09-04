@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { Platform } from 'react-native';
+import { Platform, Alert } from 'react-native';
 import { createMMKV } from 'react-native-mmkv';
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
@@ -55,6 +55,12 @@ interface MockStoreContextProps {
   setSyncFrequency: (freq: 'realtime' | 'daily' | 'weekly' | 'never' | 'manual') => void;
   lastSyncTimestamp: number;
   triggerManualSync: () => Promise<boolean>;
+  includeCashInTotal: boolean;
+  includeBankInTotal: boolean;
+  setIncludeCashInTotal: (enabled: boolean) => boolean;
+  setIncludeBankInTotal: (enabled: boolean) => boolean;
+  totalBalance: number;
+  clearBalances: () => Promise<void>;
 }
 
 const MockStoreContext = createContext<MockStoreContextProps | undefined>(undefined);
@@ -64,6 +70,14 @@ export const MockStoreProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   const [hasCompletedSetup, setHasCompletedSetup] = useState(() => storage.getBoolean('hasCompletedSetup') || false);
   const [cashBalance, setCashBalance] = useState(() => storage.getNumber('cashBalance') ?? 0);
   const [upiBalance, setUpiBalance] = useState(() => storage.getNumber('upiBalance') ?? 0);
+  const [includeCashInTotal, setIncludeCashInTotalState] = useState<boolean>(() => {
+    const saved = storage.getBoolean('includeCashInTotal');
+    return saved !== undefined ? saved : true;
+  });
+  const [includeBankInTotal, setIncludeBankInTotalState] = useState<boolean>(() => {
+    const saved = storage.getBoolean('includeBankInTotal');
+    return saved !== undefined ? saved : true;
+  });
   const [monthlyBudget, setMonthlyBudget] = useState(() => storage.getNumber('monthlyBudget') ?? 0);
   const [pinCode, setPinCode] = useState<string | null>(() => storage.getString('pinCode') ?? null);
 
@@ -206,6 +220,8 @@ export const MockStoreProvider: React.FC<{ children: React.ReactNode }> = ({ chi
                 if (data.pinnedCategories !== undefined) setPinnedCategories(data.pinnedCategories);
                 if (data.categories !== undefined) setCategories(data.categories);
                 if (data.goals !== undefined) setGoals(data.goals);
+                if (data.includeCashInTotal !== undefined) setIncludeCashInTotalState(data.includeCashInTotal);
+                if (data.includeBankInTotal !== undefined) setIncludeBankInTotalState(data.includeBankInTotal);
               } else {
                 // We have a cloud backup but no local setup. Prompt user!
                 setPendingBackup(data);
@@ -260,6 +276,8 @@ export const MockStoreProvider: React.FC<{ children: React.ReactNode }> = ({ chi
             if (data.pinnedCategories !== undefined) setPinnedCategories(data.pinnedCategories);
             if (data.categories !== undefined) setCategories(data.categories);
             if (data.goals !== undefined) setGoals(data.goals);
+            if (data.includeCashInTotal !== undefined) setIncludeCashInTotalState(data.includeCashInTotal);
+            if (data.includeBankInTotal !== undefined) setIncludeBankInTotalState(data.includeBankInTotal);
           }
         }
       }, err => console.log('Firestore user snapshot error:', err));
@@ -304,6 +322,14 @@ export const MockStoreProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   useEffect(() => {
     storage.set('upiBalance', upiBalance);
   }, [upiBalance]);
+
+  useEffect(() => {
+    storage.set('includeCashInTotal', includeCashInTotal);
+  }, [includeCashInTotal]);
+
+  useEffect(() => {
+    storage.set('includeBankInTotal', includeBankInTotal);
+  }, [includeBankInTotal]);
 
   useEffect(() => {
     storage.set('monthlyBudget', monthlyBudget);
@@ -377,6 +403,18 @@ export const MockStoreProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     }
   }, [pinCode, hasCompletedSetup, syncFrequency]);
 
+  // Sync balance source preferences up to Firestore
+  useEffect(() => {
+    const user = auth().currentUser;
+    if (user && hasCompletedSetup && syncFrequency === 'realtime') {
+      firestore()
+        .collection('users')
+        .doc(user.uid)
+        .update({ includeCashInTotal, includeBankInTotal })
+        .catch(err => console.log('Firestore balance sources sync failed:', err));
+    }
+  }, [includeCashInTotal, includeBankInTotal, hasCompletedSetup, syncFrequency]);
+
   // Periodic Daily / Weekly sync runner
   useEffect(() => {
     const checkPeriodicSync = async () => {
@@ -399,9 +437,9 @@ export const MockStoreProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
   const login = async () => {
     try {
-      await GoogleSignin.hasPlayServices();
+      await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
       const userInfo = await GoogleSignin.signIn();
-      const idToken = userInfo.data?.idToken;
+      const idToken = userInfo.data?.idToken || (userInfo as any)?.idToken;
       if (idToken) {
         const credential = auth.GoogleAuthProvider.credential(idToken);
         await auth().signInWithCredential(credential);
@@ -410,7 +448,9 @@ export const MockStoreProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       }
     } catch (err: any) {
       console.log('Google Sign-In failed:', err);
-      showToast(err?.message || 'Google Sign-In failed');
+      const errMsg = err?.message || 'Google Sign-In failed';
+      showToast(errMsg);
+      Alert.alert('Google Sign-In Error', errMsg);
     }
   };
 
@@ -466,6 +506,8 @@ export const MockStoreProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     });
     setPinnedCategories(['Food', 'Travel', 'Stationery']);
     setCategories(DEFAULT_CATEGORIES);
+    setIncludeCashInTotalState(true);
+    setIncludeBankInTotalState(true);
     storage.clearAll();
   };
 
@@ -492,7 +534,9 @@ export const MockStoreProvider: React.FC<{ children: React.ReactNode }> = ({ chi
           categoryLimits,
           pinnedCategories,
           categories,
-          goals
+          goals,
+          includeCashInTotal,
+          includeBankInTotal
         });
       } catch (err) {
         console.log('Error writing setup to Firestore:', err);
@@ -683,6 +727,26 @@ export const MockStoreProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     }
   };
 
+  const clearBalances = async () => {
+    setCashBalance(0);
+    setUpiBalance(0);
+    storage.set('cashBalance', 0);
+    storage.set('upiBalance', 0);
+
+    const user = auth().currentUser;
+    if (user) {
+      try {
+        await firestore()
+          .collection('users')
+          .doc(user.uid)
+          .update({ cashBalance: 0, upiBalance: 0 });
+      } catch (err) {
+        console.log('Firestore balance clear failed:', err);
+      }
+    }
+    showToast('Balances cleared to ₹0.00');
+  };
+
   const addCustomCategory = (name: string, icon: string, color: string) => {
     let bgColor = 'rgba(148, 163, 184, 0.1)';
     if (color.startsWith('#')) {
@@ -795,6 +859,34 @@ export const MockStoreProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     }, 3000);
   };
 
+  const setIncludeCashInTotal = (enabled: boolean): boolean => {
+    if (!enabled && !includeBankInTotal) {
+      Alert.alert(
+        'Action Not Allowed',
+        'At least one balance source must remain enabled in Total Balance.'
+      );
+      showToast('Cannot disable all balance sources');
+      return false;
+    }
+    setIncludeCashInTotalState(enabled);
+    return true;
+  };
+
+  const setIncludeBankInTotal = (enabled: boolean): boolean => {
+    if (!enabled && !includeCashInTotal) {
+      Alert.alert(
+        'Action Not Allowed',
+        'At least one balance source must remain enabled in Total Balance.'
+      );
+      showToast('Cannot disable all balance sources');
+      return false;
+    }
+    setIncludeBankInTotalState(enabled);
+    return true;
+  };
+
+  const totalBalance = (includeCashInTotal ? cashBalance : 0) + (includeBankInTotal ? upiBalance : 0);
+
   const triggerManualSync = async (): Promise<boolean> => {
     const user = auth().currentUser;
     if (!user) return false;
@@ -813,6 +905,8 @@ export const MockStoreProvider: React.FC<{ children: React.ReactNode }> = ({ chi
           pinnedCategories,
           categories,
           goals,
+          includeCashInTotal,
+          includeBankInTotal,
           lastSynced: Date.now()
         }, { merge: true });
 
@@ -892,6 +986,14 @@ export const MockStoreProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       storage.set('pinnedCategories', JSON.stringify(pendingBackup.pinnedCategories || []));
       storage.set('categories', JSON.stringify(pendingBackup.categories || []));
       storage.set('goals', JSON.stringify(pendingBackup.goals || []));
+      if (pendingBackup.includeCashInTotal !== undefined) {
+        setIncludeCashInTotalState(pendingBackup.includeCashInTotal);
+        storage.set('includeCashInTotal', pendingBackup.includeCashInTotal);
+      }
+      if (pendingBackup.includeBankInTotal !== undefined) {
+        setIncludeBankInTotalState(pendingBackup.includeBankInTotal);
+        storage.set('includeBankInTotal', pendingBackup.includeBankInTotal);
+      }
 
       // 3. Clear pending backup state
       setPendingBackup(null);
@@ -964,6 +1066,10 @@ export const MockStoreProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     storage.set('pinnedCategories', JSON.stringify(['Food', 'Travel', 'Stationery']));
     storage.set('categories', JSON.stringify(DEFAULT_CATEGORIES));
     storage.set('goals', JSON.stringify([]));
+    setIncludeCashInTotalState(true);
+    setIncludeBankInTotalState(true);
+    storage.set('includeCashInTotal', true);
+    storage.set('includeBankInTotal', true);
 
     setPendingBackup(null);
     setBackupExists(false);
@@ -1021,7 +1127,13 @@ export const MockStoreProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         syncFrequency,
         setSyncFrequency,
         lastSyncTimestamp,
-        triggerManualSync
+        triggerManualSync,
+        includeCashInTotal,
+        includeBankInTotal,
+        setIncludeCashInTotal,
+        setIncludeBankInTotal,
+        totalBalance,
+        clearBalances
       }}
     >
       {children}

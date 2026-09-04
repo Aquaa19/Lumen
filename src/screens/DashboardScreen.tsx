@@ -14,7 +14,10 @@ import { DEFAULT_CATEGORIES } from '../utils/constants';
 import SpeedIcon from '../public/assets/icons/SpeedIcon';
 
 export const DashboardScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
-  const { cashBalance, upiBalance, transactions, categoryLimits, pinnedCategories, categories, goals, deleteGoal, monthlyBudget } = useMockStore();
+  const { 
+    cashBalance, upiBalance, transactions, categoryLimits, pinnedCategories, categories, goals, deleteGoal, monthlyBudget,
+    includeCashInTotal, includeBankInTotal 
+  } = useMockStore();
   const activeTab = 'total';
   const insets = useSafeAreaInsets();
   const bottomMargin = Math.max(insets.bottom, 12);
@@ -74,8 +77,11 @@ export const DashboardScreen: React.FC<{ navigation: any }> = ({ navigation }) =
   const safeUpiBalance = typeof upiBalance === 'number' && !isNaN(upiBalance) ? upiBalance : 0;
   const safeTransactions = Array.isArray(transactions) ? transactions : [];
 
+  const computedTotalBalance = 
+    (includeCashInTotal ? safeCashBalance : 0) + (includeBankInTotal ? safeUpiBalance : 0);
+
   const currentBalance = 
-    activeTab === 'total' ? safeCashBalance + safeUpiBalance :
+    activeTab === 'total' ? computedTotalBalance :
     activeTab === 'cash' ? safeCashBalance : safeUpiBalance;
 
   // Filter transactions based on active tab
@@ -156,14 +162,23 @@ export const DashboardScreen: React.FC<{ navigation: any }> = ({ navigation }) =
               />
             }
           >
-            <View className="items-start">
-              <Text 
-                allowFontScaling={false}
-                style={{ fontSize: 12, lineHeight: 16, fontFamily: 'Montserrat-Regular', color: 'rgba(194, 198, 214, 0.8)' }}
-                className="uppercase tracking-wider mb-2"
-              >
-                Total Balance
-              </Text>
+            <View className="items-start w-full">
+              <View className="flex-row items-center justify-between w-full mb-2">
+                <Text 
+                  allowFontScaling={false}
+                  style={{ fontSize: 12, lineHeight: 16, fontFamily: 'Montserrat-Regular', color: 'rgba(194, 198, 214, 0.8)' }}
+                  className="uppercase tracking-wider"
+                >
+                  Total Balance
+                </Text>
+                {(!includeCashInTotal || !includeBankInTotal) && (
+                  <View className="px-2 py-0.5 rounded-full bg-white/10 border border-white/15">
+                    <Text style={{ fontSize: 10, fontFamily: 'Montserrat-SemiBold', color: '#93c5fd' }}>
+                      {includeBankInTotal ? 'Bank Only' : 'Cash Only'}
+                    </Text>
+                  </View>
+                )}
+              </View>
               <Text 
                 allowFontScaling={false}
                 style={{ fontSize: 48, lineHeight: 56, fontFamily: 'Montserrat-Bold', color: 'white', letterSpacing: -1 }}
